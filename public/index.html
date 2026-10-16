@@ -1,5 +1,13 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>QuestStarter — Turn any idea into a quest</title>
+<title>QuestStarter — Turn any app idea into a quest | Free vibe coding project planner</title>
+<meta name="description" content="QuestStarter turns any app, game, bot or AI agent idea into a scoped MVP, tech stack, level-by-level build plan and copy-paste prompts for Cursor and Claude Code. Free.">
+<link rel="canonical" href="__BASE__/__PATH__">
+<meta property="og:type" content="website"><meta property="og:site_name" content="QuestStarter">
+<meta property="og:title" content="__TITLE__"><meta property="og:description" content="Turn any idea into a scoped MVP, build plan and AI coding prompts. Free.">
+<meta property="og:url" content="__BASE__/__PATH__">
+<meta name="twitter:card" content="summary"><meta name="twitter:title" content="__TITLE__"><meta name="twitter:description" content="Turn any idea into a scoped MVP, build plan and AI coding prompts. Free.">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"QuestStarter","url":"__BASE__/","description":"Free tool that turns any app, game, bot or AI agent idea into a scoped MVP, tech stack, build plan and copy-paste prompts for AI coding tools.","applicationCategory":"DeveloperApplication","operatingSystem":"Any (web)","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is QuestStarter?","acceptedAnswer":{"@type":"Answer","text":"A free tool that turns a project idea into a scoped MVP, tech stack, 6-level build plan and copy-paste prompts for AI coding tools."}},{"@type":"Question","name":"Is it free?","acceptedAnswer":{"@type":"Answer","text":"Yes, QuestStarter is free to use with no signup."}},{"@type":"Question","name":"Which tools do the prompts work with?","acceptedAnswer":{"@type":"Answer","text":"Cursor, Claude Code, Codex, Windsurf, ChatGPT and any other AI coding assistant."}},{"@type":"Question","name":"Can I share my quest?","acceptedAnswer":{"@type":"Answer","text":"Yes. Press Share to copy a link that regenerates your quest for anyone who opens it."}}]}</script>
 <style>
 :root{--bg:#0d0b1a;--card:#171430;--ink:#e9e6ff;--mut:#9a95c9;--a:#7cf5c4;--b:#b57cff;--c:#ffd36e}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% 0,#241a4d,var(--bg) 55%);color:var(--ink);font:16px/1.5 ui-monospace,Menlo,Consolas,monospace;min-height:100vh}
@@ -22,12 +30,17 @@ pre{background:#0b0920;border:1px solid #2f2a5c;border-radius:8px;padding:12px;w
 label.q{display:block;margin:6px 0;cursor:pointer}
 footer{color:var(--mut);margin-top:40px;font-size:.8rem;text-align:center}
 </style></head><body><div class="w">
-<h1>Quest<span>Starter</span> ⚔️</h1>
+<h1><a href="/" style="color:inherit;text-decoration:none">Quest<span>Starter</span> ⚔️</a></h1>
 <p class="tag">Type an idea. Get a scoped MVP, tech stack, level-by-level build plan, and copy-paste prompts for Cursor &amp; friends. Free.</p>
 <textarea id="idea" placeholder="e.g. A Discord bot that tracks my friends' game stats and posts a weekly leaderboard"></textarea>
 <div class="chips" id="chips"></div>
 <button id="go">Start Quest ▶</button> <span id="msg" class="err"></span>
 <div id="out" class="hidden"></div>
+<section class="card" id="faq"><h2>❓ FAQ</h2>
+<p><b>What is QuestStarter?</b><br>A free tool that turns a project idea into a scoped MVP, tech stack, 6-level build plan and copy-paste prompts for AI coding tools.</p>
+<p><b>Is it free?</b><br>Yes, no signup needed.</p>
+<p><b>Which tools do the prompts work with?</b><br>Cursor, Claude Code, Codex, Windsurf, ChatGPT and any AI coding assistant.</p>
+<p><b>Can I share my quest?</b><br>Yes. Press Share to copy a link that rebuilds your quest for anyone.</p></section>
 <footer>QuestStarter v0.1 · template engine (LLM-ready) · build something, earn XP</footer>
 </div>
 <script>
@@ -36,17 +49,24 @@ const $=id=>document.getElementById(id);
 EX.forEach(e=>{const b=document.createElement('button');b.className='s';b.textContent=e.length>42?e.slice(0,40)+'…':e;b.onclick=()=>{$('idea').value=e;run()};$('chips').appendChild(b)});
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 let cur=null;
-async function run(){
+async function run(ns){
   $('msg').textContent='';const idea=$('idea').value;
   try{const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idea})});
-  const j=await r.json();if(!r.ok)throw new Error(j.error);cur=j;render(j)}catch(e){$('msg').textContent=e.message}
+  const j=await r.json();if(!r.ok)throw new Error(j.error);cur=j;render(j,ns===true)}catch(e){$('msg').textContent=e.message}
 }
 $('go').onclick=run;
+const enc=s=>btoa(String.fromCharCode(...new TextEncoder().encode(s))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const dec=s=>new TextDecoder().decode(Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0)));
+function share(b){const url=location.origin+'/q/'+enc($('idea').value.trim());history.replaceState(null,'','/q/'+enc($('idea').value.trim()));
+ const done=()=>{b.textContent='Link copied!';setTimeout(()=>b.textContent='🔗 Share',1500)};
+ (navigator.clipboard?navigator.clipboard.writeText(url):Promise.reject()).then(done,()=>{prompt('Copy this link',url)})}
+const m0=location.pathname.match(/^\/q\/([\w-]+)/);
+if(m0){try{$('idea').value=dec(m0[1]);run(true)}catch(e){$('msg').textContent='Invalid quest link'}}
 function key(j){return 'qs:'+j.mvp.name}
-function render(j){
+function render(j,ns){
   const done=JSON.parse(localStorage.getItem(key(j))||'[]');
   const m=j.mvp;
-  let h=`<div class="card"><div class="row"><h2>🎯 Quest: ${esc(m.name)}</h2><button class="s" onclick="dl()">⬇ Download .md</button></div>
+  let h=`<div class="card"><div class="row"><h2>🎯 Quest: ${esc(m.name)}</h2><span><button class="s" id="share" onclick="share(this)">🔗 Share</button> <button class="s" onclick="dl()">⬇ Download .md</button></span></div>
   ${m.types.map(t=>`<span class="badge">${esc(t)}</span>`).join('')}<span class="badge">${j.totalXp} XP total</span>
   <p>${esc(m.pitch)}</p>
   <b>Level 1 must-haves</b><ul>${m.mustHave.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
@@ -60,7 +80,7 @@ function render(j){
   <div class="card"><h2>📜 Copy-Paste Prompts</h2>${j.prompts.map((p,i)=>`<div class="row"><b>${esc(p.title)}</b><button class="s" onclick="cp(${i},this)">Copy</button></div><pre>${esc(p.text)}</pre>`).join('')}</div>`;
   $('out').innerHTML=h;$('out').classList.remove('hidden');
   document.querySelectorAll('input[data-i]').forEach(c=>c.onchange=()=>{const s=[...document.querySelectorAll('input[data-i]:checked')].map(x=>+x.dataset.i);localStorage.setItem(key(j),JSON.stringify(s));xp()});
-  xp();$('out').scrollIntoView({behavior:'smooth'});
+  xp();if(!ns)$('out').scrollIntoView({behavior:'smooth'});
 }
 function xp(){const s=[...document.querySelectorAll('input[data-i]:checked')].map(x=>+x.dataset.i);const g=s.reduce((a,i)=>a+cur.plan[i].xp,0);
  $('bar').style.width=(100*g/cur.totalXp)+'%';$('xptxt').textContent=g+' / '+cur.totalXp+' XP'+(g===cur.totalXp?' — 🏆 QUEST COMPLETE!':'')}
