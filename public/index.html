@@ -1,0 +1,70 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>QuestStarter — Turn any idea into a quest</title>
+<style>
+:root{--bg:#0d0b1a;--card:#171430;--ink:#e9e6ff;--mut:#9a95c9;--a:#7cf5c4;--b:#b57cff;--c:#ffd36e}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% 0,#241a4d,var(--bg) 55%);color:var(--ink);font:16px/1.5 ui-monospace,Menlo,Consolas,monospace;min-height:100vh}
+.w{max-width:900px;margin:0 auto;padding:28px 18px 80px}
+h1{font-size:2.2rem;margin:0;color:var(--a);text-shadow:0 0 18px #7cf5c455}h1 span{color:var(--b)}
+.tag{color:var(--mut);margin:4px 0 22px}
+textarea{width:100%;min-height:96px;background:#0f0d24;color:var(--ink);border:2px solid var(--b);border-radius:10px;padding:12px;font:inherit}
+button{background:var(--a);color:#06241a;border:0;border-radius:8px;padding:10px 18px;font:inherit;font-weight:700;cursor:pointer}
+button.s{background:#2a2552;color:var(--ink);padding:5px 10px;font-weight:400;font-size:.8rem}
+button:hover{filter:brightness(1.12)}
+.chips{margin:10px 0 14px;display:flex;flex-wrap:wrap;gap:8px}
+.card{background:var(--card);border:1px solid #2f2a5c;border-radius:12px;padding:18px;margin:16px 0}
+h2{margin:0 0 10px;color:var(--c);font-size:1.15rem}
+ul{margin:6px 0 6px 20px;padding:0}li{margin:3px 0}
+.badge{display:inline-block;background:#2a2552;color:var(--a);border-radius:20px;padding:2px 10px;font-size:.78rem;margin-right:6px}
+.xp{height:12px;background:#0f0d24;border-radius:8px;overflow:hidden;border:1px solid #2f2a5c}.xp i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--a),var(--b));transition:width .3s}
+pre{background:#0b0920;border:1px solid #2f2a5c;border-radius:8px;padding:12px;white-space:pre-wrap;word-break:break-word;font-size:.85rem;margin:8px 0}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.mut{color:var(--mut)}.err{color:#ff7c8a}.hidden{display:none}
+label.q{display:block;margin:6px 0;cursor:pointer}
+footer{color:var(--mut);margin-top:40px;font-size:.8rem;text-align:center}
+</style></head><body><div class="w">
+<h1>Quest<span>Starter</span> ⚔️</h1>
+<p class="tag">Type an idea. Get a scoped MVP, tech stack, level-by-level build plan, and copy-paste prompts for Cursor &amp; friends. Free.</p>
+<textarea id="idea" placeholder="e.g. A Discord bot that tracks my friends' game stats and posts a weekly leaderboard"></textarea>
+<div class="chips" id="chips"></div>
+<button id="go">Start Quest ▶</button> <span id="msg" class="err"></span>
+<div id="out" class="hidden"></div>
+<footer>QuestStarter v0.1 · template engine (LLM-ready) · build something, earn XP</footer>
+</div>
+<script>
+const EX=["A Discord bot that tracks my friends' game stats and posts a weekly leaderboard","A 2D roguelike platformer with procedurally generated dungeons","An AI agent that reads my GitHub issues and drafts fixes","A web app that shows free game drops and patch notes for my wishlist","A Chrome extension that summarizes any page with AI"];
+const $=id=>document.getElementById(id);
+EX.forEach(e=>{const b=document.createElement('button');b.className='s';b.textContent=e.length>42?e.slice(0,40)+'…':e;b.onclick=()=>{$('idea').value=e;run()};$('chips').appendChild(b)});
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let cur=null;
+async function run(){
+  $('msg').textContent='';const idea=$('idea').value;
+  try{const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idea})});
+  const j=await r.json();if(!r.ok)throw new Error(j.error);cur=j;render(j)}catch(e){$('msg').textContent=e.message}
+}
+$('go').onclick=run;
+function key(j){return 'qs:'+j.mvp.name}
+function render(j){
+  const done=JSON.parse(localStorage.getItem(key(j))||'[]');
+  const m=j.mvp;
+  let h=`<div class="card"><div class="row"><h2>🎯 Quest: ${esc(m.name)}</h2><button class="s" onclick="dl()">⬇ Download .md</button></div>
+  ${m.types.map(t=>`<span class="badge">${esc(t)}</span>`).join('')}<span class="badge">${j.totalXp} XP total</span>
+  <p>${esc(m.pitch)}</p>
+  <b>Level 1 must-haves</b><ul>${m.mustHave.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+  <b>Out of scope (resist!)</b><ul>${m.outOfScope.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+  <b>👹 Boss fight:</b> ${esc(m.boss)}<br><b>💎 Loot (later):</b> ${m.loot.map(esc).join(' · ')}
+  <p><b>Victory when:</b></p><ul>${m.success.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>
+  <div class="card"><h2>🧰 Tech Stack</h2><ul>${j.stack.map(s=>`<li><b>${esc(s.tech)}</b> <span class="mut">— ${esc(s.why)}</span></li>`).join('')}</ul></div>
+  <div class="card"><h2>🗺️ Build Plan</h2><div class="xp"><i id="bar"></i></div><p class="mut" id="xptxt"></p>
+  ${j.plan.map((l,i)=>`<div style="margin:12px 0"><label class="q"><input type="checkbox" data-i="${i}" ${done.includes(i)?'checked':''}> <b>Level ${l.level}: ${esc(l.title)}</b> <span class="badge">+${l.xp} XP</span></label>
+  <ul>${l.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ul><span class="mut">✅ Done when: ${esc(l.done)}</span></div>`).join('')}</div>
+  <div class="card"><h2>📜 Copy-Paste Prompts</h2>${j.prompts.map((p,i)=>`<div class="row"><b>${esc(p.title)}</b><button class="s" onclick="cp(${i},this)">Copy</button></div><pre>${esc(p.text)}</pre>`).join('')}</div>`;
+  $('out').innerHTML=h;$('out').classList.remove('hidden');
+  document.querySelectorAll('input[data-i]').forEach(c=>c.onchange=()=>{const s=[...document.querySelectorAll('input[data-i]:checked')].map(x=>+x.dataset.i);localStorage.setItem(key(j),JSON.stringify(s));xp()});
+  xp();$('out').scrollIntoView({behavior:'smooth'});
+}
+function xp(){const s=[...document.querySelectorAll('input[data-i]:checked')].map(x=>+x.dataset.i);const g=s.reduce((a,i)=>a+cur.plan[i].xp,0);
+ $('bar').style.width=(100*g/cur.totalXp)+'%';$('xptxt').textContent=g+' / '+cur.totalXp+' XP'+(g===cur.totalXp?' — 🏆 QUEST COMPLETE!':'')}
+function cp(i,b){navigator.clipboard.writeText(cur.prompts[i].text);b.textContent='Copied!';setTimeout(()=>b.textContent='Copy',1200)}
+function dl(){const j=cur,m=j.mvp;let t=`# Quest: ${m.name}\n\n${m.pitch}\n\n## Must-haves\n${m.mustHave.map(x=>'- '+x).join('\n')}\n\n## Out of scope\n${m.outOfScope.map(x=>'- '+x).join('\n')}\n\n## Boss fight\n${m.boss}\n\n## Stack\n${j.stack.map(s=>`- **${s.tech}** — ${s.why}`).join('\n')}\n\n## Build plan\n${j.plan.map(l=>`### Level ${l.level}: ${l.title} (+${l.xp} XP)\n${l.steps.map(s=>'- [ ] '+s).join('\n')}\nDone when: ${l.done}`).join('\n\n')}\n\n## Prompts\n${j.prompts.map(p=>`### ${p.title}\n\`\`\`\n${p.text}\n\`\`\``).join('\n\n')}\n`;
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/markdown'}));a.download=m.name.replace(/\s+/g,'-').toLowerCase()+'-quest.md';a.click()}
+</script></body></html>
