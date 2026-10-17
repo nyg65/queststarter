@@ -48,7 +48,7 @@ const TYPES = {
 
 const FLAVOR = [
   { kw: ['game', 'gaming', 'gamer', 'steam', 'xbox', 'playstation', 'esports', 'twitch', 'minecraft', 'discord'], loot: ['Steam / game API integration', 'Leaderboards', 'Discord share button', 'Achievement badges'] },
-  { kw: ['ai', 'llm', 'gpt', 'agent', 'prompt'], loot: ['Model picker', 'Conversation memory', 'Cost / token meter', 'Eval set to test quality'] },
+  { kw: ['ai', 'llm', 'gpt', 'agent', 'prompt', 'chatbot', 'rag'], loot: ['Model picker', 'Conversation memory', 'Cost / token meter', 'Eval set to test quality'] },
   { kw: ['social', 'community', 'friends', 'chat', 'multiplayer'], loot: ['Friend lists', 'Realtime updates (WebSockets)', 'Moderation tools'] },
   { kw: ['money', 'budget', 'finance', 'crypto', 'trading', 'bet'], loot: ['CSV export', 'Charts', 'Disclaimer page (not financial advice)'] },
 ];
@@ -67,21 +67,30 @@ function detectTypes(text) {
   const keys = scored.map(x => x[0]);
   // generic "app/web/tool" shouldn't beat specific types
   if (keys.length > 1 && keys[0] === 'web') keys.push(keys.shift());
+  // "app"/"tool" alone is just a noun, not a web-app signal when a specific type was found
+  if (keys.length > 1 && keys[0] !== 'web' && !/\b(web|website|site|saas|platform|landing|portfolio)\b/.test(t)) { const i = keys.indexOf('web'); if (i > 0) keys.splice(i, 1); }
+  // an app that picks/tracks/recommends games is a web/data tool about games, not a game to build
+  const gameGenre = /\bgame (where|about|in which|set)\b|\b(platformer|rpg|roguelike|shooter|puzzle|arcade|tower defense|card game|deckbuilder|multiplayer|level|player|enemy|enemies)\b/.test(t);
+  if (keys[0] === 'game' && !gameGenre && /\b(pick|picks|recommend\w*|suggest\w*|choose|finder|track\w*|backlog|library|wishlist|review\w*|deals?)\b/.test(t)) { keys.shift(); if (!keys.includes('web') && !keys.includes('data')) keys.unshift('web'); }
   return keys.length ? keys.slice(0, 2) : ['web'];
 }
 
-function titleCase(s) { return s.replace(/\b\w/g, c => c.toUpperCase()); }
+const ACRO = { ai: 'AI', rag: 'RAG', api: 'API', llm: 'LLM', gpt: 'GPT', ios: 'iOS', iphone: 'iPhone', mvp: 'MVP', rpg: 'RPG', ui: 'UI', '2d': '2D', '3d': '3D', npc: 'NPC', mmo: 'MMO', fps: 'FPS', pc: 'PC', vr: 'VR', ar: 'AR', youtube: 'YouTube', github: 'GitHub', tiktok: 'TikTok' };
+function titleCase(s) { return s.split(' ').map(w => ACRO[w] || w.replace(/\b\w/g, c => c.toUpperCase())).join(' '); }
+function hasWord(text, k) { return new RegExp('(^|[^a-z0-9])' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '($|[^a-z0-9])').test(text); }
+function lbl(l) { return l.toLowerCase().replace(/\bai\b/g, 'AI').replace(/\bapi\b/g, 'API'); }
+function article(w) { return /^[aeiou]/i.test(w) ? 'an' : 'a'; }
 
 function projectName(idea) {
   const words = idea.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(w => w && !STOP.has(w));
   return titleCase(words.slice(0, 3).join(' ')) || 'My Project';
 }
 
-function cap(s) { s = s.trim(); return s.charAt(0).toUpperCase() + s.slice(1); }
+function cap(s) { s = s.trim(); return /^[a-z][A-Z]/.test(s) ? s : s.charAt(0).toUpperCase() + s.slice(1); }
 
 function generate(idea) {
   idea = String(idea || '').trim().slice(0, 600);
-  if (idea.length < 4) throw new Error('Tell me a bit more about your idea (at least a few words).');
+  if (idea.length < 4 || !/[a-z0-9]{2,}/i.test(idea)) throw new Error('Tell me a bit more about your idea (at least a few words).');
   const keys = detectTypes(idea);
   const primary = TYPES[keys[0]];
   const secondary = keys[1] ? TYPES[keys[1]] : null;
@@ -89,19 +98,19 @@ function generate(idea) {
   const lower = idea.toLowerCase();
 
   const stack = primary.stack.map(([tech, why]) => ({ tech, why }));
-  if (secondary) for (const [tech, why] of secondary.stack.slice(0, 2)) if (!stack.find(s => s.tech === tech)) stack.push({ tech, why: why + ' (for the ' + secondary.label.toLowerCase() + ' side)' });
+  if (secondary) for (const [tech, why] of secondary.stack.slice(0, 2)) if (!stack.find(s => s.tech === tech)) stack.push({ tech, why: why + ' (for the ' + lbl(secondary.label) + ' side)' });
   if (/\b(ai|llm|gpt|agent|smart|generate|summar)/.test(lower) && !keys.includes('agent')) stack.push({ tech: 'An LLM API behind a single wrapper function', why: 'Your idea sounds AI-powered; keep the model swappable.' });
 
   const must = [...primary.must];
-  if (secondary) must.push('Integration point with your ' + secondary.label.toLowerCase() + ' component');
+  if (secondary) must.push('Integration point with your ' + lbl(secondary.label) + ' component');
   const loot = new Set();
-  for (const f of FLAVOR) if (f.kw.some(k => (' ' + lower + ' ').includes(k.length <= 3 ? ' ' + k + ' ' : k))) f.loot.forEach(l => loot.add(l));
+  for (const f of FLAVOR) if (f.kw.some(k => hasWord(lower, k) || (k.length > 4 && lower.includes(k)))) f.loot.forEach(l => loot.add(l));
   ['Polish pass and onboarding', 'Share / invite flow', 'Basic analytics'].forEach(l => loot.add(l));
 
   const stackLine = stack.slice(0, 3).map(s => s.tech).join(', ');
   const mvp = {
     name,
-    pitch: `${cap(idea.replace(/[.!?]+$/, ''))} — shipped as a ${primary.label.toLowerCase()}${secondary ? ' with a ' + secondary.label.toLowerCase() + ' component' : ''}, scoped to one core loop that a real user can finish in under a minute.`,
+    pitch: `${cap(idea.replace(/[.!?]+$/, ''))} — shipped as ${article(primary.label)} ${lbl(primary.label)}${secondary ? ' with ' + article(secondary.label) + ' ' + lbl(secondary.label) + ' component' : ''}, scoped to one core loop that a real user can finish in under a minute.`,
     types: keys.map(k => TYPES[k].label),
     mustHave: must,
     outOfScope: ['User accounts / payments (unless the idea is about them)', 'Admin dashboards', 'Mobile-perfect design', 'Anything not needed for the core loop'],
