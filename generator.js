@@ -9,7 +9,7 @@ const TYPES = {
     boss: 'Reliable data ingestion / API integration without hitting rate limits',
   },
   game: {
-    label: 'Game', kw: ['game', 'platformer', 'rpg', 'roguelike', 'shooter', 'puzzle', 'arcade', 'tower defense', 'card game', 'multiplayer'],
+    label: 'Game', kw: ['game', 'platformer', 'rpg', 'roguelike', 'shooter', 'puzzle', 'arcade', 'tower defense', 'card game', 'multiplayer', 'unity', 'godot'],
     stack: [['Phaser 3 + Vite', 'Fast 2D browser game framework; huge example base AI knows well.'], ['TypeScript', 'Catches bugs in game-state logic early.'], ['Itch.io / Netlify', 'Free, instant sharing of playable builds.'], ['Kenney.nl assets', 'Free CC0 art/sound so you can ship without an artist.']],
     must: ['Player character that moves and has a goal', 'One enemy or obstacle type', 'Win / lose condition and restart', 'Score or progress display'],
     boss: 'Game feel: collision, difficulty curve, and juice (sound, particles, screen shake)',
@@ -46,6 +46,18 @@ const TYPES = {
   },
 };
 
+// Engine override for games: Phaser by default, Unity or Godot when the idea asks for them (or for 3D).
+const GAME_ENGINES = {
+  unity: [['Unity 6 (C#)', 'Industry-standard engine; AI tools write solid C# for it.'], ['Unity MCP server for Claude Code / Cursor', 'Lets your AI tool create scenes, objects, and scripts inside the editor instead of you copy-pasting.'], ['Git + Git LFS', 'Unity projects have big binary assets; LFS keeps the repo usable.'], ['Itch.io (WebGL or desktop build)', 'Free, instant sharing of playable builds.']],
+  godot: [['Godot 4 (GDScript)', 'Free, open-source, lightweight; GDScript is simple for AI tools to write.'], ['Godot MCP server for Claude Code / Cursor', 'Lets your AI tool run the project and edit scenes and scripts directly.'], ['Git', 'Godot scenes are text files, so diffs and AI edits stay readable.'], ['Itch.io (HTML5 or desktop export)', 'Free, instant sharing of playable builds.']],
+};
+function gameEngine(lower) {
+  if (/\bunity\b/.test(lower)) return 'unity';
+  if (/\bgodot\b/.test(lower)) return 'godot';
+  if (/\b3d\b|\bthree dimensional\b/.test(lower)) return 'godot';
+  return null;
+}
+
 const FLAVOR = [
   { kw: ['game', 'gaming', 'gamer', 'steam', 'xbox', 'playstation', 'esports', 'twitch', 'minecraft', 'discord'], loot: ['Steam / game API integration', 'Leaderboards', 'Discord share button', 'Achievement badges'] },
   { kw: ['ai', 'llm', 'gpt', 'agent', 'prompt', 'chatbot', 'rag'], loot: ['Model picker', 'Conversation memory', 'Cost / token meter', 'Eval set to test quality'] },
@@ -72,6 +84,8 @@ function detectTypes(text) {
   // an app that picks/tracks/recommends games is a web/data tool about games, not a game to build
   const gameGenre = /\bgame (where|about|in which|set)\b|\b(platformer|rpg|roguelike|shooter|puzzle|arcade|tower defense|card game|deckbuilder|multiplayer|level|player|enemy|enemies)\b/.test(t);
   if (keys[0] === 'game' && !gameGenre && /\b(pick|picks|recommend\w*|suggest\w*|choose|finder|track\w*|backlog|library|wishlist|review\w*|deals?)\b/.test(t)) { keys.shift(); if (!keys.includes('web') && !keys.includes('data')) keys.unshift('web'); }
+  // a bot/tool that is merely about games ("tracks my friends' game wins") shouldn't also get a game engine
+  if (keys[0] !== 'game' && keys.includes('game') && !gameGenre && !/\b(unity|godot)\b/.test(t)) keys.splice(keys.indexOf('game'), 1);
   return keys.length ? keys.slice(0, 2) : ['web'];
 }
 
@@ -83,7 +97,7 @@ function article(w) { return /^[aeiou]/i.test(w) ? 'an' : 'a'; }
 
 const FILLER = new Set('helps help lets let allows allow can will you your which who where when using use uses via from into just some every all also really like so tells shows gives'.split(' '));
 const KIND = new Set('bot tool extension plugin agent website site webapp saas platform thing chrome browser discord telegram slack mobile ios android iphone web'.split(' '));
-const VERB = { track: 'Tracker', tracks: 'Tracker', summarize: 'Summarizer', summarizes: 'Summarizer', review: 'Reviewer', reviews: 'Reviewer', pick: 'Picker', picks: 'Picker', find: 'Finder', finds: 'Finder', recommend: 'Recommender', recommends: 'Recommender', suggest: 'Suggester', suggests: 'Suggester', plan: 'Planner', plans: 'Planner', generate: 'Generator', generates: 'Generator', monitor: 'Monitor', monitors: 'Monitor', alert: 'Alerts', alerts: 'Alerts', organize: 'Organizer', organizes: 'Organizer', schedule: 'Scheduler', schedules: 'Scheduler', compare: 'Comparer', compares: 'Comparer', translate: 'Translator', translates: 'Translator', scrape: 'Scraper', scrapes: 'Scraper', log: 'Logger', logs: 'Logger', remind: 'Reminder', reminds: 'Reminder', count: 'Counter', counts: 'Counter', rate: 'Rater', rates: 'Rater', write: 'Writer', writes: 'Writer', build: 'Builder', builds: 'Builder', create: 'Creator', creates: 'Creator', explain: 'Explainer', explains: 'Explainer', analyze: 'Analyzer', analyzes: 'Analyzer', post: 'Poster', posts: 'Poster', send: 'Sender', sends: 'Sender', watch: 'Watcher', watches: 'Watcher', turn: 'Converter', turns: 'Converter', convert: 'Converter', converts: 'Converter' };
+const VERB = { track: 'Tracker', tracks: 'Tracker', summarize: 'Summarizer', summarizes: 'Summarizer', review: 'Reviewer', reviews: 'Reviewer', pick: 'Picker', picks: 'Picker', find: 'Finder', finds: 'Finder', recommend: 'Recommender', recommends: 'Recommender', suggest: 'Suggester', suggests: 'Suggester', plan: 'Planner', plans: 'Planner', generate: 'Generator', generates: 'Generator', monitor: 'Monitor', monitors: 'Monitor', alert: 'Alerts', alerts: 'Alerts', organize: 'Organizer', organizes: 'Organizer', schedule: 'Scheduler', schedules: 'Scheduler', compare: 'Comparer', compares: 'Comparer', translate: 'Translator', translates: 'Translator', scrape: 'Scraper', scrapes: 'Scraper', log: 'Logger', logs: 'Logger', remind: 'Reminder', reminds: 'Reminder', count: 'Counter', counts: 'Counter', rate: 'Rater', rates: 'Rater', write: 'Writer', writes: 'Writer', build: 'Builder', builds: 'Builder', create: 'Creator', creates: 'Creator', explain: 'Explainer', explains: 'Explainer', analyze: 'Analyzer', analyzes: 'Analyzer', post: 'Poster', posts: 'Poster', send: 'Sender', sends: 'Sender', watch: 'Watcher', watches: 'Watcher', run: 'Runner', runs: 'Runner', show: 'Viewer', shows: 'Viewer', turn: 'Converter', turns: 'Converter', convert: 'Converter', converts: 'Converter' };
 const BREAK = /^(to|for|with|on|in|at|by|and|or|when|so|from|using|via|while|before|after|based|over|where|as|that|which|who|if|like|into|about)$/;
 
 // "a discord bot that tracks my friends game wins" -> "Friends Game Wins Tracker" (falls back to the first 3 meaningful words)
@@ -104,6 +118,7 @@ function projectName(idea) {
   for (const w of all) {
     if (BREAK.test(w)) { if (words.length) break; else continue; }
     if (STOP.has(w) || FILLER.has(w)) continue;
+    if (KIND.has(w) && words.length >= 2) continue; // "youtube summarizer chrome extension" -> "YouTube Summarizer"
     words.push(w);
     if (words.length === 3) break;
   }
@@ -121,7 +136,8 @@ function generate(idea) {
   const name = projectName(idea);
   const lower = idea.toLowerCase();
 
-  const stack = primary.stack.map(([tech, why]) => ({ tech, why }));
+  const engine = keys[0] === 'game' ? gameEngine(lower) : null;
+  const stack = (engine ? GAME_ENGINES[engine] : primary.stack).map(([tech, why]) => ({ tech, why }));
   if (secondary) for (const [tech, why] of secondary.stack.slice(0, 2)) if (!stack.find(s => s.tech === tech)) stack.push({ tech, why: why + ' (for the ' + lbl(secondary.label) + ' side)' });
   if (/\b(ai|llm|gpt|agent|smart|generate|summar)/.test(lower) && !keys.includes('agent')) stack.push({ tech: 'An LLM API behind a single wrapper function', why: 'Your idea sounds AI-powered; keep the model swappable.' });
 

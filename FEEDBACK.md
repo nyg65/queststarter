@@ -36,3 +36,34 @@ Maintained by the "X feedback watch" routine (twice daily). Public X reads only;
    > For social media in public: a tool that turns your commit log into a daily build-in-public post draft. You're already shipping every 2 days, so it feeds itself. If you want a quick scope + build plan, I made a free thing for this: https://queststarter.onrender.com
 3. Follow-up post from John's account (a quest example beats a pitch):
    > Typed "a discord bot that tracks my friends' game wins" into QuestStarter. Got: a 4-item MVP, Node + discord.js + SQLite stack, 6 levels from setup to launch, and 8 copy-paste prompts for Cursor/Claude Code (including a pre-launch security check). Free, no signup: https://queststarter.onrender.com
+
+## 2026-10-17 (5:00 PM CT run)
+
+### Mentions of QuestStarter
+- No new mentions since the morning run. John's launch post (https://x.com/JohnPesce2011/status/2111246359865307447) is still at 3 impressions, 0 likes, 0 replies. The account now has 3 followers (was 2).
+- Site check: https://queststarter.onrender.com/health 200; local :4173 200.
+- **Real user feedback, feature requests, bug reports: still none.** The morning reply/post drafts are still waiting on John's approval; without them the app has no distribution.
+
+### What builders are saying (since 9 AM CT)
+- The "knowing what to build is the hard part" theme is getting big reach. @eptwts (138K followers) posted that vibe-coding a good product is still hard and needs a clear understanding of what you're building (https://x.com/eptwts/status/2111461254132887844; ~11K impressions, 293 likes, 68 replies). Replies echo it: @BreezeOg1 "vibe coding fast is easy, knowing what to build is the hard part", @Shobhitkhuranaa "be scope locked on what, who, how before the vibe coding starts", @bulidwithadham "knowing what to reject takes product experience". That is QuestStarter's exact pitch (scoped MVP + out-of-scope list).
+- Direct "what do I build" posts: @namke0g "Bought Claude Code... No idea what to build" (https://x.com/namke0g/status/2111513873312350680); @KarwanAtta3 asks what to build next after BuyLow AI (https://x.com/KarwanAtta3/status/2111505800422125902).
+- Unity + MCP game building again: @sorenxet's "cozy farm game alone with Opus 5.5 and Unity 6, every prompt is a department" (https://x.com/sorenxet/status/2111458380854296639; ~1.5K impressions, 44 bookmarks). Second strong signal after @Mnilax this morning, so backlog item 1 was built this run.
+- Planning-first workflow keeps coming up: @glockmog plans an outline per feature with the AI before building; @FiveStackAI says plan with a big model, edit with a cheap one, and cap daily spend.
+- Small games as the right scope for vibe coders: @vaibiksite says a $5 browser-sized game is "exactly the right size for vibe coded stuff".
+
+### Actions taken this run
+- Built (backlog 1): game ideas that mention Unity get a Unity 6 (C#) stack with a Unity MCP server for Claude Code/Cursor, Git LFS, and itch.io builds. Ideas that mention Godot or 3D get Godot 4 (GDScript) with a Godot MCP server. Everything else still gets Phaser. "a cozy farm game in unity" now gets Unity instead of Phaser.
+- Fixed: bots and tools that are only about games ("a discord bot that tracks my friends' game wins") were also tagged as a Game and handed Phaser. They now plan as just a bot/tool; real game ideas and Unity/Godot ideas are unaffected.
+- Fixed names: "runs" and "shows" now name the project ("Trivia Game Runner", "Steam Game Deals Viewer"), and trailing kind words are dropped ("YouTube Summarizer Chrome" is now "YouTube Summarizer").
+- Verified with ~20 ideas plus junk input; restarted the local server; /, /api/generate, /llms.txt all 200. Committed and pushed so Render picks it up.
+
+### Backlog (new this run)
+5. Cozy, sandbox and sim games get combat must-haves ("one enemy type, win/lose condition"). Add a cozy/sim variant (core loop, save/load, one progression system).
+6. Pitch keeps the user's casing ("in unity"); capitalize known engines and brands in the pitch.
+7. "an rpg where the npcs are llm agents" plans as an AI Agent first; game ideas with AI features should stay a Game with an AI component.
+
+### Drafts for John's approval (not posted)
+4. Reply to @eptwts, https://x.com/eptwts/status/2111461254132887844 (big thread, most visibility available today)
+   > Agree. What's helped me most: write down the 3 or 4 things v1 must do, and what it won't do, before the agent writes a line. I made a free tool that does that scoping step from one sentence, if it's useful: https://queststarter.onrender.com
+5. Reply to @namke0g, https://x.com/namke0g/status/2111513873312350680
+   > Easiest start: pick something annoying you do every week and have Claude Code automate it. Small scope, you're the first user, and you'll know when it works. If you want a scoped plan and prompts from a one-line idea, I made this free: https://queststarter.onrender.com
