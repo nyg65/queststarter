@@ -81,9 +81,33 @@ function hasWord(text, k) { return new RegExp('(^|[^a-z0-9])' + k.replace(/[.*+?
 function lbl(l) { return l.toLowerCase().replace(/\bai\b/g, 'AI').replace(/\bapi\b/g, 'API'); }
 function article(w) { return /^[aeiou]/i.test(w) ? 'an' : 'a'; }
 
+const FILLER = new Set('helps help lets let allows allow can will you your which who where when using use uses via from into just some every all also really like so tells shows gives'.split(' '));
+const KIND = new Set('bot tool extension plugin agent website site webapp saas platform thing chrome browser discord telegram slack mobile ios android iphone web'.split(' '));
+const VERB = { track: 'Tracker', tracks: 'Tracker', summarize: 'Summarizer', summarizes: 'Summarizer', review: 'Reviewer', reviews: 'Reviewer', pick: 'Picker', picks: 'Picker', find: 'Finder', finds: 'Finder', recommend: 'Recommender', recommends: 'Recommender', suggest: 'Suggester', suggests: 'Suggester', plan: 'Planner', plans: 'Planner', generate: 'Generator', generates: 'Generator', monitor: 'Monitor', monitors: 'Monitor', alert: 'Alerts', alerts: 'Alerts', organize: 'Organizer', organizes: 'Organizer', schedule: 'Scheduler', schedules: 'Scheduler', compare: 'Comparer', compares: 'Comparer', translate: 'Translator', translates: 'Translator', scrape: 'Scraper', scrapes: 'Scraper', log: 'Logger', logs: 'Logger', remind: 'Reminder', reminds: 'Reminder', count: 'Counter', counts: 'Counter', rate: 'Rater', rates: 'Rater', write: 'Writer', writes: 'Writer', build: 'Builder', builds: 'Builder', create: 'Creator', creates: 'Creator', explain: 'Explainer', explains: 'Explainer', analyze: 'Analyzer', analyzes: 'Analyzer', post: 'Poster', posts: 'Poster', send: 'Sender', sends: 'Sender', watch: 'Watcher', watches: 'Watcher', turn: 'Converter', turns: 'Converter', convert: 'Converter', converts: 'Converter' };
+const BREAK = /^(to|for|with|on|in|at|by|and|or|when|so|from|using|via|while|before|after|based|over|where|as|that|which|who|if|like|into|about)$/;
+
+// "a discord bot that tracks my friends game wins" -> "Friends Game Wins Tracker" (falls back to the first 3 meaningful words)
 function projectName(idea) {
-  const words = idea.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(w => w && !STOP.has(w));
-  return titleCase(words.slice(0, 3).join(' ')) || 'My Project';
+  const all = idea.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean);
+  const vi = all.findIndex((w, i) => VERB[w] && i > 0);
+  if (vi > 0) {
+    const obj = [];
+    for (const w of all.slice(vi + 1)) {
+      if (BREAK.test(w)) { if (obj.length) break; else continue; }
+      if (STOP.has(w) || FILLER.has(w) || KIND.has(w)) continue;
+      obj.push(w);
+      if (obj.length === 3) break;
+    }
+    if (obj.length) return titleCase(obj.join(' ')) + ' ' + VERB[all[vi]];
+  }
+  const words = [];
+  for (const w of all) {
+    if (BREAK.test(w)) { if (words.length) break; else continue; }
+    if (STOP.has(w) || FILLER.has(w)) continue;
+    words.push(w);
+    if (words.length === 3) break;
+  }
+  return titleCase(words.join(' ')) || 'My Project';
 }
 
 function cap(s) { s = s.trim(); return /^[a-z][A-Z]/.test(s) ? s : s.charAt(0).toUpperCase() + s.slice(1); }
@@ -136,6 +160,7 @@ function generate(idea) {
     { title: 'Level 3: real data and persistence', text: `Replace sample data in "${name}" with real input and persistent storage. Add loading, empty, and error states plus input validation. List any edge cases I should test by hand.` },
     { title: 'Boss fight', text: `The hardest part of "${name}" is: ${primary.boss}. Propose 3 approaches ranked by simplicity, with tradeoffs. Then implement the simplest one, add logging, and write 5 nasty test cases.` },
     { title: 'Debug helper', text: `Something is broken in "${name}". Here's what I expected: [X]. Here's what happened: [Y]. Here's the error/log: [paste]. First, list the 3 most likely causes. Then suggest the smallest change to test each. Don't rewrite unrelated code.` },
+    { title: 'Pre-launch security check', text: `Act as a hostile reviewer of "${name}" before anyone else uses it. Check for: API keys or tokens in the code or repo history, missing auth on routes, unvalidated input, data another user could read, and costs an attacker could run up (API calls, LLM tokens). Rank what you find by damage, fix the top 3, and tell me how to verify each fix.` },
     { title: 'Polish and launch', text: `Review "${name}" like a picky user. List the top 10 rough edges (UX, copy, errors, performance), then fix the top 5. Next, write a README with a one-line pitch, setup, usage, and a demo section, and give me deploy steps for the stack above.` },
   ];
 
