@@ -9,7 +9,7 @@ const TYPES = {
     boss: 'Reliable data ingestion / API integration without hitting rate limits',
   },
   game: {
-    label: 'Game', kw: ['game', 'platformer', 'rpg', 'roguelike', 'shooter', 'puzzle', 'arcade', 'tower defense', 'card game', 'multiplayer', 'unity', 'godot', 'flight sim', 'racing sim', 'city builder', 'colony sim', 'life sim', 'tycoon', 'escape room', 'vr game', 'sim game', 'farming sim', 'simulator'],
+    label: 'Game', kw: ['game', 'platformer', 'rpg', 'roguelike', 'shooter', 'puzzle', 'arcade', 'tower defense', 'card game', 'multiplayer', 'unity', 'godot', 'flight sim', 'racing sim', 'city builder', 'colony sim', 'life sim', 'tycoon', 'escape room', 'vr game', 'sim game', 'farming sim', 'simulator', 'roblox', 'obby', 'unreal'],
     stack: [['Phaser 3 + Vite', 'Fast 2D browser game framework; huge example base AI knows well.'], ['TypeScript', 'Catches bugs in game-state logic early.'], ['Itch.io / Netlify', 'Free, instant sharing of playable builds.'], ['Kenney.nl assets', 'Free CC0 art/sound so you can ship without an artist.']],
     must: ['Player character that moves and has a goal', 'One enemy or obstacle type', 'Win / lose condition and restart', 'Score or progress display'],
     boss: 'Game feel: collision, difficulty curve, and juice (sound, particles, screen shake)',
@@ -50,6 +50,8 @@ const TYPES = {
 const GAME_ENGINES = {
   unity: [['Unity 6 (C#)', 'Industry-standard engine; AI tools write solid C# for it.'], ['Unity MCP server for Claude Code / Cursor', 'Lets your AI tool create scenes, objects, and scripts inside the editor instead of you copy-pasting.'], ['Git + Git LFS', 'Unity projects have big binary assets; LFS keeps the repo usable.'], ['Itch.io (WebGL or desktop build)', 'Free, instant sharing of playable builds.']],
   three: [['Three.js + Vite', '3D that runs in any browser from a link; AI tools know Three.js well enough to build whole games in one chat.'], ['TypeScript', 'Catches bugs in game-state and physics logic early.'], ['Itch.io / Netlify', 'Free, instant sharing of playable builds; no download for players.'], ['Free glTF models (Kenney, Poly Pizza)', 'CC0 3D assets so you can ship without a modeler.']],
+  roblox: [['Roblox Studio (Luau)', 'Free engine with players on every device already; Luau is small and AI tools write it well.'], ['Roblox Studio MCP server for Claude Code / Cursor', 'Lets your AI tool read your place, write scripts and start playtests inside Studio.'], ['Rojo + Git', 'Syncs scripts from your editor into Studio, so AI edits live in normal files you can diff and undo.'], ['Publish to Roblox (start private, then public)', 'Free hosting and discovery; no store or download step for players.']],
+  unreal: [['Unreal Engine 5 (Blueprints + C++)', 'High-end 3D and lighting out of the box; start in Blueprints and add C++ only where needed.'], ['An Unreal MCP plugin for Claude Code / Cursor', 'Lets your AI tool spawn actors, edit levels and wire Blueprints inside the editor.'], ['Git + Git LFS', 'Unreal assets are big binaries; LFS keeps the repo usable.'], ['Itch.io (desktop build)', 'Free, instant sharing of playable builds; Steam playtest later.']],
   godot: [['Godot 4 (GDScript)', 'Free, open-source, lightweight; GDScript is simple for AI tools to write.'], ['Godot MCP server for Claude Code / Cursor', 'Lets your AI tool run the project and edit scenes and scripts directly.'], ['Git', 'Godot scenes are text files, so diffs and AI edits stay readable.'], ['Itch.io (HTML5 or desktop export)', 'Free, instant sharing of playable builds.']],
 };
 // Cozy, sandbox and sim games don't need combat; give them a core-loop + progression MVP instead.
@@ -57,6 +59,8 @@ const COZY = /\b(cozy|cosy|farming|farm|sim|simulator|sandbox|life sim|idle|incr
 const COZY_MUST = ['A core loop the player repeats (e.g. plant, wait, harvest, sell)', 'One progression system (unlocks, upgrades, or money)', 'Save and load so progress survives a restart', 'A clear on-screen goal for the first 5 minutes'];
 const COZY_BOSS = 'Pacing and progression: making the loop satisfying for 10+ minutes without combat';
 function gameEngine(lower) {
+  if (/\broblox\b|\bobby\b/.test(lower)) return 'roblox';
+  if (/\bunreal\b|\bue5\b/.test(lower)) return 'unreal';
   if (/\bunity\b/.test(lower)) return 'unity';
   if (/\bgodot\b/.test(lower)) return 'godot';
   if (/\bthree\.?js\b/.test(lower)) return 'three';
@@ -99,7 +103,7 @@ function detectTypes(text) {
   return keys.length ? keys.slice(0, 2) : ['web'];
 }
 
-const ACRO = { ai: 'AI', rag: 'RAG', api: 'API', llm: 'LLM', gpt: 'GPT', ios: 'iOS', iphone: 'iPhone', mvp: 'MVP', rpg: 'RPG', ui: 'UI', '2d': '2D', '3d': '3D', npc: 'NPC', mmo: 'MMO', fps: 'FPS', pc: 'PC', vr: 'VR', ar: 'AR', youtube: 'YouTube', github: 'GitHub', tiktok: 'TikTok', gpu: 'GPU', cpu: 'CPU', pdf: 'PDF', seo: 'SEO', sql: 'SQL', npcs: 'NPCs', unity: 'Unity', godot: 'Godot', threejs: 'Three.js', webgl: 'WebGL', discord: 'Discord', telegram: 'Telegram', slack: 'Slack', twitter: 'Twitter', reddit: 'Reddit', steam: 'Steam', chrome: 'Chrome', android: 'Android', notion: 'Notion', spotify: 'Spotify', twitch: 'Twitch', minecraft: 'Minecraft', roblox: 'Roblox', xbox: 'Xbox', playstation: 'PlayStation', openai: 'OpenAI', chatgpt: 'ChatGPT' };
+const ACRO = { ai: 'AI', rag: 'RAG', api: 'API', llm: 'LLM', gpt: 'GPT', ios: 'iOS', iphone: 'iPhone', mvp: 'MVP', rpg: 'RPG', ui: 'UI', '2d': '2D', '3d': '3D', npc: 'NPC', mmo: 'MMO', fps: 'FPS', pc: 'PC', vr: 'VR', ar: 'AR', youtube: 'YouTube', github: 'GitHub', tiktok: 'TikTok', gpu: 'GPU', cpu: 'CPU', pdf: 'PDF', seo: 'SEO', sql: 'SQL', npcs: 'NPCs', unity: 'Unity', godot: 'Godot', unreal: 'Unreal', ue5: 'UE5', obby: 'Obby', threejs: 'Three.js', webgl: 'WebGL', discord: 'Discord', telegram: 'Telegram', slack: 'Slack', twitter: 'Twitter', reddit: 'Reddit', steam: 'Steam', chrome: 'Chrome', android: 'Android', notion: 'Notion', spotify: 'Spotify', twitch: 'Twitch', minecraft: 'Minecraft', roblox: 'Roblox', xbox: 'Xbox', playstation: 'PlayStation', openai: 'OpenAI', chatgpt: 'ChatGPT' };
 function titleCase(s) { return s.split(' ').map(w => ACRO[w] || w.replace(/\b\w/g, c => c.toUpperCase())).join(' '); }
 function hasWord(text, k) { return new RegExp('(^|[^a-z0-9])' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '($|[^a-z0-9])').test(text); }
 function lbl(l) { return l.toLowerCase().replace(/\bai\b/g, 'AI').replace(/\bapi\b/g, 'API'); }
@@ -112,7 +116,7 @@ const BREAK = /^(to|for|with|on|in|at|by|and|or|when|so|from|using|via|while|bef
 
 // "a discord bot that tracks my friends game wins" -> "Friends Game Wins Tracker" (falls back to the first 3 meaningful words)
 function projectName(idea) {
-  const all = idea.toLowerCase().replace(/\bthree\.js\b/g, 'threejs').replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean);
+  const all = idea.toLowerCase().replace(/\bthree\.js\b/g, 'threejs').replace(/\bunreal engine( \d)?\b/g, 'unreal').replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean);
   const vi = all.findIndex((w, i) => VERB[w] && i > 0);
   if (vi > 0) {
     const obj = [];
@@ -134,7 +138,7 @@ function projectName(idea) {
     if (words.length === 3) break;
   }
   // a lone generic word ("a game where you...", "a vr app for meditation") reads badly; prefix what comes after the break
-  if (words.length === 2 && /^(threejs|unity|godot|phaser)$/.test(words[0]) && words[1] === 'game' && stopAt < all.length) words.shift();
+  if (words.length === 2 && /^(threejs|unity|godot|phaser|roblox|unreal)$/.test(words[0]) && words[1] === 'game' && stopAt < all.length) words.shift();
   if (words.length === 1 && stopAt < all.length) {
     const more = [];
     for (const w of all.slice(stopAt + 1)) {
@@ -148,7 +152,7 @@ function projectName(idea) {
   return titleCase(words.join(' ')) || 'My Project';
 }
 
-function fixCase(s) { return s.replace(/\bthree\.?js\b/g, 'Three.js').replace(/[A-Za-z0-9]+/g, w => (w === w.toLowerCase() && ACRO[w] && w !== 'ar') ? ACRO[w] : w); }
+function fixCase(s) { return s.replace(/\bthree\.?js\b/g, 'Three.js').replace(/\bunreal engine\b/gi, 'Unreal Engine').replace(/[A-Za-z0-9]+/g, w => (w === w.toLowerCase() && ACRO[w] && w !== 'ar') ? ACRO[w] : w); }
 function cap(s) { s = s.trim(); return /^[a-z][A-Z]/.test(s) ? s : s.charAt(0).toUpperCase() + s.slice(1); }
 
 function generate(idea) {
@@ -162,7 +166,7 @@ function generate(idea) {
 
   const engine = keys[0] === 'game' ? gameEngine(lower) : null;
   const stack = (engine ? GAME_ENGINES[engine] : primary.stack).map(([tech, why]) => ({ tech, why }));
-  if (engine && /\b(3d|three dimensional|vr|virtual reality)\b|\bthree\.?js\b/.test(lower)) stack.push({ tech: 'Blender + Blender MCP (optional)', why: 'Lets Claude Code or Cursor model and export simple 3D assets for you, so you are not stuck on art.' });
+  if (engine && engine !== 'roblox' && (engine === 'unreal' || /\b(3d|three dimensional|vr|virtual reality)\b|\bthree\.?js\b/.test(lower))) stack.push({ tech: 'Blender + Blender MCP (optional)', why: 'Lets Claude Code or Cursor model and export simple 3D assets for you, so you are not stuck on art.' });
   if (keys[0] === 'bot') {
     const sdk = /\btelegram\b/.test(lower) ? ['Node.js + grammY (Telegram)', 'Modern, well-documented Telegram bot framework; easy for AI tools to write.']
       : /\bslack\b/.test(lower) ? ['Node.js + Slack Bolt', "Slack's official bot framework, with slash commands and events built in."]
