@@ -146,4 +146,4 @@ Maintained by the "X feedback watch" routine (twice daily). Public X reads only;
 11. Reply to @dhruvphogat04, https://x.com/dhruvphogat04/status/2111843265112940601
     > Build the app you'd open every day: a tracker for something you already do by hand. Small, you're the first user, and it gets you through the App Store review once. If you want a scoped plan from a one-line idea, I made this free: https://queststarter.onrender.com
 12. Reply to @ritesh_khokhani, https://x.com/ritesh_khokhani/status/2111901629221888266
-    > Working on it. Biggest lesson so far: scope it to one loop (move, avoid, score) before asking the AI for anything. Built a free tool that does that step for game ideas, Unity/Godot/Roblox/Three.js: https://queststarter.onrender.com
+    > The best tip I've seen from people shipping these: scope it to one loop (move, avoid, score) before asking the AI for anything. I built a free tool that does that scoping step for game ideas, with Unity, Godot, Roblox and Three.js plans: https://queststarter.onrender.com
