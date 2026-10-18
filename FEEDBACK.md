@@ -67,3 +67,44 @@ Maintained by the "X feedback watch" routine (twice daily). Public X reads only;
    > Agree. What's helped me most: write down the 3 or 4 things v1 must do, and what it won't do, before the agent writes a line. I made a free tool that does that scoping step from one sentence, if it's useful: https://queststarter.onrender.com
 5. Reply to @namke0g, https://x.com/namke0g/status/2111513873312350680
    > Easiest start: pick something annoying you do every week and have Claude Code automate it. Small scope, you're the first user, and you'll know when it works. If you want a scoped plan and prompts from a one-line idea, I made this free: https://queststarter.onrender.com
+
+## 2026-10-18 (9:00 AM CT run)
+
+### Mentions of QuestStarter
+- No mentions of QuestStarter, the site URL, or @JohnPesce2011 since the last run. The launch post (https://x.com/JohnPesce2011/status/2111246359865307447) is still at 3 impressions, 0 likes, 0 replies; the account has 3 followers and 1 post.
+- Site check: https://queststarter.onrender.com/health 200 (12s cold start); local :4173 200 on /, /health, /llms.txt, /sitemap.xml, /robots.txt.
+- **Real user feedback, feature requests, bug reports: still none.** All 5 earlier reply/post drafts are still waiting on John's approval; nothing has been posted, so the app still has no distribution.
+
+### What builders are saying (since 5 PM CT yesterday)
+- "Deciding what to build" is now the consensus take on vibe coding. Tim Sweeney's 30/70 Unreal post (941K impressions) and @rauchg's quote (52K) and @fchollet's "total automation" thread (225K) drew lots of replies saying the human job is now deciding what to build and checking it works (@crisp_digi, @justfyi, @Mr_TuanHoang, @codewithrohit). Big audience, same pitch as ours, but those threads are crowded.
+- Direct "what do I build" asks: @PedroFe36671124 "I have Claude code and Chatgpt, any advice on what to build?" (https://x.com/PedroFe36671124/status/2111654231119737014); @jinnatul_md, automation builder at 250 followers, "What should I build next?" (https://x.com/jinnatul_md/status/2111689081315049637, 3 replies). @dkolosovs polled solo builders on where their week goes, with "deciding what to build next" as an option (https://x.com/dkolosovs/status/2111796494047101366).
+- Spec-first workflows: @avthar's /create-spec skill with verification criteria (643 impressions); @NeyronixAI notes people agree with their agent on what to build but not how to prove it works; @jmdevilleros uses spec.md, plan.md, AGENTS.md and decisions.md; @shamsudeenb2 generates plans, interfaces and tests before code. Our done-checks cover "how to prove it", but we don't export these files.
+- 3D games straight from an AI chat: @DeepStarts, "this entire 3D game was built in a single Claude Code chat using Opus 5.5 and Three.js" (https://x.com/DeepStarts/status/2111766357100700026, 19 likes, 13 replies). @RoundtableSpace: Claude Code drove Blender and Unity through MCP to build a fishing game's 3D assets (45K impressions). @sara_kumodeck claims a vibe-coded browser flight sim made $87K/mo (unverified). Browser 3D was a gap: "3D" sent everyone to Godot.
+- Post-MVP pain: @lancehubdev ("90% of an MVP in 48 hours, the last 10% takes 3 weeks": Stripe webhooks, Supabase RLS, hydration), @surajdothustle (auth and Stripe webhooks break after the weekend MVP), @jojowindev ("monday: a stranger finds your api keys in view source"). More support for the security prompt and the paid launch-ready pack idea (backlog 3).
+- Mood check: big gaming accounts are arguing about vibe-coded games (@LiquidHbox, 501K impressions). Our game-focused copy should stay about learning and shipping, not "replace game devs".
+
+### Actions taken this run
+- Built: game ideas that mention Three.js, or a 3D game in the browser, now get a Three.js + Vite plan (TypeScript, itch.io/Netlify, free glTF models) instead of Godot. Other 3D ideas still get Godot, VR still gets Unity.
+- Built: 3D and VR game plans now add "Blender + Blender MCP (optional)" so the AI tool can make simple 3D assets.
+- Fixed: "a three.js flight sim" was planned as a web app called "Three Js Flight"; it's now a game called "Three.js Flight Sim". Flight sims, city builders, colony sims, life sims and tycoon games are now recognized as games ("a city builder sim" was a web app).
+- Fixed: flight, racing, space and combat sims were getting the cozy farm must-haves ("plant, wait, harvest, sell"); they now get the action MVP.
+- Fixed names: "a three.js game where you dodge asteroids" was "Three.js Game", now "Dodge Asteroids Game". Pitches write "Three.js" correctly.
+- FAQ (page, FAQPage JSON-LD, llms.txt) now covers Three.js and Blender MCP; JSON-LD validated.
+- Verified ~25 ideas including earlier regressions and junk input; restarted the local server.
+- Committed locally as 9b447fd but **not pushed**: the safety check blocked the push, so the live Render site doesn't have these changes yet. Pushing deploys to the public site; it needs John's OK (or a standing OK for the routine to push fixes).
+
+### Backlog (new this run)
+8. (from ops log) still open: server-render /q/ quest pages.
+11. Export spec files: a "Download for your agent" option that writes spec.md, plan.md and AGENTS.md (rules) from the quest, matching how spec-first builders work (@jmdevilleros, @avthar).
+12. "VR app for meditation" (VR, not a game) plans as a Next.js web app; non-game VR apps should get Unity or WebXR.
+13. "a tool that tracks my unity build times" is named "Unity Times Tracker" (drops "build" because it's also a verb).
+
+### Drafts for John's approval (not posted)
+6. Reply to @PedroFe36671124, https://x.com/PedroFe36671124/status/2111654231119737014
+   > Pick something you or a friend does by hand every week and automate it. You're the first user, so you'll know fast if it works. If you want a scoped plan and copy-paste prompts from a one-line idea, I made this free: https://queststarter.onrender.com
+7. Reply to @jinnatul_md, https://x.com/jinnatul_md/status/2111689081315049637
+   > Congrats on 250! You already sell WhatsApp + CRM automations, so build the thing your clients keep asking for twice. Productize one of those and post the build daily.
+8. Reply to @dkolosovs's poll, https://x.com/dkolosovs/status/2111796494047101366
+   > D for me, which is why I built a small tool for it: one sentence in, scoped MVP, stack and build prompts out. B is close behind though, reviewing agent output is the new job.
+9. Reply to @DeepStarts, https://x.com/DeepStarts/status/2111766357100700026
+   > Impressive that one chat held the whole thing. Did you plan the scope up front or let it grow as you went?
