@@ -9,7 +9,7 @@ const TYPES = {
     boss: 'Reliable data ingestion / API integration without hitting rate limits',
   },
   game: {
-    label: 'Game', kw: ['game', 'platformer', 'rpg', 'roguelike', 'shooter', 'puzzle', 'arcade', 'tower defense', 'card game', 'multiplayer', 'unity', 'godot', 'escape room', 'vr game', 'sim game', 'farming sim', 'simulator'],
+    label: 'Game', kw: ['game', 'platformer', 'rpg', 'roguelike', 'shooter', 'puzzle', 'arcade', 'tower defense', 'card game', 'multiplayer', 'unity', 'godot', 'flight sim', 'racing sim', 'city builder', 'colony sim', 'life sim', 'tycoon', 'escape room', 'vr game', 'sim game', 'farming sim', 'simulator'],
     stack: [['Phaser 3 + Vite', 'Fast 2D browser game framework; huge example base AI knows well.'], ['TypeScript', 'Catches bugs in game-state logic early.'], ['Itch.io / Netlify', 'Free, instant sharing of playable builds.'], ['Kenney.nl assets', 'Free CC0 art/sound so you can ship without an artist.']],
     must: ['Player character that moves and has a goal', 'One enemy or obstacle type', 'Win / lose condition and restart', 'Score or progress display'],
     boss: 'Game feel: collision, difficulty curve, and juice (sound, particles, screen shake)',
@@ -46,9 +46,10 @@ const TYPES = {
   },
 };
 
-// Engine override for games: Phaser by default, Unity or Godot when the idea asks for them (or for 3D).
+// Engine override for games: Phaser by default; Unity, Godot or Three.js when the idea asks for them (3D in a browser gets Three.js, other 3D gets Godot).
 const GAME_ENGINES = {
   unity: [['Unity 6 (C#)', 'Industry-standard engine; AI tools write solid C# for it.'], ['Unity MCP server for Claude Code / Cursor', 'Lets your AI tool create scenes, objects, and scripts inside the editor instead of you copy-pasting.'], ['Git + Git LFS', 'Unity projects have big binary assets; LFS keeps the repo usable.'], ['Itch.io (WebGL or desktop build)', 'Free, instant sharing of playable builds.']],
+  three: [['Three.js + Vite', '3D that runs in any browser from a link; AI tools know Three.js well enough to build whole games in one chat.'], ['TypeScript', 'Catches bugs in game-state and physics logic early.'], ['Itch.io / Netlify', 'Free, instant sharing of playable builds; no download for players.'], ['Free glTF models (Kenney, Poly Pizza)', 'CC0 3D assets so you can ship without a modeler.']],
   godot: [['Godot 4 (GDScript)', 'Free, open-source, lightweight; GDScript is simple for AI tools to write.'], ['Godot MCP server for Claude Code / Cursor', 'Lets your AI tool run the project and edit scenes and scripts directly.'], ['Git', 'Godot scenes are text files, so diffs and AI edits stay readable.'], ['Itch.io (HTML5 or desktop export)', 'Free, instant sharing of playable builds.']],
 };
 // Cozy, sandbox and sim games don't need combat; give them a core-loop + progression MVP instead.
@@ -58,7 +59,9 @@ const COZY_BOSS = 'Pacing and progression: making the loop satisfying for 10+ mi
 function gameEngine(lower) {
   if (/\bunity\b/.test(lower)) return 'unity';
   if (/\bgodot\b/.test(lower)) return 'godot';
+  if (/\bthree\.?js\b/.test(lower)) return 'three';
   if (/\b(vr|virtual reality|quest 3)\b/.test(lower)) return 'unity';
+  if (/\b(3d|three dimensional)\b/.test(lower) && /\b(browser|web|webgl|online)\b/.test(lower)) return 'three';
   if (/\b3d\b|\bthree dimensional\b/.test(lower)) return 'godot';
   return null;
 }
@@ -92,11 +95,11 @@ function detectTypes(text) {
   if (keys[0] === 'agent' && keys.includes('game') && gameGenre) { keys.splice(keys.indexOf('game'), 1); keys.unshift('game'); }
   if (keys[0] === 'game' && !gameGenre && /\b(pick|picks|recommend\w*|suggest\w*|choose|finder|track\w*|backlog|library|wishlist|review\w*|deals?)\b/.test(t)) { keys.shift(); if (!keys.includes('web') && !keys.includes('data')) keys.unshift('web'); }
   // a bot/tool that is merely about games ("tracks my friends' game wins") shouldn't also get a game engine
-  if (keys[0] !== 'game' && keys.includes('game') && !gameGenre && !/\b(unity|godot)\b/.test(t)) keys.splice(keys.indexOf('game'), 1);
+  if (keys[0] !== 'game' && keys.includes('game') && !gameGenre && !/\b(unity|godot|three\.?js)\b/.test(t)) keys.splice(keys.indexOf('game'), 1);
   return keys.length ? keys.slice(0, 2) : ['web'];
 }
 
-const ACRO = { ai: 'AI', rag: 'RAG', api: 'API', llm: 'LLM', gpt: 'GPT', ios: 'iOS', iphone: 'iPhone', mvp: 'MVP', rpg: 'RPG', ui: 'UI', '2d': '2D', '3d': '3D', npc: 'NPC', mmo: 'MMO', fps: 'FPS', pc: 'PC', vr: 'VR', ar: 'AR', youtube: 'YouTube', github: 'GitHub', tiktok: 'TikTok', gpu: 'GPU', cpu: 'CPU', pdf: 'PDF', seo: 'SEO', sql: 'SQL', npcs: 'NPCs', unity: 'Unity', godot: 'Godot', discord: 'Discord', telegram: 'Telegram', slack: 'Slack', twitter: 'Twitter', reddit: 'Reddit', steam: 'Steam', chrome: 'Chrome', android: 'Android', notion: 'Notion', spotify: 'Spotify', twitch: 'Twitch', minecraft: 'Minecraft', roblox: 'Roblox', xbox: 'Xbox', playstation: 'PlayStation', openai: 'OpenAI', chatgpt: 'ChatGPT' };
+const ACRO = { ai: 'AI', rag: 'RAG', api: 'API', llm: 'LLM', gpt: 'GPT', ios: 'iOS', iphone: 'iPhone', mvp: 'MVP', rpg: 'RPG', ui: 'UI', '2d': '2D', '3d': '3D', npc: 'NPC', mmo: 'MMO', fps: 'FPS', pc: 'PC', vr: 'VR', ar: 'AR', youtube: 'YouTube', github: 'GitHub', tiktok: 'TikTok', gpu: 'GPU', cpu: 'CPU', pdf: 'PDF', seo: 'SEO', sql: 'SQL', npcs: 'NPCs', unity: 'Unity', godot: 'Godot', threejs: 'Three.js', webgl: 'WebGL', discord: 'Discord', telegram: 'Telegram', slack: 'Slack', twitter: 'Twitter', reddit: 'Reddit', steam: 'Steam', chrome: 'Chrome', android: 'Android', notion: 'Notion', spotify: 'Spotify', twitch: 'Twitch', minecraft: 'Minecraft', roblox: 'Roblox', xbox: 'Xbox', playstation: 'PlayStation', openai: 'OpenAI', chatgpt: 'ChatGPT' };
 function titleCase(s) { return s.split(' ').map(w => ACRO[w] || w.replace(/\b\w/g, c => c.toUpperCase())).join(' '); }
 function hasWord(text, k) { return new RegExp('(^|[^a-z0-9])' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '($|[^a-z0-9])').test(text); }
 function lbl(l) { return l.toLowerCase().replace(/\bai\b/g, 'AI').replace(/\bapi\b/g, 'API'); }
@@ -109,7 +112,7 @@ const BREAK = /^(to|for|with|on|in|at|by|and|or|when|so|from|using|via|while|bef
 
 // "a discord bot that tracks my friends game wins" -> "Friends Game Wins Tracker" (falls back to the first 3 meaningful words)
 function projectName(idea) {
-  const all = idea.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean);
+  const all = idea.toLowerCase().replace(/\bthree\.js\b/g, 'threejs').replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean);
   const vi = all.findIndex((w, i) => VERB[w] && i > 0);
   if (vi > 0) {
     const obj = [];
@@ -131,6 +134,7 @@ function projectName(idea) {
     if (words.length === 3) break;
   }
   // a lone generic word ("a game where you...", "a vr app for meditation") reads badly; prefix what comes after the break
+  if (words.length === 2 && /^(threejs|unity|godot|phaser)$/.test(words[0]) && words[1] === 'game' && stopAt < all.length) words.shift();
   if (words.length === 1 && stopAt < all.length) {
     const more = [];
     for (const w of all.slice(stopAt + 1)) {
@@ -144,7 +148,7 @@ function projectName(idea) {
   return titleCase(words.join(' ')) || 'My Project';
 }
 
-function fixCase(s) { return s.replace(/[A-Za-z0-9]+/g, w => (w === w.toLowerCase() && ACRO[w] && w !== 'ar') ? ACRO[w] : w); }
+function fixCase(s) { return s.replace(/\bthree\.?js\b/g, 'Three.js').replace(/[A-Za-z0-9]+/g, w => (w === w.toLowerCase() && ACRO[w] && w !== 'ar') ? ACRO[w] : w); }
 function cap(s) { s = s.trim(); return /^[a-z][A-Z]/.test(s) ? s : s.charAt(0).toUpperCase() + s.slice(1); }
 
 function generate(idea) {
@@ -158,6 +162,7 @@ function generate(idea) {
 
   const engine = keys[0] === 'game' ? gameEngine(lower) : null;
   const stack = (engine ? GAME_ENGINES[engine] : primary.stack).map(([tech, why]) => ({ tech, why }));
+  if (engine && /\b(3d|three dimensional|vr|virtual reality)\b|\bthree\.?js\b/.test(lower)) stack.push({ tech: 'Blender + Blender MCP (optional)', why: 'Lets Claude Code or Cursor model and export simple 3D assets for you, so you are not stuck on art.' });
   if (keys[0] === 'bot') {
     const sdk = /\btelegram\b/.test(lower) ? ['Node.js + grammY (Telegram)', 'Modern, well-documented Telegram bot framework; easy for AI tools to write.']
       : /\bslack\b/.test(lower) ? ['Node.js + Slack Bolt', "Slack's official bot framework, with slash commands and events built in."]
@@ -165,7 +170,7 @@ function generate(idea) {
       : /\bdiscord\b/.test(lower) ? ['Node.js + discord.js', 'Best docs and examples for Discord bots; easy for AI tools to write.'] : null;
     if (sdk) stack[0] = { tech: sdk[0], why: sdk[1] };
   }
-  const cozy = keys[0] === 'game' && COZY.test(lower);
+  const cozy = keys[0] === 'game' && COZY.test(lower) && !/\b(flight|racing|space|combat|battle|war|mech) (sim|simulator)\b/.test(lower);
   if (secondary) for (const [tech, why] of secondary.stack.slice(0, 2)) if (!stack.find(s => s.tech === tech)) stack.push({ tech, why: why + ' (for the ' + lbl(secondary.label) + ' side)' });
   if (/\b(ai|llm|gpt|agent|smart|generate|summar)/.test(lower) && !keys.includes('agent')) stack.push({ tech: 'An LLM API behind a single wrapper function', why: 'Your idea sounds AI-powered; keep the model swappable.' });
 

@@ -26,7 +26,7 @@ __EXAMPLES__
 - What is QuestStarter? A free, no-signup tool that turns a project idea into a Quest Card: scoped MVP, tech stack, 6-level build plan with XP, and copy-paste prompts for AI coding tools.
 - What kinds of ideas work? Web apps, browser games, Discord/Telegram/Slack bots, AI agents and chatbots, Chrome extensions, mobile apps, and data trackers or alert tools.
 - Which AI coding tools do the prompts work with? Cursor, Claude Code, Codex, Windsurf, GitHub Copilot, ChatGPT and any other assistant.
-- Does it work for Unity or Godot games? Yes. Game ideas that mention Unity get a Unity 6 (C#) plan, ideas that mention Godot or 3D get a Godot 4 plan, and both include an MCP server so Claude Code or Cursor can edit scenes directly. Other game ideas get Phaser 3 for the browser. Cozy and sim games get a progression-focused MVP instead of combat.
+- Does it work for Unity, Godot or Three.js games? Yes. Game ideas that mention Unity get a Unity 6 (C#) plan, ideas that mention Godot or 3D get a Godot 4 plan, and both include an MCP server so Claude Code or Cursor can edit scenes directly. Ideas that mention Three.js or a 3D browser game get a Three.js plan that runs from a link. 3D and VR plans also suggest Blender MCP so your AI tool can make simple 3D assets. Other game ideas get Phaser 3 for the browser. Cozy and sim games get a progression-focused MVP instead of combat.
 - Can I save or share a quest? Yes: download it as Markdown, or share the /q/ link, which rebuilds the same quest for anyone.
 
 ## Good for
