@@ -9,7 +9,7 @@ const TYPES = {
     boss: 'Reliable data ingestion / API integration without hitting rate limits',
   },
   game: {
-    label: 'Game', kw: ['game', 'platformer', 'rpg', 'roguelike', 'shooter', 'puzzle', 'arcade', 'tower defense', 'card game', 'multiplayer', 'unity', 'godot'],
+    label: 'Game', kw: ['game', 'platformer', 'rpg', 'roguelike', 'shooter', 'puzzle', 'arcade', 'tower defense', 'card game', 'multiplayer', 'unity', 'godot', 'escape room', 'vr game', 'sim game', 'farming sim', 'simulator'],
     stack: [['Phaser 3 + Vite', 'Fast 2D browser game framework; huge example base AI knows well.'], ['TypeScript', 'Catches bugs in game-state logic early.'], ['Itch.io / Netlify', 'Free, instant sharing of playable builds.'], ['Kenney.nl assets', 'Free CC0 art/sound so you can ship without an artist.']],
     must: ['Player character that moves and has a goal', 'One enemy or obstacle type', 'Win / lose condition and restart', 'Score or progress display'],
     boss: 'Game feel: collision, difficulty curve, and juice (sound, particles, screen shake)',
@@ -51,15 +51,20 @@ const GAME_ENGINES = {
   unity: [['Unity 6 (C#)', 'Industry-standard engine; AI tools write solid C# for it.'], ['Unity MCP server for Claude Code / Cursor', 'Lets your AI tool create scenes, objects, and scripts inside the editor instead of you copy-pasting.'], ['Git + Git LFS', 'Unity projects have big binary assets; LFS keeps the repo usable.'], ['Itch.io (WebGL or desktop build)', 'Free, instant sharing of playable builds.']],
   godot: [['Godot 4 (GDScript)', 'Free, open-source, lightweight; GDScript is simple for AI tools to write.'], ['Godot MCP server for Claude Code / Cursor', 'Lets your AI tool run the project and edit scenes and scripts directly.'], ['Git', 'Godot scenes are text files, so diffs and AI edits stay readable.'], ['Itch.io (HTML5 or desktop export)', 'Free, instant sharing of playable builds.']],
 };
+// Cozy, sandbox and sim games don't need combat; give them a core-loop + progression MVP instead.
+const COZY = /\b(cozy|cosy|farming|farm|sim|simulator|sandbox|life sim|idle|incremental|tycoon|management|builder|city builder|crafting|walking sim|relaxing)\b/;
+const COZY_MUST = ['A core loop the player repeats (e.g. plant, wait, harvest, sell)', 'One progression system (unlocks, upgrades, or money)', 'Save and load so progress survives a restart', 'A clear on-screen goal for the first 5 minutes'];
+const COZY_BOSS = 'Pacing and progression: making the loop satisfying for 10+ minutes without combat';
 function gameEngine(lower) {
   if (/\bunity\b/.test(lower)) return 'unity';
   if (/\bgodot\b/.test(lower)) return 'godot';
+  if (/\b(vr|virtual reality|quest 3)\b/.test(lower)) return 'unity';
   if (/\b3d\b|\bthree dimensional\b/.test(lower)) return 'godot';
   return null;
 }
 
 const FLAVOR = [
-  { kw: ['game', 'gaming', 'gamer', 'steam', 'xbox', 'playstation', 'esports', 'twitch', 'minecraft', 'discord'], loot: ['Steam / game API integration', 'Leaderboards', 'Discord share button', 'Achievement badges'] },
+  { kw: ['game', 'gaming', 'gamer', 'steam', 'xbox', 'playstation', 'esports', 'twitch', 'minecraft', 'speedrun'], loot: ['Steam / game API integration', 'Leaderboards', 'Discord share button', 'Achievement badges'] },
   { kw: ['ai', 'llm', 'gpt', 'agent', 'prompt', 'chatbot', 'rag'], loot: ['Model picker', 'Conversation memory', 'Cost / token meter', 'Eval set to test quality'] },
   { kw: ['social', 'community', 'friends', 'chat', 'multiplayer'], loot: ['Friend lists', 'Realtime updates (WebSockets)', 'Moderation tools'] },
   { kw: ['money', 'budget', 'finance', 'crypto', 'trading', 'bet'], loot: ['CSV export', 'Charts', 'Disclaimer page (not financial advice)'] },
@@ -82,23 +87,25 @@ function detectTypes(text) {
   // "app"/"tool" alone is just a noun, not a web-app signal when a specific type was found
   if (keys.length > 1 && keys[0] !== 'web' && !/\b(web|website|site|saas|platform|landing|portfolio)\b/.test(t)) { const i = keys.indexOf('web'); if (i > 0) keys.splice(i, 1); }
   // an app that picks/tracks/recommends games is a web/data tool about games, not a game to build
-  const gameGenre = /\bgame (where|about|in which|set)\b|\b(platformer|rpg|roguelike|shooter|puzzle|arcade|tower defense|card game|deckbuilder|multiplayer|level|player|enemy|enemies)\b/.test(t);
+  const gameGenre = /\bgame (where|about|in which|set)\b|\b(platformer|rpg|roguelike|shooter|puzzle|arcade|tower defense|card game|deckbuilder|multiplayer|level|player|enemy|enemies|npc|npcs|dungeon|escape room)\b/.test(t);
+  // a game with AI features ("an rpg where the npcs are llm agents") is a game first, with an AI component
+  if (keys[0] === 'agent' && keys.includes('game') && gameGenre) { keys.splice(keys.indexOf('game'), 1); keys.unshift('game'); }
   if (keys[0] === 'game' && !gameGenre && /\b(pick|picks|recommend\w*|suggest\w*|choose|finder|track\w*|backlog|library|wishlist|review\w*|deals?)\b/.test(t)) { keys.shift(); if (!keys.includes('web') && !keys.includes('data')) keys.unshift('web'); }
   // a bot/tool that is merely about games ("tracks my friends' game wins") shouldn't also get a game engine
   if (keys[0] !== 'game' && keys.includes('game') && !gameGenre && !/\b(unity|godot)\b/.test(t)) keys.splice(keys.indexOf('game'), 1);
   return keys.length ? keys.slice(0, 2) : ['web'];
 }
 
-const ACRO = { ai: 'AI', rag: 'RAG', api: 'API', llm: 'LLM', gpt: 'GPT', ios: 'iOS', iphone: 'iPhone', mvp: 'MVP', rpg: 'RPG', ui: 'UI', '2d': '2D', '3d': '3D', npc: 'NPC', mmo: 'MMO', fps: 'FPS', pc: 'PC', vr: 'VR', ar: 'AR', youtube: 'YouTube', github: 'GitHub', tiktok: 'TikTok' };
+const ACRO = { ai: 'AI', rag: 'RAG', api: 'API', llm: 'LLM', gpt: 'GPT', ios: 'iOS', iphone: 'iPhone', mvp: 'MVP', rpg: 'RPG', ui: 'UI', '2d': '2D', '3d': '3D', npc: 'NPC', mmo: 'MMO', fps: 'FPS', pc: 'PC', vr: 'VR', ar: 'AR', youtube: 'YouTube', github: 'GitHub', tiktok: 'TikTok', gpu: 'GPU', cpu: 'CPU', pdf: 'PDF', seo: 'SEO', sql: 'SQL', npcs: 'NPCs', unity: 'Unity', godot: 'Godot', discord: 'Discord', telegram: 'Telegram', slack: 'Slack', twitter: 'Twitter', reddit: 'Reddit', steam: 'Steam', chrome: 'Chrome', android: 'Android', notion: 'Notion', spotify: 'Spotify', twitch: 'Twitch', minecraft: 'Minecraft', roblox: 'Roblox', xbox: 'Xbox', playstation: 'PlayStation', openai: 'OpenAI', chatgpt: 'ChatGPT' };
 function titleCase(s) { return s.split(' ').map(w => ACRO[w] || w.replace(/\b\w/g, c => c.toUpperCase())).join(' '); }
 function hasWord(text, k) { return new RegExp('(^|[^a-z0-9])' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '($|[^a-z0-9])').test(text); }
 function lbl(l) { return l.toLowerCase().replace(/\bai\b/g, 'AI').replace(/\bapi\b/g, 'API'); }
 function article(w) { return /^[aeiou]/i.test(w) ? 'an' : 'a'; }
 
-const FILLER = new Set('helps help lets let allows allow can will you your which who where when using use uses via from into just some every all also really like so tells shows gives'.split(' '));
+const FILLER = new Set('helps help lets let allows allow can will you your which who where when using use uses via from into just some every all also really like so tells shows gives are was were has have get gets'.split(' '));
 const KIND = new Set('bot tool extension plugin agent website site webapp saas platform thing chrome browser discord telegram slack mobile ios android iphone web'.split(' '));
-const VERB = { track: 'Tracker', tracks: 'Tracker', summarize: 'Summarizer', summarizes: 'Summarizer', review: 'Reviewer', reviews: 'Reviewer', pick: 'Picker', picks: 'Picker', find: 'Finder', finds: 'Finder', recommend: 'Recommender', recommends: 'Recommender', suggest: 'Suggester', suggests: 'Suggester', plan: 'Planner', plans: 'Planner', generate: 'Generator', generates: 'Generator', monitor: 'Monitor', monitors: 'Monitor', alert: 'Alerts', alerts: 'Alerts', organize: 'Organizer', organizes: 'Organizer', schedule: 'Scheduler', schedules: 'Scheduler', compare: 'Comparer', compares: 'Comparer', translate: 'Translator', translates: 'Translator', scrape: 'Scraper', scrapes: 'Scraper', log: 'Logger', logs: 'Logger', remind: 'Reminder', reminds: 'Reminder', count: 'Counter', counts: 'Counter', rate: 'Rater', rates: 'Rater', write: 'Writer', writes: 'Writer', build: 'Builder', builds: 'Builder', create: 'Creator', creates: 'Creator', explain: 'Explainer', explains: 'Explainer', analyze: 'Analyzer', analyzes: 'Analyzer', post: 'Poster', posts: 'Poster', send: 'Sender', sends: 'Sender', watch: 'Watcher', watches: 'Watcher', run: 'Runner', runs: 'Runner', show: 'Viewer', shows: 'Viewer', turn: 'Converter', turns: 'Converter', convert: 'Converter', converts: 'Converter' };
-const BREAK = /^(to|for|with|on|in|at|by|and|or|when|so|from|using|via|while|before|after|based|over|where|as|that|which|who|if|like|into|about)$/;
+const VERB = { track: 'Tracker', tracks: 'Tracker', summarize: 'Summarizer', summarizes: 'Summarizer', review: 'Reviewer', reviews: 'Reviewer', pick: 'Picker', picks: 'Picker', find: 'Finder', finds: 'Finder', recommend: 'Recommender', recommends: 'Recommender', suggest: 'Suggester', suggests: 'Suggester', plan: 'Planner', plans: 'Planner', generate: 'Generator', generates: 'Generator', monitor: 'Monitor', monitors: 'Monitor', alert: 'Alerts', alerts: 'Alerts', organize: 'Organizer', organizes: 'Organizer', schedule: 'Scheduler', schedules: 'Scheduler', compare: 'Comparer', compares: 'Comparer', translate: 'Translator', translates: 'Translator', scrape: 'Scraper', scrapes: 'Scraper', log: 'Logger', logs: 'Logger', remind: 'Reminder', reminds: 'Reminder', count: 'Counter', counts: 'Counter', rate: 'Rater', rates: 'Rater', write: 'Writer', writes: 'Writer', build: 'Builder', builds: 'Builder', create: 'Creator', creates: 'Creator', explain: 'Explainer', explains: 'Explainer', analyze: 'Analyzer', analyzes: 'Analyzer', post: 'Poster', posts: 'Poster', send: 'Sender', sends: 'Sender', watch: 'Watcher', watches: 'Watcher', run: 'Runner', runs: 'Runner', show: 'Viewer', shows: 'Viewer', turn: 'Converter', turns: 'Converter', block: 'Blocker', blocks: 'Blocker', book: 'Booker', books: 'Booker', teach: 'Tutor', teaches: 'Tutor', convert: 'Converter', converts: 'Converter' };
+const BREAK = /^(to|for|with|on|in|at|by|and|or|when|so|from|using|via|while|before|after|based|over|where|as|that|which|who|if|like|into|about|across|between|during|without|per|than)$/;
 
 // "a discord bot that tracks my friends game wins" -> "Friends Game Wins Tracker" (falls back to the first 3 meaningful words)
 function projectName(idea) {
@@ -115,16 +122,29 @@ function projectName(idea) {
     if (obj.length) return titleCase(obj.join(' ')) + ' ' + VERB[all[vi]];
   }
   const words = [];
-  for (const w of all) {
-    if (BREAK.test(w)) { if (words.length) break; else continue; }
+  let stopAt = all.length;
+  for (const [i, w] of all.entries()) {
+    if (BREAK.test(w)) { if (words.length) { stopAt = i; break; } else continue; }
     if (STOP.has(w) || FILLER.has(w)) continue;
     if (KIND.has(w) && words.length >= 2) continue; // "youtube summarizer chrome extension" -> "YouTube Summarizer"
     words.push(w);
     if (words.length === 3) break;
   }
+  // a lone generic word ("a game where you...", "a vr app for meditation") reads badly; prefix what comes after the break
+  if (words.length === 1 && stopAt < all.length) {
+    const more = [];
+    for (const w of all.slice(stopAt + 1)) {
+      if (BREAK.test(w)) { if (more.length) break; else continue; }
+      if (STOP.has(w) || FILLER.has(w) || KIND.has(w) || w === words[0]) continue;
+      more.push(w);
+      if (more.length === 3) break;
+    }
+    if (more.length) return titleCase(more.join(' ') + ' ' + words[0]);
+  }
   return titleCase(words.join(' ')) || 'My Project';
 }
 
+function fixCase(s) { return s.replace(/[A-Za-z0-9]+/g, w => (w === w.toLowerCase() && ACRO[w] && w !== 'ar') ? ACRO[w] : w); }
 function cap(s) { s = s.trim(); return /^[a-z][A-Z]/.test(s) ? s : s.charAt(0).toUpperCase() + s.slice(1); }
 
 function generate(idea) {
@@ -138,10 +158,19 @@ function generate(idea) {
 
   const engine = keys[0] === 'game' ? gameEngine(lower) : null;
   const stack = (engine ? GAME_ENGINES[engine] : primary.stack).map(([tech, why]) => ({ tech, why }));
+  if (keys[0] === 'bot') {
+    const sdk = /\btelegram\b/.test(lower) ? ['Node.js + grammY (Telegram)', 'Modern, well-documented Telegram bot framework; easy for AI tools to write.']
+      : /\bslack\b/.test(lower) ? ['Node.js + Slack Bolt', "Slack's official bot framework, with slash commands and events built in."]
+      : /\btwitch\b/.test(lower) ? ['Node.js + tmi.js / Twurple (Twitch)', 'Reads and posts Twitch chat; Twurple also covers the Twitch API.']
+      : /\bdiscord\b/.test(lower) ? ['Node.js + discord.js', 'Best docs and examples for Discord bots; easy for AI tools to write.'] : null;
+    if (sdk) stack[0] = { tech: sdk[0], why: sdk[1] };
+  }
+  const cozy = keys[0] === 'game' && COZY.test(lower);
   if (secondary) for (const [tech, why] of secondary.stack.slice(0, 2)) if (!stack.find(s => s.tech === tech)) stack.push({ tech, why: why + ' (for the ' + lbl(secondary.label) + ' side)' });
   if (/\b(ai|llm|gpt|agent|smart|generate|summar)/.test(lower) && !keys.includes('agent')) stack.push({ tech: 'An LLM API behind a single wrapper function', why: 'Your idea sounds AI-powered; keep the model swappable.' });
 
-  const must = [...primary.must];
+  const must = cozy ? [...COZY_MUST] : [...primary.must];
+  const boss = cozy ? COZY_BOSS : primary.boss;
   if (secondary) must.push('Integration point with your ' + lbl(secondary.label) + ' component');
   const loot = new Set();
   for (const f of FLAVOR) if (f.kw.some(k => hasWord(lower, k) || (k.length > 4 && lower.includes(k)))) f.loot.forEach(l => loot.add(l));
@@ -150,11 +179,11 @@ function generate(idea) {
   const stackLine = stack.slice(0, 3).map(s => s.tech).join(', ');
   const mvp = {
     name,
-    pitch: `${cap(idea.replace(/[.!?]+$/, ''))} — shipped as ${article(primary.label)} ${lbl(primary.label)}${secondary ? ' with ' + article(secondary.label) + ' ' + lbl(secondary.label) + ' component' : ''}, scoped to one core loop that a real user can finish in under a minute.`,
+    pitch: `${cap(fixCase(idea.replace(/[.!?]+$/, '')))} — shipped as ${article(primary.label)} ${lbl(primary.label)}${secondary ? ' with ' + article(secondary.label) + ' ' + lbl(secondary.label) + ' component' : ''}, scoped to one core loop that a real user can finish in under a minute.`,
     types: keys.map(k => TYPES[k].label),
     mustHave: must,
     outOfScope: ['User accounts / payments (unless the idea is about them)', 'Admin dashboards', 'Mobile-perfect design', 'Anything not needed for the core loop'],
-    boss: primary.boss,
+    boss: boss,
     loot: [...loot].slice(0, 6),
     success: [`A stranger can use it from a link or command with no explanation`, `The core loop works end to end 10 times in a row`, `You've shown it to 3 people and gotten feedback`],
   };
@@ -163,7 +192,7 @@ function generate(idea) {
     { level: 1, title: 'Tutorial Zone: Setup', xp: 100, steps: ['Create the repo and scaffold with: ' + stackLine, 'Add a README with the one-sentence pitch', 'Get a "hello world" running locally and commit', 'Add a .cursor/rules (or CLAUDE.md) file with your stack and conventions'], done: 'App runs locally and is pushed to GitHub.' },
     { level: 2, title: 'First Quest: Core Loop', xp: 250, steps: must.slice(0, 3).map(cap), done: 'The core loop works with hardcoded/sample data.' },
     { level: 3, title: 'Side Quest: Real Data & State', xp: 250, steps: ['Replace sample data with real input and persistence', 'Handle empty, loading, and error states', 'Add input validation'], done: 'Data survives a refresh/restart.' },
-    { level: 4, title: 'Boss Fight: ' + primary.boss, xp: 400, steps: ['Reproduce the hardest problem in isolation', 'Ask your AI tool for 2-3 approaches, pick the simplest', 'Implement, then test with ugly inputs', 'Add logging so failures are visible'], done: 'The boss problem no longer breaks the core loop.' },
+    { level: 4, title: 'Boss Fight: ' + boss, xp: 400, steps: ['Reproduce the hardest problem in isolation', 'Ask your AI tool for 2-3 approaches, pick the simplest', 'Implement, then test with ugly inputs', 'Add logging so failures are visible'], done: 'The boss problem no longer breaks the core loop.' },
     { level: 5, title: 'Polish & Loot', xp: 200, steps: ['Fix the 5 most annoying rough edges', 'Add one loot item: ' + mvp.loot[0], 'Write a 3-line how-to-use in the README'], done: 'You would be proud to show it to a friend.' },
     { level: 6, title: 'Launch: Ship It', xp: 300, steps: ['Deploy (see stack for hosting)', 'Test the public URL/command on a second device', 'Post it on X / Discord / Reddit with a short demo clip', 'Collect feedback and list the next 3 quests'], done: 'It is live and someone other than you used it.' },
   ];
@@ -174,7 +203,7 @@ function generate(idea) {
     { title: 'Level 1: scaffold the project', text: `${ctx}\n\nScaffold this project from scratch using the stack above. Give me the exact terminal commands, the folder structure, and the minimal code for a working "hello world". Do not build features yet. End with how to run it.` },
     { title: 'Level 2: build the core loop', text: `Using the existing scaffold for "${name}", implement the core loop: ${must.slice(0, 3).join('; ')}. Use hardcoded sample data. Keep it to the fewest files possible. Show the diff and how to test it manually.` },
     { title: 'Level 3: real data and persistence', text: `Replace sample data in "${name}" with real input and persistent storage. Add loading, empty, and error states plus input validation. List any edge cases I should test by hand.` },
-    { title: 'Boss fight', text: `The hardest part of "${name}" is: ${primary.boss}. Propose 3 approaches ranked by simplicity, with tradeoffs. Then implement the simplest one, add logging, and write 5 nasty test cases.` },
+    { title: 'Boss fight', text: `The hardest part of "${name}" is: ${boss}. Propose 3 approaches ranked by simplicity, with tradeoffs. Then implement the simplest one, add logging, and write 5 nasty test cases.` },
     { title: 'Debug helper', text: `Something is broken in "${name}". Here's what I expected: [X]. Here's what happened: [Y]. Here's the error/log: [paste]. First, list the 3 most likely causes. Then suggest the smallest change to test each. Don't rewrite unrelated code.` },
     { title: 'Pre-launch security check', text: `Act as a hostile reviewer of "${name}" before anyone else uses it. Check for: API keys or tokens in the code or repo history, missing auth on routes, unvalidated input, data another user could read, and costs an attacker could run up (API calls, LLM tokens). Rank what you find by damage, fix the top 3, and tell me how to verify each fix.` },
     { title: 'Polish and launch', text: `Review "${name}" like a picky user. List the top 10 rough edges (UX, copy, errors, performance), then fix the top 5. Next, write a README with a one-line pitch, setup, usage, and a demo section, and give me deploy steps for the stack above.` },
