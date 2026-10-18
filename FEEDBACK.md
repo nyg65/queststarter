@@ -108,3 +108,42 @@ Maintained by the "X feedback watch" routine (twice daily). Public X reads only;
    > D for me, which is why I built a small tool for it: one sentence in, scoped MVP, stack and build prompts out. B is close behind though, reviewing agent output is the new job.
 9. Reply to @DeepStarts, https://x.com/DeepStarts/status/2111766357100700026
    > Impressive that one chat held the whole thing. Did you plan the scope up front or let it grow as you went?
+
+## 2026-10-18 (5:00 PM CT run)
+
+### Mentions of QuestStarter
+- No mentions of QuestStarter, the site URL, or @JohnPesce2011 since the 9 AM run. Launch post (https://x.com/JohnPesce2011/status/2111246359865307447) is at 4 impressions, 0 likes, 0 replies; the account has 3 followers and 1 post.
+- Site check: https://queststarter.onrender.com/health 200 (12s cold start). Local :4173 was down again; restarted it, and /, /health, /llms.txt, /sitemap.xml, /robots.txt are all 200.
+- **Real user feedback, feature requests, bug reports: still none.** Drafts 1-9 are still waiting on John's approval; nothing has been posted.
+
+### What builders are saying (since 9 AM CT)
+- Roblox and Unreal now have AI-agent workflows: @AICoderClass says Roblox Studio has a built-in MCP server for Claude Code/Cursor/Codex (https://x.com/AICoderClass/status/2111850014351781899); @learnaiwithamid says Epic shipped an official Claude Code plugin for Unreal Engine (https://x.com/learnaiwithamid/status/2111833282673606923, unverified, small account). @vibeforgelabs sells an $9 game prompt pack with Roblox Luau prompts. QuestStarter was handing Roblox and Unreal ideas a Phaser browser plan, so this got fixed (below).
+- The Unity fishing game built with Claude Code + Blender keeps getting reposted (@amin_postik, @Mohd_Ainan17), and a code-only ancient Greek world in Three.js is spreading (@Sanemavcil, 314 impressions). Supports the Three.js and Blender MCP changes, which are now live.
+- Competitor: @rachelwolan launched productfoo, an open-source "product manager for your coding agent" that does market research, challenges the idea, writes the pitch, sharpens the spec and checks the build against it (https://x.com/rachelwolan/status/2111835600597012549; 717 impressions, 22 replies). It's a CLI for experienced builders; QuestStarter's edge is zero setup, beginner-friendly, games. Worth watching.
+- Clarifying questions: @SinghLovenish cites an ICLR 2026 study where asking questions first helped coding agents by up to 74% on vague tasks (https://x.com/SinghLovenish/status/2111865214568415374, small account). @RonakOnChain is switching from vibe coding to spec-driven dev. Supports a "2-3 quick questions before the quest" step and backlog 11 (spec file export).
+- Paid prompt packs exist at $9 (@vibeforgelabs, 1 follower, no traction shown). Price point for backlog 3 (paid launch-ready pack).
+- Direct "what should I build" asks: @TheCraigHewitt (5.1K followers) has Claude and Codex usage resets expiring and wants to build "something massive", maybe open-source an enterprise tool (https://x.com/TheCraigHewitt/status/2111899002019143941, 524 impressions, 6 replies); @dhruvphogat04 bought Apple and Google developer accounts and doesn't know what to build (https://x.com/dhruvphogat04/status/2111843265112940601); @bititheintern "what should i build with AI?" (https://x.com/bititheintern/status/2111877811577512385, 2 followers); @2KoolForSch00l got a free .tech domain and asks what to build first.
+- Game builders: @ritesh_khokhani (920 followers) asks who has built a game with vibe coding (https://x.com/ritesh_khokhani/status/2111901629221888266); @brandonstirrup (4K followers) "vibe coded a bad but improvable game in two days" with 3 hours of active work.
+- Mood: anti-AI pushback in gaming continues (@Best4Liberty on vibe-coded Roblox clones; @duelingdoggo on a "video game crash"). Keep game copy about learning and shipping your own idea.
+
+### Actions taken this run
+- Built: Roblox and obby ideas now get Roblox Studio (Luau), the Roblox Studio MCP server, Rojo + Git and publishing on Roblox, instead of Phaser. "a roblox obby game", "a tycoon game on roblox" and "an obby with checkpoints" all plan correctly.
+- Built: Unreal and UE5 ideas now get Unreal Engine 5 (Blueprints + C++), an Unreal MCP plugin, Git LFS, itch.io builds and Blender MCP, instead of Phaser.
+- Fixed name: "an unreal engine 5 horror game" was going to be named "Unreal Engine 5"; it's now "Unreal Horror Game", and pitches write "Unreal Engine".
+- Kept bots and trackers that mention Roblox as bots/web apps ("a roblox trading bot for discord" doesn't get a game engine).
+- FAQ on the page, FAQPage JSON-LD (validated) and llms.txt now cover Roblox and Unreal.
+- Verified ~20 ideas including earlier regressions and junk input; restarted the local server.
+- Committed 131b56f and pushed; this also shipped the 9 AM Three.js/Blender commit (9b447fd) that was blocked earlier. Render picked it up within ~2 min: the live API returns the Roblox plan and "Three.js Flight Sim".
+
+### Backlog (new this run)
+14. Roblox plans still get generic action must-haves ("one enemy or obstacle type"); add a Roblox variant (spawn + checkpoints, server-validated actions, DataStore save, one monetization hook like a game pass).
+15. Clarifying questions: optionally ask 2-3 quick questions (platform, solo vs multiplayer, time budget) before generating (ICLR study via @SinghLovenish, productfoo's "challenges your ideas").
+16. "a minecraft server plugin that adds quests" plans as a Next.js web app; Minecraft mods/plugins should get Paper (Java) or Fabric.
+
+### Drafts for John's approval (not posted)
+10. Reply to @TheCraigHewitt, https://x.com/TheCraigHewitt/status/2111899002019143941
+    > Open source the internal tool you'd have paid for last job. You know the pain, the spec writes itself, and burning resets on a big scaffold is the best use of them. Write the 4 must-haves first so the agents don't wander.
+11. Reply to @dhruvphogat04, https://x.com/dhruvphogat04/status/2111843265112940601
+    > Build the app you'd open every day: a tracker for something you already do by hand. Small, you're the first user, and it gets you through the App Store review once. If you want a scoped plan from a one-line idea, I made this free: https://queststarter.onrender.com
+12. Reply to @ritesh_khokhani, https://x.com/ritesh_khokhani/status/2111901629221888266
+    > Working on it. Biggest lesson so far: scope it to one loop (move, avoid, score) before asking the AI for anything. Built a free tool that does that step for game ideas, Unity/Godot/Roblox/Three.js: https://queststarter.onrender.com
