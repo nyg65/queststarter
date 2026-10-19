@@ -181,3 +181,36 @@ Maintained by the "X feedback watch" routine (twice daily). Public X reads only;
     > Remake a tiny game you loved as a kid, but with one twist. Keep it to one loop (move, avoid, score) and ship it in a weekend. If you want a scoped plan and build prompts from a one-line idea, I made this free: https://queststarter.onrender.com
 14. Reply to @froessell, https://x.com/froessell/status/2112089812383486321
     > Most useful game post I've read this week. Everyone shares build speed, almost nobody shares day-one retention. Did the zero-click start move conversion much once it went live?
+
+## 2026-10-19 (5:00 PM CT run)
+
+### Mentions of QuestStarter
+- No mentions of QuestStarter, the site URL, or @JohnPesce2011 since the 9 AM run (search and the account's mentions both empty). Launch post (https://x.com/JohnPesce2011/status/2111246359865307447) is still at 4 impressions, 0 likes, 0 replies; the account has 3 followers and 1 post.
+- Site check: local :4173 200 (restarted on the new code). Live https://queststarter.onrender.com was cold and still on Render's "waking up" page during this run; the box's own outbound HTTPS was also failing at the time (google.com too), so this looks like a box network blip plus a normal cold start, not a site outage. Recheck at the 8 AM run.
+- **Real user feedback, feature requests, bug reports: still none.** Drafts 1-14 are still waiting on John's approval; nothing has been posted.
+
+### What builders are saying (since 9 AM CT)
+- "Does anyone make money from vibe-coded games?": @JustLingonberry (2.5K followers) asked it of Three.js game builders (https://x.com/JustLingonberry/status/2112246605915341107, 1.6K impressions, 12 replies). Replies: mostly no money; @vigilharbor says marketing is "a whole job on its own" (find similar games, go to their communities, give something free, keep updating); @LeeLeepenkman (4.4K followers) says he once made about $5K a year from ads on web games he posted everywhere. QuestStarter's game Level 6 said "post on X / Discord / Reddit", which is the generic advice that isn't working, so it got more specific (below).
+- Same theme outside games: @stacklevels "I shipped my first app to an empty audience. The building went fast. Finding buyers didn't." @rseroter (37K followers) on scoping before turning a vibe-coded prototype into real software: minimize scope, find blind spots, limit dependencies (https://x.com/rseroter/status/2112220228302377408). Supports the scoped-MVP pitch.
+- Personal utility apps: @EShishniashvili asks why pay $5/month for a gym tracker or habit tracker when you can build one in 5-10 minutes with Claude or Codex. Those are exactly the ideas QuestStarter was mis-planning as data tools (fixed below).
+- Game builders: @Tigerless_labs wants to "build a tiny game this weekend"; @ZDi____ wants playtesters for a vibe-coded browser hoofball game; @SoulloopGame (Steam Next Fest demo) asks "what should I build next?"; @TensorustAI's vibe-coded game launches free on Steam tomorrow. @Hasan_4300 (37K followers, 13.8K impressions) on Viggle JST-2, which turns one image into an animation-ready character an agent can call (https://x.com/Hasan_4300/status/2112205949981368596, unverified).
+- Agent-team competitors: @Halfcycleai pitches `npx halfcycle`, which adds a product owner, architect and reviewer to Claude Code (12 followers). Another "decide what to build" tool for experienced builders, like productfoo.
+- Mood: Steam Next Fest started today; @takezilla says one studio pulled its demo over fears of AI clones, and @Edenwoodfilm and others complain about vibe-coded game ports and clones. Keep game copy about building your own idea.
+
+### Actions taken this run
+- Fixed: personal trackers (habit, workout, mood, sleep, reading, study, streak, fitness and similar) now plan as a Web App, or a Mobile App when the idea says phone, iOS or Android. "a habit tracker app" was a Data / API Tool (backlog 19); "a sleep tracker ios app" is now a Mobile App. Price, patch-note, spend and stats trackers stay data tools.
+- Built: browser game quests (Phaser and Three.js) now say to publish on itch.io and then on CrazyGames, which shows playtime and retention in its developer dashboard and shares ad revenue. Unity, Godot, Roblox and Unreal keep their own hosting.
+- Built: every game quest's last launch step now says to find 3 places where players of similar games already hang out (a subreddit, a Discord server, an itch.io tag) and post a clip there, instead of a generic "post on X / Discord / Reddit".
+- Verified 19 ideas against the previous generator: only trackers and game Level 6 changed; bots, data tools, agents and MCP plans are identical. Local /, /llms.txt and /api/generate are 200.
+- Committed locally, not pushed (same as the 9 AM change: pushing waits on John's OK). The live site doesn't have either change yet.
+
+### Backlog (new this run)
+20. "a workout log for my phone" plans as a Web App named "Phone Logger"; "phone" alone should count as mobile, and "log for" should name it "Workout Log".
+21. Games: an optional "Find your first players" prompt (which communities, what free thing to give, a 2-week posting plan), from the @JustLingonberry thread.
+22. 3D games: consider Viggle JST-2 as a loot item for characters once verified.
+
+### Drafts for John's approval (not posted)
+15. Reply to @JustLingonberry, https://x.com/JustLingonberry/status/2112246605915341107
+    > Most of the ones I've seen are 2. The few that earn put them on CrazyGames or Poki for the ad share and treat finding players as half the project. Building got easy; distribution didn't.
+16. Reply to @Tigerless_labs, https://x.com/Tigerless_labs/status/2112213435257848094
+    > Do it. Pick one loop (move, avoid, score), get it playable on day one, then spend day two on the first minute. If you want a scoped plan and build prompts from a one-line idea, I made this free: https://queststarter.onrender.com

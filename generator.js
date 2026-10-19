@@ -91,6 +91,7 @@ const VSCODE_BOSS = 'Extension host lifecycle and keeping the editor fast (activ
 const TURN = /\b(turn[- ]based|card game|deckbuilder|deck builder|board game|chess|checkers|tic tac toe|strategy game|tactics|trivia|quiz game|word game|wordle|text adventure|interactive fiction|visual novel|sudoku)\b/;
 const TURN_MUST = ['Game state model (board, hand, or story position) that the UI reads from', 'One full turn: player acts, game resolves, opponent or game responds', 'Win / lose condition and restart', 'Clear feedback on what just happened each turn'];
 const TURN_BOSS = 'Rules and balance: making every turn resolve correctly and choices feel meaningful';
+const PERSONAL = /\b(habits?|workouts?|gym|exercises?|mood|water intake|sleep|reading|journal|study|streaks?|meditation|fitness|calories?|weight|chores?|goals?)\b/;
 const STOP = new Set('a an the to for of and or that i my me with on in it is be build make create want app project idea simple'.split(' '));
 
 function detectTypes(text) {
@@ -115,6 +116,8 @@ function detectTypes(text) {
   if (keys[0] === 'game' && !gameGenre && /\b(pick|picks|recommend\w*|suggest\w*|choose|finder|track\w*|backlog|library|wishlist|review\w*|deals?|rat(e|es|ing|ings)|timer|stats)\b/.test(t)) { keys.shift(); if (!keys.includes('web') && !keys.includes('data')) keys.unshift('web'); }
   // a bot/tool that is merely about games ("tracks my friends' game wins") shouldn't also get a game engine
   if (keys[0] !== 'game' && keys.includes('game') && !gameGenre && !/\b(unity|godot|three\.?js)\b/.test(t)) keys.splice(keys.indexOf('game'), 1);
+  // a personal tracker ("a habit tracker app", "a workout log") is an app the user fills in, not a data fetcher
+  if (keys[0] === 'data' && PERSONAL.test(t) && !/\b(scrap\w*|alerts?|api|monitor\w*|prices?|deals?|patch\w*|news|digest|feed|spend\w*|costs?)\b/.test(t)) { keys.shift(); const m = /\b(mobile|ios|android|iphone|phone)\b/.test(t) ? 'mobile' : 'web'; if (!keys.includes(m)) keys.unshift(m); else { keys.splice(keys.indexOf(m), 1); keys.unshift(m); } }
   return keys.length ? keys.slice(0, 2) : ['web'];
 }
 
@@ -224,7 +227,7 @@ function generate(idea) {
     { level: 4, title: 'Boss Fight: ' + boss, xp: 400, steps: ['Reproduce the hardest problem in isolation', 'Ask your AI tool for 2-3 approaches, pick the simplest', 'Implement, then test with ugly inputs', 'Add logging so failures are visible'], done: 'The boss problem no longer breaks the core loop.' },
     { level: 5, title: 'Polish & Loot', xp: 200, steps: ['Fix the 5 most annoying rough edges', 'Add one loot item: ' + mvp.loot[0], 'Write a 3-line how-to-use in the README'], done: 'You would be proud to show it to a friend.' },
     keys[0] === 'game'
-      ? { level: 6, title: 'Launch: Ship It', xp: 300, steps: ['Publish a playable build (see stack for hosting), and test it on a phone and a second computer', 'First-minute check: a new player is playing within one click, the first minute is forgiving, and only what that minute needs loads up front', 'Watch 3 numbers: average playtime, share still playing after 1 minute, and share who come back the next day', 'Post a short gameplay clip on X / Discord / Reddit, collect feedback and list the next 3 quests (a reason to come back tomorrow is usually one)'], done: 'It is live, strangers played it, and you know your playtime, first-minute and next-day numbers.' }
+      ? { level: 6, title: 'Launch: Ship It', xp: 300, steps: [(engine === null || engine === 'three' ? 'Publish a playable build on itch.io, and once it plays well also on CrazyGames, whose developer dashboard shows playtime and retention and pays a share of ad revenue; ' : 'Publish a playable build (see stack for hosting), and ') + 'test it on a phone and a second computer', 'First-minute check: a new player is playing within one click, the first minute is forgiving, and only what that minute needs loads up front', 'Watch 3 numbers: average playtime, share still playing after 1 minute, and share who come back the next day', 'Find 3 places where players of similar games already hang out (a subreddit, a Discord server, an itch.io tag), post a short gameplay clip there, collect feedback and list the next 3 quests (a reason to come back tomorrow is usually one)'], done: 'It is live, strangers played it, and you know your playtime, first-minute and next-day numbers.' }
       : { level: 6, title: 'Launch: Ship It', xp: 300, steps: ['Deploy (see stack for hosting)', 'Test the public URL/command on a second device', 'Post it on X / Discord / Reddit with a short demo clip', 'Collect feedback and list the next 3 quests'], done: 'It is live and someone other than you used it.' },
   ];
 
