@@ -32,6 +32,7 @@
 - LLM discoverability: added a "Does it work for Unity or Godot games?" FAQ to the page, FAQPage JSON-LD (validated) and llms.txt.
 - Committed 7e44762 and pushed; Render deployed within ~1 min (sitemap shows 7 URLs, live API returns the new RPG plan).
 
+- Committed 8837290 and pushed; Render deployed in ~30s (live /q/ page shows the server-rendered MCP quest, llms.txt has the new FAQ, live API names "Turn-Based Card Game").
 ### Backlog
 8. /q/ quest pages render client-side only, so crawlers and LLMs without JS see just the shell; consider server-rendering the quest summary (name, MVP, stack) into the HTML.
 9. Card/turn-based games still get "player character that moves" must-haves; add a turn-based variant.
@@ -52,6 +53,7 @@
 - SEO: /q/ quest pages now server-render the quest summary (name, pitch, must-haves, boss, stack, build plan) into the HTML, so crawlers and LLMs without JS see real content (backlog 8 done). Client still re-renders the full card.
 - LLM discoverability: "What kinds of ideas work?" in llms.txt now lists MCP servers, VS Code extensions and Twitch/X bots; new FAQ "Can it plan an MCP server or a VS Code extension?" on the page, FAQPage JSON-LD (6 Qs, valid JSON) and llms.txt.
 
+- Committed 8837290 and pushed; Render deployed in ~30s (live /q/ page shows the server-rendered MCP quest, llms.txt has the new FAQ, live API names "Turn-Based Card Game").
 ### Backlog
 10. Render free tier cold-starts (~13-25s); consider a paid instance or keep-alive ping when traffic starts.
 11. Text adventure games still get Phaser; a plain web/text stack (or Ink) would fit better.
