@@ -56,3 +56,14 @@
 10. Render free tier cold-starts (~13-25s); consider a paid instance or keep-alive ping when traffic starts.
 11. Text adventure games still get Phaser; a plain web/text stack (or Ink) would fit better.
 12. Generic names remain for some ideas ("MCP Server", "Strategy Game"); consider pulling the service name ("Notion MCP Server").
+
+## 2026-10-19 (weekly newsletter + monetization run, ~10:25 AM CT)
+- Drafted newsletter issue 1 (newsletter/2026-10-19-issue-01.md) and monetization/sponsor review (newsletter/2026-10-19-monetization-sponsors.md). Nothing sent.
+- Live check: https://queststarter.onrender.com/health 200 (~13s cold start); 4 newsletter /q/ links return 200.
+- Local main is 2 commits ahead of origin (5a508dc game launch/retention step, 48be749 FEEDBACK); not pushed, awaiting John's OK.
+### Backlog (found while picking newsletter examples)
+13. "a tool that tracks how much I spend on Claude Code each day" is named "How Much Spend Tracker" (should be "Claude Code Spend Tracker").
+14. "a browser game where you dodge asteroids..." is named "Browser Game"; "browser" should be skipped like other generic words.
+15. "an MCP server that lets my coding agent read my Notion roadmap" plans as AI Agent + MCP Server (agent-loop must-haves); "coding agent" as the client shouldn't make it an agent.
+16. Pitch keeps lowercase "vs code"; "explains my git diff" gets no LLM in the stack.
+17. "a habit tracker app" still plans as a Data / API Tool (FEEDBACK backlog 19).
