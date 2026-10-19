@@ -9,7 +9,7 @@ const TYPES = {
     boss: 'Reliable data ingestion / API integration without hitting rate limits',
   },
   game: {
-    label: 'Game', kw: ['game', 'platformer', 'rpg', 'roguelike', 'shooter', 'puzzle', 'arcade', 'tower defense', 'card game', 'multiplayer', 'unity', 'godot', 'flight sim', 'racing sim', 'city builder', 'colony sim', 'life sim', 'tycoon', 'escape room', 'vr game', 'sim game', 'farming sim', 'simulator', 'roblox', 'obby', 'unreal'],
+    label: 'Game', kw: ['game', 'platformer', 'rpg', 'roguelike', 'shooter', 'puzzle', 'arcade', 'tower defense', 'card game', 'multiplayer', 'unity', 'godot', 'flight sim', 'racing sim', 'city builder', 'colony sim', 'life sim', 'tycoon', 'escape room', 'vr game', 'sim game', 'farming sim', 'simulator', 'roblox', 'obby', 'unreal', 'deckbuilder', 'board game', 'chess', 'tic tac toe', 'strategy game', 'turn-based', 'turn based', 'text adventure', 'trivia game', 'word game'],
     stack: [['Phaser 3 + Vite', 'Fast 2D browser game framework; huge example base AI knows well.'], ['TypeScript', 'Catches bugs in game-state logic early.'], ['Itch.io / Netlify', 'Free, instant sharing of playable builds.'], ['Kenney.nl assets', 'Free CC0 art/sound so you can ship without an artist.']],
     must: ['Player character that moves and has a goal', 'One enemy or obstacle type', 'Win / lose condition and restart', 'Score or progress display'],
     boss: 'Game feel: collision, difficulty curve, and juice (sound, particles, screen shake)',
@@ -19,6 +19,12 @@ const TYPES = {
     stack: [['TypeScript or Python', 'Both have first-class LLM SDKs.'], ['OpenAI / Anthropic / xAI API (behind one wrapper)', 'Keep the model swappable.'], ['Tool-calling with JSON schemas', 'Agents = LLM + tools + a loop; start with 2 tools.'], ['SQLite or Postgres for memory/logs', 'Log every step so you can debug runs.'], ['Zod / Pydantic', 'Validate model output before acting on it.']],
     must: ['A single-goal agent loop (plan, act, observe, stop)', 'Two real tools the agent can call', 'Step-by-step run log visible to the user', 'Hard limits: max steps, max cost, human confirmation for risky actions'],
     boss: 'Making the agent reliable: bad tool calls, loops, and hallucinated results',
+  },
+  mcp: {
+    label: 'MCP Server', kw: ['mcp', 'model context protocol'],
+    stack: [['TypeScript + @modelcontextprotocol/sdk', 'Official MCP SDK; Claude Code and Cursor can scaffold a server with it in one prompt.'], ['stdio transport first (HTTP later)', 'Runs locally from Claude Desktop, Claude Code or Cursor with no hosting.'], ['Zod schemas for every tool input', 'Clear, validated inputs are what make the model call your tools correctly.'], ['MCP Inspector', 'Test each tool by hand before wiring it into an AI client.']],
+    must: ['One tool with a clear name, description and input schema', 'Connect it to Claude Code, Claude Desktop or Cursor and call it from chat', 'Read secrets (API tokens) from env vars, never from tool input', 'README with the copy-paste client config snippet'],
+    boss: 'Tool design: descriptions and schemas the model actually calls correctly, plus safe auth to the service',
   },
   extension: {
     label: 'Browser Extension', kw: ['extension', 'chrome', 'browser plugin', 'userscript'],
@@ -77,6 +83,14 @@ const FLAVOR = [
   { kw: ['money', 'budget', 'finance', 'crypto', 'trading', 'bet'], loot: ['CSV export', 'Charts', 'Disclaimer page (not financial advice)'] },
 ];
 
+const VSCODE = /\b(vs ?code|vscode|visual studio code|cursor extension)\b/;
+const VSCODE_STACK = [['VS Code Extension API + TypeScript (yo code)', 'Official scaffold; the same extension also runs in Cursor and Windsurf.'], ['esbuild', 'Fast bundling that the official template supports.'], ['VS Code Marketplace + Open VSX', 'Publish to both so Cursor and other VS Code forks can install it.']];
+const VSCODE_MUST = ['One command in the Command Palette that runs the core action', 'Show the result in the editor (hover, panel, or inline decoration)', 'Settings via contributes.configuration', 'Test it in the Extension Development Host (F5)'];
+const VSCODE_BOSS = 'Extension host lifecycle and keeping the editor fast (activation events, async work)';
+// Turn-based, card, board, puzzle and text games have no moving character or collision
+const TURN = /\b(turn[- ]based|card game|deckbuilder|deck builder|board game|chess|checkers|tic tac toe|strategy game|tactics|trivia|quiz game|word game|wordle|text adventure|interactive fiction|visual novel|sudoku)\b/;
+const TURN_MUST = ['Game state model (board, hand, or story position) that the UI reads from', 'One full turn: player acts, game resolves, opponent or game responds', 'Win / lose condition and restart', 'Clear feedback on what just happened each turn'];
+const TURN_BOSS = 'Rules and balance: making every turn resolve correctly and choices feel meaningful';
 const STOP = new Set('a an the to for of and or that i my me with on in it is be build make create want app project idea simple'.split(' '));
 
 function detectTypes(text) {
@@ -84,7 +98,8 @@ function detectTypes(text) {
   const scored = [];
   for (const [key, def] of Object.entries(TYPES)) {
     let s = 0;
-    for (const k of def.kw) if (t.includes(k.length <= 3 ? ' ' + k : k)) s += k.length > 3 ? 2 : 1;
+    const tt = key === 'game' ? t.replace(/\bgam(er|ers|ing)\b/g, ' ') : t;
+    for (const k of def.kw) if (tt.includes(k.length <= 3 ? ' ' + k : k)) s += k.length > 3 ? 2 : 1;
     if (s) scored.push([key, s]);
   }
   scored.sort((a, b) => b[1] - a[1]);
@@ -97,26 +112,26 @@ function detectTypes(text) {
   const gameGenre = /\bgame (where|about|in which|set)\b|\b(platformer|rpg|roguelike|shooter|puzzle|arcade|tower defense|card game|deckbuilder|multiplayer|level|player|enemy|enemies|npc|npcs|dungeon|escape room)\b/.test(t);
   // a game with AI features ("an rpg where the npcs are llm agents") is a game first, with an AI component
   if (keys[0] === 'agent' && keys.includes('game') && gameGenre) { keys.splice(keys.indexOf('game'), 1); keys.unshift('game'); }
-  if (keys[0] === 'game' && !gameGenre && /\b(pick|picks|recommend\w*|suggest\w*|choose|finder|track\w*|backlog|library|wishlist|review\w*|deals?)\b/.test(t)) { keys.shift(); if (!keys.includes('web') && !keys.includes('data')) keys.unshift('web'); }
+  if (keys[0] === 'game' && !gameGenre && /\b(pick|picks|recommend\w*|suggest\w*|choose|finder|track\w*|backlog|library|wishlist|review\w*|deals?|rat(e|es|ing|ings)|timer|stats)\b/.test(t)) { keys.shift(); if (!keys.includes('web') && !keys.includes('data')) keys.unshift('web'); }
   // a bot/tool that is merely about games ("tracks my friends' game wins") shouldn't also get a game engine
   if (keys[0] !== 'game' && keys.includes('game') && !gameGenre && !/\b(unity|godot|three\.?js)\b/.test(t)) keys.splice(keys.indexOf('game'), 1);
   return keys.length ? keys.slice(0, 2) : ['web'];
 }
 
-const ACRO = { ai: 'AI', rag: 'RAG', api: 'API', llm: 'LLM', gpt: 'GPT', ios: 'iOS', iphone: 'iPhone', mvp: 'MVP', rpg: 'RPG', ui: 'UI', '2d': '2D', '3d': '3D', npc: 'NPC', mmo: 'MMO', fps: 'FPS', pc: 'PC', vr: 'VR', ar: 'AR', youtube: 'YouTube', github: 'GitHub', tiktok: 'TikTok', gpu: 'GPU', cpu: 'CPU', pdf: 'PDF', seo: 'SEO', sql: 'SQL', npcs: 'NPCs', unity: 'Unity', godot: 'Godot', unreal: 'Unreal', ue5: 'UE5', obby: 'Obby', threejs: 'Three.js', webgl: 'WebGL', discord: 'Discord', telegram: 'Telegram', slack: 'Slack', twitter: 'Twitter', reddit: 'Reddit', steam: 'Steam', chrome: 'Chrome', android: 'Android', notion: 'Notion', spotify: 'Spotify', twitch: 'Twitch', minecraft: 'Minecraft', roblox: 'Roblox', xbox: 'Xbox', playstation: 'PlayStation', openai: 'OpenAI', chatgpt: 'ChatGPT' };
+const ACRO = { ai: 'AI', rag: 'RAG', mcp: 'MCP', cli: 'CLI', saas: 'SaaS', claude: 'Claude', cursor: 'Cursor', vscode: 'VS Code', turnbased: 'Turn-Based', api: 'API', llm: 'LLM', gpt: 'GPT', ios: 'iOS', iphone: 'iPhone', mvp: 'MVP', rpg: 'RPG', ui: 'UI', '2d': '2D', '3d': '3D', npc: 'NPC', mmo: 'MMO', fps: 'FPS', pc: 'PC', vr: 'VR', ar: 'AR', youtube: 'YouTube', github: 'GitHub', tiktok: 'TikTok', gpu: 'GPU', cpu: 'CPU', pdf: 'PDF', seo: 'SEO', sql: 'SQL', npcs: 'NPCs', unity: 'Unity', godot: 'Godot', unreal: 'Unreal', ue5: 'UE5', obby: 'Obby', threejs: 'Three.js', webgl: 'WebGL', discord: 'Discord', telegram: 'Telegram', slack: 'Slack', twitter: 'Twitter', reddit: 'Reddit', steam: 'Steam', chrome: 'Chrome', android: 'Android', notion: 'Notion', spotify: 'Spotify', twitch: 'Twitch', minecraft: 'Minecraft', roblox: 'Roblox', xbox: 'Xbox', playstation: 'PlayStation', openai: 'OpenAI', chatgpt: 'ChatGPT' };
 function titleCase(s) { return s.split(' ').map(w => ACRO[w] || w.replace(/\b\w/g, c => c.toUpperCase())).join(' '); }
 function hasWord(text, k) { return new RegExp('(^|[^a-z0-9])' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '($|[^a-z0-9])').test(text); }
-function lbl(l) { return l.toLowerCase().replace(/\bai\b/g, 'AI').replace(/\bapi\b/g, 'API'); }
-function article(w) { return /^[aeiou]/i.test(w) ? 'an' : 'a'; }
+function lbl(l) { return l.toLowerCase().replace(/\bai\b/g, 'AI').replace(/\bapi\b/g, 'API').replace(/\bmcp\b/g, 'MCP').replace(/\bvs code\b/g, 'VS Code'); }
+function article(w) { if (/^[A-Z]{2,}/.test(w)) return /^[AEFHILMNORSX]/.test(w) ? 'an' : 'a'; return /^[aeiou]/i.test(w) ? 'an' : 'a'; }
 
-const FILLER = new Set('helps help lets let allows allow can will you your which who where when using use uses via from into just some every all also really like so tells shows gives are was were has have get gets'.split(' '));
-const KIND = new Set('bot tool extension plugin agent website site webapp saas platform thing chrome browser discord telegram slack mobile ios android iphone web'.split(' '));
-const VERB = { track: 'Tracker', tracks: 'Tracker', summarize: 'Summarizer', summarizes: 'Summarizer', review: 'Reviewer', reviews: 'Reviewer', pick: 'Picker', picks: 'Picker', find: 'Finder', finds: 'Finder', recommend: 'Recommender', recommends: 'Recommender', suggest: 'Suggester', suggests: 'Suggester', plan: 'Planner', plans: 'Planner', generate: 'Generator', generates: 'Generator', monitor: 'Monitor', monitors: 'Monitor', alert: 'Alerts', alerts: 'Alerts', organize: 'Organizer', organizes: 'Organizer', schedule: 'Scheduler', schedules: 'Scheduler', compare: 'Comparer', compares: 'Comparer', translate: 'Translator', translates: 'Translator', scrape: 'Scraper', scrapes: 'Scraper', log: 'Logger', logs: 'Logger', remind: 'Reminder', reminds: 'Reminder', count: 'Counter', counts: 'Counter', rate: 'Rater', rates: 'Rater', write: 'Writer', writes: 'Writer', build: 'Builder', builds: 'Builder', create: 'Creator', creates: 'Creator', explain: 'Explainer', explains: 'Explainer', analyze: 'Analyzer', analyzes: 'Analyzer', post: 'Poster', posts: 'Poster', send: 'Sender', sends: 'Sender', watch: 'Watcher', watches: 'Watcher', run: 'Runner', runs: 'Runner', show: 'Viewer', shows: 'Viewer', turn: 'Converter', turns: 'Converter', block: 'Blocker', blocks: 'Blocker', book: 'Booker', books: 'Booker', teach: 'Tutor', teaches: 'Tutor', convert: 'Converter', converts: 'Converter' };
+const FILLER = new Set('helps help lets let allows allow can will you your which who where when using use uses via from into just some every all also really like so tells shows gives are was were has have get gets play plays playing style'.split(' '));
+const KIND = new Set('cli bot tool extension plugin agent website site webapp saas platform thing chrome browser discord telegram slack mobile ios android iphone web'.split(' '));
+const VERB = { track: 'Tracker', tracks: 'Tracker', summarize: 'Summarizer', summarizes: 'Summarizer', review: 'Reviewer', reviews: 'Reviewer', pick: 'Picker', picks: 'Picker', find: 'Finder', finds: 'Finder', recommend: 'Recommender', recommends: 'Recommender', suggest: 'Suggester', suggests: 'Suggester', plan: 'Planner', plans: 'Planner', generate: 'Generator', generates: 'Generator', monitor: 'Monitor', monitors: 'Monitor', alert: 'Alerts', alerts: 'Alerts', organize: 'Organizer', organizes: 'Organizer', schedule: 'Scheduler', schedules: 'Scheduler', compare: 'Comparer', compares: 'Comparer', translate: 'Translator', translates: 'Translator', scrape: 'Scraper', scrapes: 'Scraper', log: 'Logger', logs: 'Logger', remind: 'Reminder', reminds: 'Reminder', count: 'Counter', counts: 'Counter', rate: 'Rater', rates: 'Rater', write: 'Writer', writes: 'Writer', build: 'Builder', builds: 'Builder', create: 'Creator', creates: 'Creator', explain: 'Explainer', explains: 'Explainer', analyze: 'Analyzer', analyzes: 'Analyzer', post: 'Poster', posts: 'Poster', send: 'Sender', sends: 'Sender', watch: 'Watcher', watches: 'Watcher', run: 'Runner', runs: 'Runner', show: 'Viewer', shows: 'Viewer', turn: 'Converter', turns: 'Converter', block: 'Blocker', blocks: 'Blocker', book: 'Booker', books: 'Booker', teach: 'Tutor', teaches: 'Tutor', convert: 'Converter', converts: 'Converter', rename: 'Renamer', renames: 'Renamer' };
 const BREAK = /^(to|for|with|on|in|at|by|and|or|when|so|from|using|via|while|before|after|based|over|where|as|that|which|who|if|like|into|about|across|between|during|without|per|than)$/;
 
 // "a discord bot that tracks my friends game wins" -> "Friends Game Wins Tracker" (falls back to the first 3 meaningful words)
 function projectName(idea) {
-  const all = idea.toLowerCase().replace(/\bthree\.js\b/g, 'threejs').replace(/\bunreal engine( \d)?\b/g, 'unreal').replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean);
+  const all = idea.toLowerCase().replace(/\bthree\.js\b/g, 'threejs').replace(/\bunreal engine( \d)?\b/g, 'unreal').replace(/\bturn[- ]based\b/g, 'turnbased').replace(/\bvs ?code\b|\bvisual studio code\b/g, 'vscode').replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean);
   const vi = all.findIndex((w, i) => VERB[w] && i > 0);
   if (vi > 0) {
     const obj = [];
@@ -159,27 +174,32 @@ function generate(idea) {
   idea = String(idea || '').trim().slice(0, 600);
   if (idea.length < 4 || !/[a-z0-9]{2,}/i.test(idea)) throw new Error('Tell me a bit more about your idea (at least a few words).');
   const keys = detectTypes(idea);
-  const primary = TYPES[keys[0]];
+  const primary = keys[0] === 'extension' && VSCODE.test(idea.toLowerCase()) ? { ...TYPES.extension, label: 'VS Code Extension' } : TYPES[keys[0]];
   const secondary = keys[1] ? TYPES[keys[1]] : null;
   const name = projectName(idea);
   const lower = idea.toLowerCase();
 
   const engine = keys[0] === 'game' ? gameEngine(lower) : null;
-  const stack = (engine ? GAME_ENGINES[engine] : primary.stack).map(([tech, why]) => ({ tech, why }));
+  const vscode = keys[0] === 'extension' && VSCODE.test(lower);
+  const stack = (engine ? GAME_ENGINES[engine] : vscode ? VSCODE_STACK : primary.stack).map(([tech, why]) => ({ tech, why }));
   if (engine && engine !== 'roblox' && (engine === 'unreal' || /\b(3d|three dimensional|vr|virtual reality)\b|\bthree\.?js\b/.test(lower))) stack.push({ tech: 'Blender + Blender MCP (optional)', why: 'Lets Claude Code or Cursor model and export simple 3D assets for you, so you are not stuck on art.' });
-  if (keys[0] === 'bot') {
+  const botSdk = () => {
     const sdk = /\btelegram\b/.test(lower) ? ['Node.js + grammY (Telegram)', 'Modern, well-documented Telegram bot framework; easy for AI tools to write.']
       : /\bslack\b/.test(lower) ? ['Node.js + Slack Bolt', "Slack's official bot framework, with slash commands and events built in."]
       : /\btwitch\b/.test(lower) ? ['Node.js + tmi.js / Twurple (Twitch)', 'Reads and posts Twitch chat; Twurple also covers the Twitch API.']
-      : /\bdiscord\b/.test(lower) ? ['Node.js + discord.js', 'Best docs and examples for Discord bots; easy for AI tools to write.'] : null;
-    if (sdk) stack[0] = { tech: sdk[0], why: sdk[1] };
-  }
+      : /\bdiscord\b/.test(lower) ? ['Node.js + discord.js', 'Best docs and examples for Discord bots; easy for AI tools to write.']
+      : /\b(twitter|x)\b/.test(lower) ? ['Node.js + twitter-api-v2 (X API)', 'Typed client for posting and reading on X; check the X API plan limits first.'] : null;
+    const i = stack.findIndex(s => s.tech.startsWith(TYPES.bot.stack[0][0]));
+    if (sdk && i >= 0) stack[i] = { tech: sdk[0], why: sdk[1] + (i > 0 ? ' (for the bot side)' : '') };
+  };
   const cozy = keys[0] === 'game' && COZY.test(lower) && !/\b(flight|racing|space|combat|battle|war|mech) (sim|simulator)\b/.test(lower);
   if (secondary) for (const [tech, why] of secondary.stack.slice(0, 2)) if (!stack.find(s => s.tech === tech)) stack.push({ tech, why: why + ' (for the ' + lbl(secondary.label) + ' side)' });
-  if (/\b(ai|llm|gpt|agent|smart|generate|summar)/.test(lower) && !keys.includes('agent')) stack.push({ tech: 'An LLM API behind a single wrapper function', why: 'Your idea sounds AI-powered; keep the model swappable.' });
+  botSdk();
+  if ((/\b(ai|llm|gpt|agent|smart|summar)/.test(lower) || (/\bgenerat/.test(lower) && !/\bprocedural/.test(lower))) && !keys.includes('agent')) stack.push({ tech: 'An LLM API behind a single wrapper function', why: 'Your idea sounds AI-powered; keep the model swappable.' });
 
-  const must = cozy ? [...COZY_MUST] : [...primary.must];
-  const boss = cozy ? COZY_BOSS : primary.boss;
+  const turn = keys[0] === 'game' && !cozy && TURN.test(lower);
+  const must = cozy ? [...COZY_MUST] : turn ? [...TURN_MUST] : vscode ? [...VSCODE_MUST] : [...primary.must];
+  const boss = cozy ? COZY_BOSS : turn ? TURN_BOSS : vscode ? VSCODE_BOSS : primary.boss;
   if (secondary) must.push('Integration point with your ' + lbl(secondary.label) + ' component');
   const loot = new Set();
   for (const f of FLAVOR) if (f.kw.some(k => hasWord(lower, k) || (k.length > 4 && lower.includes(k)))) f.loot.forEach(l => loot.add(l));
@@ -188,8 +208,8 @@ function generate(idea) {
   const stackLine = stack.slice(0, 3).map(s => s.tech).join(', ');
   const mvp = {
     name,
-    pitch: `${cap(fixCase(idea.replace(/[.!?]+$/, '')))} — shipped as ${article(primary.label)} ${lbl(primary.label)}${secondary ? ' with ' + article(secondary.label) + ' ' + lbl(secondary.label) + ' component' : ''}, scoped to one core loop that a real user can finish in under a minute.`,
-    types: keys.map(k => TYPES[k].label),
+    pitch: `${cap(fixCase(idea.replace(/[.!?]+$/, '').replace(/^(please\s+)?((build|make|create|code)( me)?|i (want|need|would like) to (build|make|create)|i want|i need|help me (build|make))\s+/i, '')))} — shipped as ${article(primary.label)} ${lbl(primary.label)}${secondary ? ' with ' + article(secondary.label) + ' ' + lbl(secondary.label) + ' component' : ''}, scoped to one core loop that a real user can finish in under a minute.`,
+    types: keys.map((k, i) => i === 0 ? primary.label : TYPES[k].label),
     mustHave: must,
     outOfScope: ['User accounts / payments (unless the idea is about them)', 'Admin dashboards', 'Mobile-perfect design', 'Anything not needed for the core loop'],
     boss: boss,

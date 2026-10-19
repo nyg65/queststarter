@@ -36,3 +36,23 @@
 8. /q/ quest pages render client-side only, so crawlers and LLMs without JS see just the shell; consider server-rendering the quest summary (name, MVP, stack) into the HTML.
 9. Card/turn-based games still get "player character that moves" must-haves; add a turn-based variant.
 10. Render free tier cold-starts (~25s); a first-time visitor from X may bounce. Consider a paid instance or keep-alive ping when traffic starts.
+
+## 2026-10-19 (daily run, ~8:15 AM CT)
+- Health: local :4173 up (restarted on latest code). Render (https://queststarter.onrender.com) up; cold start ~13s. /, /health, /robots.txt, /sitemap.xml, /llms.txt, /q/<id> 200; bad /q id and unknown paths 404; bad JSON and junk ideas give 400. Headless Chrome render of a /q/ page OK (full card, Share, prompts). Script-tag idea is escaped on /q/ pages.
+- Output test: 22 new varied ideas (card/deckbuilder/chess/trivia/strategy/text adventure games, MCP server, VS Code extension, CLI tool, X bot, D&D Discord bot, newsletter agent, habit tracker, speedrun timer, invoicing SaaS) plus a 27-idea regression set diffed against yesterday's generator (only intended changes).
+- Fixed in generator.js:
+  - Turn-based, card, board, chess, trivia, strategy and text adventure games got "player character that moves" + collision boss; they now get a turn-based MVP (game state, one full turn, win/lose, turn feedback) and a rules/balance boss (backlog 9). Tic tac toe, chess, deckbuilder, board/strategy games now count as games.
+  - "turn-based" was read as the verb "turn", naming quests "Card Game Converter"; now "Turn-Based Card Game".
+  - "a site where gamers rate controllers" planned a Phaser game; "gamer/gaming" no longer counts as building a game, and rating/timer/stats apps about games plan as web apps.
+  - New MCP Server type (TypeScript MCP SDK, stdio, Zod tool schemas, MCP Inspector, client config) instead of a Next.js web app.
+  - VS Code extensions got the Chrome MV3 stack; now a VS Code Extension API plan (yo code, esbuild, Marketplace + Open VSX), labeled "VS Code extension".
+  - X/Twitter bots get twitter-api-v2, and the platform bot SDK is applied even when the bot is the secondary type (was discord.js for a Twitter bot).
+  - "procedurally generated dungeons" added an LLM API to the stack; procedural generation no longer counts as AI.
+  - Names: "Cli Tool" is "Screenshots Renamer"; "Play Platformer" is "Cat Platformer"; SaaS/MCP/CLI/Claude/VS Code casing; pitch drops a leading "Build me"; "an MCP server" article.
+- SEO: /q/ quest pages now server-render the quest summary (name, pitch, must-haves, boss, stack, build plan) into the HTML, so crawlers and LLMs without JS see real content (backlog 8 done). Client still re-renders the full card.
+- LLM discoverability: "What kinds of ideas work?" in llms.txt now lists MCP servers, VS Code extensions and Twitch/X bots; new FAQ "Can it plan an MCP server or a VS Code extension?" on the page, FAQPage JSON-LD (6 Qs, valid JSON) and llms.txt.
+
+### Backlog
+10. Render free tier cold-starts (~13-25s); consider a paid instance or keep-alive ping when traffic starts.
+11. Text adventure games still get Phaser; a plain web/text stack (or Ink) would fit better.
+12. Generic names remain for some ideas ("MCP Server", "Strategy Game"); consider pulling the service name ("Notion MCP Server").
