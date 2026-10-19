@@ -147,3 +147,37 @@ Maintained by the "X feedback watch" routine (twice daily). Public X reads only;
     > Build the app you'd open every day: a tracker for something you already do by hand. Small, you're the first user, and it gets you through the App Store review once. If you want a scoped plan from a one-line idea, I made this free: https://queststarter.onrender.com
 12. Reply to @ritesh_khokhani, https://x.com/ritesh_khokhani/status/2111901629221888266
     > The best tip I've seen from people shipping these: scope it to one loop (move, avoid, score) before asking the AI for anything. I built a free tool that does that scoping step for game ideas, with Unity, Godot, Roblox and Three.js plans: https://queststarter.onrender.com
+
+## 2026-10-19 (9:00 AM CT run)
+
+### Mentions of QuestStarter
+- No mentions of QuestStarter, the site URL, or @JohnPesce2011 since the 5 PM run (search and the account's mentions both empty). Launch post (https://x.com/JohnPesce2011/status/2111246359865307447) is still at 4 impressions, 0 likes, 0 replies; the account has 3 followers and 1 post.
+- Site check: https://queststarter.onrender.com/health 200 (22s cold start); local :4173 200.
+- **Real user feedback, feature requests, bug reports: still none.** Drafts 1-12 are still waiting on John's approval; nothing has been posted.
+- Note: X search was rate-limited (shared access, HTTP 429) for about a minute at the start of the run; it worked on retry.
+
+### What builders are saying (since 5 PM CT yesterday)
+- Launch numbers for a vibe-coded game: @froessell (8K followers) published an article, "My Claude Code game got 664 plays. Fewer than 1 in 100 came back the next day" (https://x.com/froessell/status/2112089812383486321, 1.2K impressions, 13 replies). His browser game on CrazyGames had 3:00 average playtime, 31% still playing after one minute and 0.7% next-day retention. Causes he found: a 14 MB load before play, a hard first wave, about 2 minutes of content per run, and no reason to return. He quotes a reply saying one-prompt vibe-coded games "are good for likes on X, but nobody plays it more than once." QuestStarter's Level 6 for games was just "deploy and post", so this got built (below).
+- Big Godot showcase: @Stefan_3D_AI calls After the Wind (Ragnarok Online meets Monster Hunter, 5 weeks in Godot, up to 8 agents at once) "the cleanest game MVP made with AI I've seen" (https://x.com/Stefan_3D_AI/status/2112130671015874614, 19K impressions, 384 bookmarks). Supports the Godot + MCP plan.
+- "Knowing what to build is the hard part" is still everywhere in replies, now under @marclou's shipping post (24K impressions, 105 replies): @Little_K_Story "the bottleneck moves to deciding what to build", @sambuild1 asks how to prioritize without overbuilding. Crowded threads, small reply accounts.
+- Direct ask: @pavansinghdotin "I'm going to build my 1st Game. What should I build?" (https://x.com/pavansinghdotin/status/2112141696423325902, 264 followers, 1 reply).
+- Competition and adjacent tools: @pullwishapp (1 follower) is spamming replies for a feature-request board with an MCP "so your coding agent knows what to build next"; @AIInspoWorld runs a gallery of AI games "for when you're stuck on your next vibe-coded game"; @SlamShadyyyy says Bluesky's Attie now builds websites, games and quizzes from a prompt (unverified, small account); @charliejhills (4.2K impressions) pushes 400+ free agents and skills on GitHub as "you don't need to write Claude prompts from scratch". Prompts alone are getting commoditized; the scoping step is still the gap.
+- Monetization signal: @RoundtableSpace (43K impressions) on ShapeFinder, a Claude Code side project that helps people pick mice and keyboards and made about $130 from affiliate links in its first month. A gear or tool affiliate angle could fit QuestStarter's stack picks later.
+- Mood: anti-AI game posts continue (@gamingfan323 "another video game crash", @Dxmonickk). Keep copy about learning and shipping.
+
+### Actions taken this run
+- Built: game quests now get a game-specific Level 6. It covers testing on a phone, a first-minute check (playing within one click, a forgiving first minute, load only what that minute needs), and watching 3 numbers (average playtime, share still playing after 1 minute, share who come back the next day). Its done-check now asks that you know those numbers. Non-game quests are unchanged.
+- Built: game quests get a 9th prompt, "After launch: keep players playing". It asks the AI tool to explain each number from the code, then write a fix plan with one phase per number and one commit per phase. llms.txt mentions it.
+- Verified a 10-idea set against the previous generator: only game quests changed (Level 6 and the extra prompt); bots, extensions, MCP servers and trackers are identical. Restarted the local server; /, /llms.txt, /api/generate and /q/<id> are 200.
+- Committed locally as 5a508dc but **not pushed**: the safety check blocked the push because this routine says not to publish without John's approval. The live site doesn't have this change yet; the next approved push (or a standing OK for routines to push fixes) will ship it.
+
+### Backlog (new this run)
+17. Browser game hosting: suggest CrazyGames or Poki next to itch.io, since they report playtime, first-minute and next-day numbers for free.
+18. Games: offer "daily reward or streak" and "visible next unlock" as loot, so the reason to come back is part of the plan.
+19. "a habit tracker app" plans as a Data / API Tool; it should be a web or mobile app.
+
+### Drafts for John's approval (not posted)
+13. Reply to @pavansinghdotin, https://x.com/pavansinghdotin/status/2112141696423325902
+    > Remake a tiny game you loved as a kid, but with one twist. Keep it to one loop (move, avoid, score) and ship it in a weekend. If you want a scoped plan and build prompts from a one-line idea, I made this free: https://queststarter.onrender.com
+14. Reply to @froessell, https://x.com/froessell/status/2112089812383486321
+    > Most useful game post I've read this week. Everyone shares build speed, almost nobody shares day-one retention. Did the zero-click start move conversion much once it went live?
