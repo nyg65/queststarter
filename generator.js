@@ -223,7 +223,9 @@ function generate(idea) {
     { level: 3, title: 'Side Quest: Real Data & State', xp: 250, steps: ['Replace sample data with real input and persistence', 'Handle empty, loading, and error states', 'Add input validation'], done: 'Data survives a refresh/restart.' },
     { level: 4, title: 'Boss Fight: ' + boss, xp: 400, steps: ['Reproduce the hardest problem in isolation', 'Ask your AI tool for 2-3 approaches, pick the simplest', 'Implement, then test with ugly inputs', 'Add logging so failures are visible'], done: 'The boss problem no longer breaks the core loop.' },
     { level: 5, title: 'Polish & Loot', xp: 200, steps: ['Fix the 5 most annoying rough edges', 'Add one loot item: ' + mvp.loot[0], 'Write a 3-line how-to-use in the README'], done: 'You would be proud to show it to a friend.' },
-    { level: 6, title: 'Launch: Ship It', xp: 300, steps: ['Deploy (see stack for hosting)', 'Test the public URL/command on a second device', 'Post it on X / Discord / Reddit with a short demo clip', 'Collect feedback and list the next 3 quests'], done: 'It is live and someone other than you used it.' },
+    keys[0] === 'game'
+      ? { level: 6, title: 'Launch: Ship It', xp: 300, steps: ['Publish a playable build (see stack for hosting), and test it on a phone and a second computer', 'First-minute check: a new player is playing within one click, the first minute is forgiving, and only what that minute needs loads up front', 'Watch 3 numbers: average playtime, share still playing after 1 minute, and share who come back the next day', 'Post a short gameplay clip on X / Discord / Reddit, collect feedback and list the next 3 quests (a reason to come back tomorrow is usually one)'], done: 'It is live, strangers played it, and you know your playtime, first-minute and next-day numbers.' }
+      : { level: 6, title: 'Launch: Ship It', xp: 300, steps: ['Deploy (see stack for hosting)', 'Test the public URL/command on a second device', 'Post it on X / Discord / Reddit with a short demo clip', 'Collect feedback and list the next 3 quests'], done: 'It is live and someone other than you used it.' },
   ];
 
   const ctx = `Project: ${name}\nIdea: ${idea}\nType: ${mvp.types.join(' + ')}\nStack: ${stack.map(s => s.tech).join('; ')}`;
@@ -236,7 +238,9 @@ function generate(idea) {
     { title: 'Debug helper', text: `Something is broken in "${name}". Here's what I expected: [X]. Here's what happened: [Y]. Here's the error/log: [paste]. First, list the 3 most likely causes. Then suggest the smallest change to test each. Don't rewrite unrelated code.` },
     { title: 'Pre-launch security check', text: `Act as a hostile reviewer of "${name}" before anyone else uses it. Check for: API keys or tokens in the code or repo history, missing auth on routes, unvalidated input, data another user could read, and costs an attacker could run up (API calls, LLM tokens). Rank what you find by damage, fix the top 3, and tell me how to verify each fix.` },
     { title: 'Polish and launch', text: `Review "${name}" like a picky user. List the top 10 rough edges (UX, copy, errors, performance), then fix the top 5. Next, write a README with a one-line pitch, setup, usage, and a demo section, and give me deploy steps for the stack above.` },
+
   ];
+  if (keys[0] === 'game') prompts.push({ title: 'After launch: keep players playing', text: `"${name}" is live. Here are its numbers: average playtime [X], share of players still playing 1 minute after starting [Y], share who come back the next day [Z]. Read the code and, for each number, explain what in the game is causing it (load size and order, first-minute difficulty, how much content one run has, reasons to return). Then write a fix plan with one phase per number, first-minute first. For each fix give the files, the change and a test I can run. Make one commit per phase and stop after each so I can ship it and watch the numbers.` });
 
   return { mvp, stack, plan, prompts, totalXp: plan.reduce((a, l) => a + l.xp, 0), engine: 'template-v1' };
 }

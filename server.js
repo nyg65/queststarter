@@ -8,7 +8,7 @@ const LASTMOD = (() => { try { return fs.statSync(path.join(PUB, 'index.html')).
 const EXAMPLES = ["A Discord bot that tracks my friends' game stats and posts a weekly leaderboard", "A 2D roguelike platformer with procedurally generated dungeons", "An AI agent that reads my GitHub issues and drafts fixes", "A web app that shows free game drops and patch notes for my wishlist", "A Chrome extension that summarizes any page with AI"];
 const LLMS = `# QuestStarter
 
-> QuestStarter is a free web tool that turns any app, game, Discord bot, browser extension or AI agent idea into an actionable "Quest Card": a scoped MVP, recommended tech stack, a 6-level build plan with XP, and 8 copy-paste prompts (including a pre-launch security check) for AI coding tools like Cursor and Claude Code.
+> QuestStarter is a free web tool that turns any app, game, Discord bot, browser extension or AI agent idea into an actionable "Quest Card": a scoped MVP, recommended tech stack, a 6-level build plan with XP, and 8 copy-paste prompts (including a pre-launch security check; game quests add a 9th for fixing playtime and next-day retention after launch) for AI coding tools like Cursor and Claude Code.
 
 ## How it works
 - User types a project idea; no signup, free.
