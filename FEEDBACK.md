@@ -244,3 +244,31 @@ Maintained by the "X feedback watch" routine (twice daily). Public X reads only;
     > Write the 3-4 things it must do before you prompt anything, and treat everything else as v2. Ship the ugly version to 5 people the day those work. If you want help scoping one idea into a plan and build prompts, I made this free: https://queststarter.onrender.com
 18. Reply to @Skatersurvivors, https://x.com/Skatersurvivors/status/2112312512603681245
     > Get one run fun first: move, skate trick, one enemy, die, restart. Lock that before adding upgrades. In Godot, ask your AI tool for one scene per mechanic so it can't break the others. Nice combo, by the way.
+
+## 2026-10-20 (5:00 PM CT run)
+
+### Mentions of QuestStarter
+- No mentions of QuestStarter, the site URL, or @JohnPesce2011 since the 9 AM run. The only search hit was an unrelated World of Warcraft "quest starter items" post from @Jared_I0. Launch post (https://x.com/JohnPesce2011/status/2111246359865307447) is still at 4 impressions, 0 likes, 0 replies.
+- Site check: https://queststarter.onrender.com/health 200 (12s cold start); local :4173 200.
+- **Real user feedback, feature requests, bug reports: still none.** Drafts 1-18 are still waiting on John's approval; nothing has been posted.
+
+### What builders are saying (since 9 AM CT)
+- Demand before building: @LukeDownie5 (new account) posted lessons from a first paid app: "I built it before checking whether anyone was searching for it. Turns out, barely anyone was", plus too long getting onto the App Store and it "looked obviously vibe-coded" (https://x.com/LukeDownie5/status/2112629078725414986). QuestStarter's Level 1 went straight to scaffolding, so it got a demand check (below).
+- Weekend-project energy is in hardware + agents: @codewithantonio (24.8K followers) had Claude Code add every IoT device in his house via a Raspberry Pi 5 and Home Assistant (https://x.com/codewithantonio/status/2112599581511070061, 2.9K impressions, 38 bookmarks); @DmitryBBLV calls "old hardware plus Claude Code" the best weekend project category right now. QuestStarter has no Home Assistant / Raspberry Pi plan type yet (backlog 27).
+- Game builders: @meta_alchemist hosts a live "vibe gaming" workshop on X tomorrow at 1 PM UTC (8 AM CT) for @vibevibefun, promoted by @Honeybreel; @CallMeC4KE posted lesson 5 of a beginner series, "How to put your AI-built game online"; @andreasxirtus remixed a browser flying-car sim. Pushback continues (@VintageAntonio_: "learn game design by actually playing games"; @otainul: Godot by hand feels better than Claude output).
+- Competition: @getborel launched Borel, prompt to iOS app with Expo, publish to the App Store without a Mac (2 followers). @Z3r1ovo pairs AutoCoder with a checkout service. Builders tools, not planners; no direct QuestStarter clone seen.
+- Mood: @vibecodeguild wrote an "AI addiction" self-check for builders who can't stop starting things, which lines up with the scope-lock nudge below.
+
+### Actions taken this run
+- Built: Level 1 of every quest now starts with a 15-minute demand check (find 3 posts where people ask for it, complain about the problem, or use a similar tool / play a similar game; sharpen the idea if there are none), from @LukeDownie5's lesson.
+- Built (backlog 26): the rules-file prompt now tells the AI to remind the builder to park new ideas in IDEAS.md and finish the current one first.
+- Checked on a habit tracker, an asteroid browser game, a Discord bot and a Godot racing game; restarted local :4173; /, /health, /llms.txt and /api/generate are 200.
+- Committed locally, not pushed (pushing waits on the daily run or John's OK). The live site doesn't have this change yet.
+
+### Backlog (new this run)
+27. Home automation / Raspberry Pi ideas ("make Claude Code control my smart home") need a Home Assistant plan type (Pi or mini PC, HA integrations, MCP server for HA) instead of a generic web app.
+28. Consider a short "doesn't look vibe-coded" polish step in Level 5 (consistent spacing, real copy, one custom visual), from @LukeDownie5's third lesson.
+
+### Drafts for John's approval (not posted)
+19. Reply to @LukeDownie5, https://x.com/LukeDownie5/status/2112629078725414986
+    > Lesson 1 is the one almost everyone learns after shipping. Congrats on getting paying users anyway. I just added a 15-minute "find 3 people asking for this" step to the start of every plan in my free planner because of posts like this: https://queststarter.onrender.com
