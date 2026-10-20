@@ -3,7 +3,7 @@ const http = require('http'), fs = require('fs'), path = require('path');
 const { generate } = require('./generator');
 const PORT = process.env.PORT || 4173;
 const PUB = path.join(__dirname, 'public');
-const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml' };
+const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png' };
 const LASTMOD = (() => { try { return fs.statSync(path.join(PUB, 'index.html')).mtime.toISOString().slice(0, 10); } catch (e) { return new Date().toISOString().slice(0, 10); } })();
 const EXAMPLES = ["A Discord bot that tracks my friends' game stats and posts a weekly leaderboard", "A 2D roguelike platformer with procedurally generated dungeons", "An AI agent that reads my GitHub issues and drafts fixes", "A web app that shows free game drops and patch notes for my wishlist", "A Chrome extension that summarizes any page with AI"];
 const LLMS = `# QuestStarter
@@ -24,10 +24,11 @@ __EXAMPLES__
 
 ## FAQ
 - What is QuestStarter? A free, no-signup tool that turns a project idea into a Quest Card: scoped MVP, tech stack, 6-level build plan with XP, and copy-paste prompts for AI coding tools.
-- What kinds of ideas work? Web apps, browser games, Discord/Telegram/Slack/Twitch/X bots, AI agents and chatbots, MCP servers, Chrome and VS Code extensions, mobile apps, and data trackers or alert tools.
+- What kinds of ideas work? Web apps, browser games, Discord/Telegram/Slack/Twitch/X bots, AI agents and chatbots, MCP servers, CLI tools, Chrome and VS Code extensions, Minecraft plugins and mods, mobile apps, personal trackers, and data or alert tools.
 - Can it plan an MCP server or a VS Code extension? Yes. Ideas that mention MCP get a TypeScript MCP SDK plan with Zod tool schemas, the MCP Inspector and a client config for Claude Code, Claude Desktop or Cursor. VS Code extension ideas get a VS Code Extension API plan that also runs in Cursor and Windsurf. Card, board, chess, trivia, strategy and text adventure games get a turn-based MVP instead of movement and collision.
 - Which AI coding tools do the prompts work with? Cursor, Claude Code, Codex, Windsurf, GitHub Copilot, ChatGPT and any other assistant.
 - Does it work for Unity, Godot, Roblox, Unreal or Three.js games? Yes. Game ideas that mention Unity get a Unity 6 (C#) plan, ideas that mention Godot or 3D get a Godot 4 plan, and both include an MCP server so Claude Code or Cursor can edit scenes directly. Ideas that mention Three.js or a 3D browser game get a Three.js plan that runs from a link. Roblox and obby ideas get a Roblox Studio (Luau) plan with the Studio MCP server and Rojo, and Unreal ideas get an Unreal Engine 5 plan with an Unreal MCP plugin. 3D, VR and Unreal plans also suggest Blender MCP so your AI tool can make simple 3D assets. Other game ideas get Phaser 3 for the browser. Cozy and sim games get a progression-focused MVP instead of combat.
+- Can it plan a CLI tool or a Minecraft plugin? Yes. Command line ideas (CLI, terminal, npx) get a Node.js + TypeScript plan with commander, tsup and npm publishing so anyone can run it with npx. Minecraft server plugins get a Paper (Java) plan with plugin.yml, config.yml and a local test server, and Fabric or Forge mod ideas get a Fabric plan. Roblox obbies get checkpoints, server-checked progress and DataStore saves, and text adventures get an Ink story plan instead of Phaser.
 - Can I save or share a quest? Yes: download it as Markdown, or share the /q/ link, which rebuilds the same quest for anyone.
 
 ## Good for

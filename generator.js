@@ -26,6 +26,18 @@ const TYPES = {
     must: ['One tool with a clear name, description and input schema', 'Connect it to Claude Code, Claude Desktop or Cursor and call it from chat', 'Read secrets (API tokens) from env vars, never from tool input', 'README with the copy-paste client config snippet'],
     boss: 'Tool design: descriptions and schemas the model actually calls correctly, plus safe auth to the service',
   },
+  mcmod: {
+    label: 'Minecraft Plugin', kw: ['minecraft plugin', 'minecraft server plugin', 'minecraft mod', 'paper plugin', 'spigot', 'bukkit', 'fabric mod', 'forge mod', 'datapack', 'minecraft server mod'],
+    stack: [['Paper API (Java 21) + Gradle', 'The standard for server plugins; works on Paper and Purpur servers and AI tools know the Bukkit API well. Use Fabric instead for a client-side mod.'], ['A local Paper test server', 'Drop the built jar in plugins/ and restart; the fastest way to try every change.'], ['config.yml + a YAML or SQLite data file', 'Server owners expect settings in config.yml; player progress needs to survive restarts.'], ['Modrinth / Hangar', 'Free places server owners already search for plugins.']],
+    must: ['One command registered in plugin.yml with permission checks', 'One event listener that drives the core mechanic', 'Settings in config.yml with sensible defaults', 'Player data saved so it survives a server restart'],
+    boss: 'Version compatibility and server performance: no blocking work on the main thread, and test on the Minecraft version you target',
+  },
+  cli: {
+    label: 'CLI Tool', kw: ['cli', 'command line', 'command-line', 'terminal tool', 'terminal app', 'npx'],
+    stack: [['Node.js + TypeScript', 'Runs anywhere npm does; AI tools write solid Node CLIs.'], ['commander + @clack/prompts', 'Argument parsing and friendly interactive prompts without reinventing either.'], ['tsup', 'Bundles to one file with a shebang so it runs with npx.'], ['npm (publish as an npx command)', 'Anyone can try it with one command, no install step.']],
+    must: ['One command that does the core job, with --help', 'Clear errors and non-zero exit codes when something fails', 'Read options from flags first, then a config file or env vars', 'Runnable with npx from a fresh folder'],
+    boss: 'Working the same on macOS, Windows and Linux (paths, shells, line endings) with error messages people can act on',
+  },
   extension: {
     label: 'Browser Extension', kw: ['extension', 'chrome', 'browser plugin', 'userscript'],
     stack: [['Chrome Extension MV3 + Vite (CRXJS)', 'Modern manifest with hot reload.'], ['TypeScript', 'Safer message passing between scripts.'], ['chrome.storage', 'Built-in persistence.']],
@@ -33,7 +45,7 @@ const TYPES = {
     boss: 'Handling sites that change their DOM, and MV3 service worker lifecycle',
   },
   mobile: {
-    label: 'Mobile App', kw: ['mobile', 'ios', 'android', 'iphone', 'phone app'],
+    label: 'Mobile App', kw: ['mobile', 'ios', 'android', 'iphone', 'phone app', 'for my phone', 'on my phone'],
     stack: [['Expo (React Native) + TypeScript', 'One codebase, test instantly on your phone.'], ['Expo Router', 'File-based navigation.'], ['Supabase', 'Auth + database without writing a backend.']],
     must: ['Two screens with navigation', 'Core action that works offline-first with local state', 'Run on a real device via Expo Go'],
     boss: 'Auth, permissions, and store submission',
@@ -58,11 +70,17 @@ const GAME_ENGINES = {
   three: [['Three.js + Vite', '3D that runs in any browser from a link; AI tools know Three.js well enough to build whole games in one chat.'], ['TypeScript', 'Catches bugs in game-state and physics logic early.'], ['Itch.io / Netlify', 'Free, instant sharing of playable builds; no download for players.'], ['Free glTF models (Kenney, Poly Pizza)', 'CC0 3D assets so you can ship without a modeler.']],
   roblox: [['Roblox Studio (Luau)', 'Free engine with players on every device already; Luau is small and AI tools write it well.'], ['Roblox Studio MCP server for Claude Code / Cursor', 'Lets your AI tool read your place, write scripts and start playtests inside Studio.'], ['Rojo + Git', 'Syncs scripts from your editor into Studio, so AI edits live in normal files you can diff and undo.'], ['Publish to Roblox (start private, then public)', 'Free hosting and discovery; no store or download step for players.']],
   unreal: [['Unreal Engine 5 (Blueprints + C++)', 'High-end 3D and lighting out of the box; start in Blueprints and add C++ only where needed.'], ['An Unreal MCP plugin for Claude Code / Cursor', 'Lets your AI tool spawn actors, edit levels and wire Blueprints inside the editor.'], ['Git + Git LFS', 'Unreal assets are big binaries; LFS keeps the repo usable.'], ['Itch.io (desktop build)', 'Free, instant sharing of playable builds; Steam playtest later.']],
+  ink: [['Ink (inkle) + the Inky editor', 'A scripting language made for branching stories; AI tools write it well and you can play-test every branch in Inky.'], ['inkjs + Vite', 'Runs your Ink story in a web page you style yourself.'], ['TypeScript', 'For any state beyond the story itself, like inventory or stats.'], ['Itch.io', 'Free hosting with a big interactive fiction audience.']],
   godot: [['Godot 4 (GDScript)', 'Free, open-source, lightweight; GDScript is simple for AI tools to write.'], ['Godot MCP server for Claude Code / Cursor', 'Lets your AI tool run the project and edit scenes and scripts directly.'], ['Git', 'Godot scenes are text files, so diffs and AI edits stay readable.'], ['Itch.io (HTML5 or desktop export)', 'Free, instant sharing of playable builds.']],
 };
 // Cozy, sandbox and sim games don't need combat; give them a core-loop + progression MVP instead.
+// Client-side Minecraft mods (Fabric/Forge) instead of server plugins (Paper)
+const MCMOD_FABRIC = [['Fabric API (Java 21) + Fabric Loom (Gradle)', 'The lightweight, fast-updating mod loader; AI tools know its registries and mixins. Use NeoForge if your modpack needs it.'], ['Loom runClient dev setup', 'Launches a test Minecraft client with your mod in one command.'], ['A JSON config + data generators', 'Players expect a config file; datagen writes recipes and models so you do not hand-edit JSON.'], ['Modrinth / CurseForge', 'Where players already search for mods.']];
+const MCMOD_FABRIC_MUST = ['One new thing registered (an item, block, or command) that works in a test world', 'The core mechanic driven by one event or mixin', 'A config file with sensible defaults', 'Runs in a clean Fabric install with only Fabric API alongside'];
 const COZY = /\b(cozy|cosy|farming|farm|sim|simulator|sandbox|life sim|idle|incremental|tycoon|management|builder|city builder|crafting|walking sim|relaxing)\b/;
 const COZY_MUST = ['A core loop the player repeats (e.g. plant, wait, harvest, sell)', 'One progression system (unlocks, upgrades, or money)', 'Save and load so progress survives a restart', 'A clear on-screen goal for the first 5 minutes'];
+const ROBLOX_MUST = ['Spawn point, checkpoints and respawn when a player falls or dies', 'Progress checked on the server, never trusted from the client', 'Progress saved with DataStoreService so it survives rejoining', 'A leaderstats display (stage, coins or wins)'];
+const ROBLOX_BOSS = 'Server/client split and DataStore reliability: exploit-proof progress that saves without data loss';
 const COZY_BOSS = 'Pacing and progression: making the loop satisfying for 10+ minutes without combat';
 function gameEngine(lower) {
   if (/\broblox\b|\bobby\b/.test(lower)) return 'roblox';
@@ -71,6 +89,7 @@ function gameEngine(lower) {
   if (/\bgodot\b/.test(lower)) return 'godot';
   if (/\bthree\.?js\b/.test(lower)) return 'three';
   if (/\b(vr|virtual reality|quest 3)\b/.test(lower)) return 'unity';
+  if (/\b(text adventure|text-based adventure|interactive fiction|choose your own adventure|text game)\b/.test(lower)) return 'ink';
   if (/\b(3d|three dimensional)\b/.test(lower) && /\b(browser|web|webgl|online)\b/.test(lower)) return 'three';
   if (/\b3d\b|\bthree dimensional\b/.test(lower)) return 'godot';
   return null;
@@ -113,30 +132,46 @@ function detectTypes(text) {
   const gameGenre = /\bgame (where|about|in which|set)\b|\b(platformer|rpg|roguelike|shooter|puzzle|arcade|tower defense|card game|deckbuilder|multiplayer|level|player|enemy|enemies|npc|npcs|dungeon|escape room)\b/.test(t);
   // a game with AI features ("an rpg where the npcs are llm agents") is a game first, with an AI component
   if (keys[0] === 'agent' && keys.includes('game') && gameGenre) { keys.splice(keys.indexOf('game'), 1); keys.unshift('game'); }
-  if (keys[0] === 'game' && !gameGenre && /\b(pick|picks|recommend\w*|suggest\w*|choose|finder|track\w*|backlog|library|wishlist|review\w*|deals?|rat(e|es|ing|ings)|timer|stats)\b/.test(t)) { keys.shift(); if (!keys.includes('web') && !keys.includes('data')) keys.unshift('web'); }
+  if (keys[0] === 'game' && !gameGenre && /\b(pick|picks|recommend\w*|suggest\w*|choose|finder|track\w*|backlog|library|wishlist|review\w*|deals?|rat(e|es|ing|ings)|timer|stats|compar\w*|performance|benchmarks?|generator|sprites?|assets?|overlay|splits|wiki|guides?|launcher)\b/.test(t)) { keys.shift(); if (!keys.includes('web') && !keys.includes('data')) keys.unshift('web'); }
   // a bot/tool that is merely about games ("tracks my friends' game wins") shouldn't also get a game engine
   if (keys[0] !== 'game' && keys.includes('game') && !gameGenre && !/\b(unity|godot|three\.?js)\b/.test(t)) keys.splice(keys.indexOf('game'), 1);
+  // "an MCP server that lets my coding agent read X": the agent is the client, so plan only the MCP server
+  if (keys.includes('mcp') && /^\s*(an? |my |the )?(\w+ ){0,2}mcp server\b/.test(t)) { const i = keys.indexOf('agent'); if (i >= 0) keys.splice(i, 1); keys.splice(keys.indexOf('mcp'), 1); keys.unshift('mcp'); }
   // a personal tracker ("a habit tracker app", "a workout log") is an app the user fills in, not a data fetcher
   if (keys[0] === 'data' && PERSONAL.test(t) && !/\b(scrap\w*|alerts?|api|monitor\w*|prices?|deals?|patch\w*|news|digest|feed|spend\w*|costs?)\b/.test(t)) { keys.shift(); const m = /\b(mobile|ios|android|iphone|phone)\b/.test(t) ? 'mobile' : 'web'; if (!keys.includes(m)) keys.unshift(m); else { keys.splice(keys.indexOf(m), 1); keys.unshift(m); } }
   return keys.length ? keys.slice(0, 2) : ['web'];
 }
 
-const ACRO = { ai: 'AI', rag: 'RAG', mcp: 'MCP', cli: 'CLI', saas: 'SaaS', claude: 'Claude', cursor: 'Cursor', vscode: 'VS Code', turnbased: 'Turn-Based', api: 'API', llm: 'LLM', gpt: 'GPT', ios: 'iOS', iphone: 'iPhone', mvp: 'MVP', rpg: 'RPG', ui: 'UI', '2d': '2D', '3d': '3D', npc: 'NPC', mmo: 'MMO', fps: 'FPS', pc: 'PC', vr: 'VR', ar: 'AR', youtube: 'YouTube', github: 'GitHub', tiktok: 'TikTok', gpu: 'GPU', cpu: 'CPU', pdf: 'PDF', seo: 'SEO', sql: 'SQL', npcs: 'NPCs', unity: 'Unity', godot: 'Godot', unreal: 'Unreal', ue5: 'UE5', obby: 'Obby', threejs: 'Three.js', webgl: 'WebGL', discord: 'Discord', telegram: 'Telegram', slack: 'Slack', twitter: 'Twitter', reddit: 'Reddit', steam: 'Steam', chrome: 'Chrome', android: 'Android', notion: 'Notion', spotify: 'Spotify', twitch: 'Twitch', minecraft: 'Minecraft', roblox: 'Roblox', xbox: 'Xbox', playstation: 'PlayStation', openai: 'OpenAI', chatgpt: 'ChatGPT' };
+const ACRO = { ai: 'AI', rag: 'RAG', mcp: 'MCP', cli: 'CLI', saas: 'SaaS', claude: 'Claude', cursor: 'Cursor', vscode: 'VS Code', turnbased: 'Turn-Based', api: 'API', llm: 'LLM', gpt: 'GPT', ios: 'iOS', iphone: 'iPhone', mvp: 'MVP', rpg: 'RPG', ui: 'UI', '2d': '2D', '3d': '3D', npc: 'NPC', mmo: 'MMO', fps: 'FPS', pc: 'PC', vr: 'VR', ar: 'AR', youtube: 'YouTube', github: 'GitHub', tiktok: 'TikTok', gpu: 'GPU', cpu: 'CPU', pdf: 'PDF', seo: 'SEO', sql: 'SQL', npcs: 'NPCs', unity: 'Unity', godot: 'Godot', unreal: 'Unreal', ue5: 'UE5', obby: 'Obby', threejs: 'Three.js', webgl: 'WebGL', discord: 'Discord', telegram: 'Telegram', slack: 'Slack', twitter: 'Twitter', reddit: 'Reddit', steam: 'Steam', chrome: 'Chrome', android: 'Android', notion: 'Notion', spotify: 'Spotify', twitch: 'Twitch', minecraft: 'Minecraft', roblox: 'Roblox', xbox: 'Xbox', playstation: 'PlayStation', openai: 'OpenAI', chatgpt: 'ChatGPT', nextjs: 'Next.js', obs: 'OBS', csv: 'CSV', json: 'JSON', npx: 'npx' };
 function titleCase(s) { return s.split(' ').map(w => ACRO[w] || w.replace(/\b\w/g, c => c.toUpperCase())).join(' '); }
 function hasWord(text, k) { return new RegExp('(^|[^a-z0-9])' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '($|[^a-z0-9])').test(text); }
-function lbl(l) { return l.toLowerCase().replace(/\bai\b/g, 'AI').replace(/\bapi\b/g, 'API').replace(/\bmcp\b/g, 'MCP').replace(/\bvs code\b/g, 'VS Code'); }
+function lbl(l) { return l.toLowerCase().replace(/\bai\b/g, 'AI').replace(/\bapi\b/g, 'API').replace(/\bmcp\b/g, 'MCP').replace(/\bvs code\b/g, 'VS Code').replace(/\bminecraft\b/g, 'Minecraft').replace(/\bcli\b/g, 'CLI'); }
 function article(w) { if (/^[A-Z]{2,}/.test(w)) return /^[AEFHILMNORSX]/.test(w) ? 'an' : 'a'; return /^[aeiou]/i.test(w) ? 'an' : 'a'; }
 
-const FILLER = new Set('helps help lets let allows allow can will you your which who where when using use uses via from into just some every all also really like so tells shows gives are was were has have get gets play plays playing style'.split(' '));
+const FILLER = new Set('helps help lets let allows allow can will you your which who where when using use uses via from into just some every all also really like new built made so tells shows gives are was were has have get gets play plays playing style'.split(' '));
 const KIND = new Set('cli bot tool extension plugin agent website site webapp saas platform thing chrome browser discord telegram slack mobile ios android iphone web'.split(' '));
-const VERB = { track: 'Tracker', tracks: 'Tracker', summarize: 'Summarizer', summarizes: 'Summarizer', review: 'Reviewer', reviews: 'Reviewer', pick: 'Picker', picks: 'Picker', find: 'Finder', finds: 'Finder', recommend: 'Recommender', recommends: 'Recommender', suggest: 'Suggester', suggests: 'Suggester', plan: 'Planner', plans: 'Planner', generate: 'Generator', generates: 'Generator', monitor: 'Monitor', monitors: 'Monitor', alert: 'Alerts', alerts: 'Alerts', organize: 'Organizer', organizes: 'Organizer', schedule: 'Scheduler', schedules: 'Scheduler', compare: 'Comparer', compares: 'Comparer', translate: 'Translator', translates: 'Translator', scrape: 'Scraper', scrapes: 'Scraper', log: 'Logger', logs: 'Logger', remind: 'Reminder', reminds: 'Reminder', count: 'Counter', counts: 'Counter', rate: 'Rater', rates: 'Rater', write: 'Writer', writes: 'Writer', build: 'Builder', builds: 'Builder', create: 'Creator', creates: 'Creator', explain: 'Explainer', explains: 'Explainer', analyze: 'Analyzer', analyzes: 'Analyzer', post: 'Poster', posts: 'Poster', send: 'Sender', sends: 'Sender', watch: 'Watcher', watches: 'Watcher', run: 'Runner', runs: 'Runner', show: 'Viewer', shows: 'Viewer', turn: 'Converter', turns: 'Converter', block: 'Blocker', blocks: 'Blocker', book: 'Booker', books: 'Booker', teach: 'Tutor', teaches: 'Tutor', convert: 'Converter', converts: 'Converter', rename: 'Renamer', renames: 'Renamer' };
+const VERB = { track: 'Tracker', tracks: 'Tracker', summarize: 'Summarizer', summarizes: 'Summarizer', review: 'Reviewer', reviews: 'Reviewer', pick: 'Picker', picks: 'Picker', find: 'Finder', finds: 'Finder', recommend: 'Recommender', recommends: 'Recommender', suggest: 'Suggester', suggests: 'Suggester', plan: 'Planner', plans: 'Planner', generate: 'Generator', generates: 'Generator', monitor: 'Monitor', monitors: 'Monitor', alert: 'Alerts', alerts: 'Alerts', organize: 'Organizer', organizes: 'Organizer', schedule: 'Scheduler', schedules: 'Scheduler', compare: 'Comparer', compares: 'Comparer', translate: 'Translator', translates: 'Translator', scrape: 'Scraper', scrapes: 'Scraper', log: 'Logger', logs: 'Logger', remind: 'Reminder', reminds: 'Reminder', count: 'Counter', counts: 'Counter', rate: 'Rater', rates: 'Rater', write: 'Writer', writes: 'Writer', build: 'Builder', builds: 'Builder', create: 'Creator', creates: 'Creator', explain: 'Explainer', explains: 'Explainer', analyze: 'Analyzer', analyzes: 'Analyzer', post: 'Poster', posts: 'Poster', send: 'Sender', sends: 'Sender', watch: 'Watcher', watches: 'Watcher', run: 'Runner', runs: 'Runner', show: 'Viewer', shows: 'Viewer', turn: 'Converter', turns: 'Converter', block: 'Blocker', blocks: 'Blocker', book: 'Booker', books: 'Booker', teach: 'Tutor', teaches: 'Tutor', convert: 'Converter', converts: 'Converter', rename: 'Renamer', renames: 'Renamer', hide: 'Hider', hides: 'Hider', triage: 'Triager', triages: 'Triager', scaffold: 'Scaffolder', scaffolds: 'Scaffolder', check: 'Checker', checks: 'Checker' };
 const BREAK = /^(to|for|with|on|in|at|by|and|or|when|so|from|using|via|while|before|after|based|over|where|as|that|which|who|if|like|into|about|across|between|during|without|per|than)$/;
 
 // "a discord bot that tracks my friends game wins" -> "Friends Game Wins Tracker" (falls back to the first 3 meaningful words)
 function projectName(idea) {
-  const all = idea.toLowerCase().replace(/\bthree\.js\b/g, 'threejs').replace(/\bunreal engine( \d)?\b/g, 'unreal').replace(/\bturn[- ]based\b/g, 'turnbased').replace(/\bvs ?code\b|\bvisual studio code\b/g, 'vscode').replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean);
-  const vi = all.findIndex((w, i) => VERB[w] && i > 0);
+  const all = idea.toLowerCase().replace(/\bthree\.js\b/g, 'threejs').replace(/\bnext\.?js\b/g, 'nextjs').replace(/\bunreal engine( \d)?\b/g, 'unreal').replace(/\bturn[- ]based\b/g, 'turnbased').replace(/\bvs ?code\b|\bvisual studio code\b/g, 'vscode').replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean);
+  // a base-form verb word used as a noun ("a workout log for my phone", "a meal plan app") is part of the name, not the action
+  const nounUse = i => !/s$/.test(all[i]) && i > 0 && !STOP.has(all[i - 1]) && !FILLER.has(all[i - 1]) && !BREAK.test(all[i - 1]) && !/^(i|we|you|they|people|users|gamers|players|can|will|to)$/.test(all[i - 1]) && (i === all.length - 1 || BREAK.test(all[i + 1]) || KIND.has(all[i + 1]) || all[i + 1] === 'app');
+  const vi = all.findIndex((w, i) => VERB[w] && i > 0 && !nounUse(i));
   if (vi > 0) {
+    // "tracks how much I spend on Claude Code each day" -> "Claude Code Spend Tracker"
+    const rest = all.slice(vi + 1);
+    if (rest[0] === 'how' && /^(much|many|long)$/.test(rest[1]) && rest.indexOf('on') > 1) {
+      const tgt = [];
+      for (const w of rest.slice(rest.indexOf('on') + 1)) {
+        if (BREAK.test(w) || /^(each|every|per|day|daily|week|weekly|month|monthly|today)$/.test(w)) break;
+        if (STOP.has(w) || FILLER.has(w)) continue;
+        tgt.push(w); if (tgt.length === 2) break;
+      }
+      const noun = rest.includes('time') || rest[1] === 'long' ? 'Time' : rest.some(w => /^(spend|spent|spending|pay|paid|cost|costs|money)$/.test(w)) ? 'Spend' : '';
+      if (tgt.length) return titleCase(tgt.join(' ')) + (noun ? ' ' + noun : '') + ' ' + VERB[all[vi]];
+    }
     const obj = [];
     for (const w of all.slice(vi + 1)) {
       if (BREAK.test(w)) { if (obj.length) break; else continue; }
@@ -156,7 +191,9 @@ function projectName(idea) {
     if (words.length === 3) break;
   }
   // a lone generic word ("a game where you...", "a vr app for meditation") reads badly; prefix what comes after the break
-  if (words.length === 2 && /^(threejs|unity|godot|phaser|roblox|unreal)$/.test(words[0]) && words[1] === 'game' && stopAt < all.length) words.shift();
+  if (words.length === 2 && /^(threejs|unity|godot|phaser|roblox|unreal|browser|web|online|simple|small|tiny|little|fun|mobile)$/.test(words[0]) && words[1] === 'game' && stopAt < all.length) words.shift();
+  // "an MCP server that reads my Notion roadmap" -> "Notion MCP Server"
+  if (words.join(' ') === 'mcp server' && stopAt < all.length) { const brand = all.slice(stopAt).find(w => ACRO[w] && !/^(ai|mcp|api|llm|gpt|claude|cursor|vscode|cli|ui|mvp)$/.test(w)); if (brand) return titleCase(brand + ' mcp server'); }
   if (words.length === 1 && stopAt < all.length) {
     const more = [];
     for (const w of all.slice(stopAt + 1)) {
@@ -170,21 +207,23 @@ function projectName(idea) {
   return titleCase(words.join(' ')) || 'My Project';
 }
 
-function fixCase(s) { return s.replace(/\bthree\.?js\b/g, 'Three.js').replace(/\bunreal engine\b/gi, 'Unreal Engine').replace(/[A-Za-z0-9]+/g, w => (w === w.toLowerCase() && ACRO[w] && w !== 'ar') ? ACRO[w] : w); }
+function fixCase(s) { return s.replace(/\bthree\.?js\b/g, 'Three.js').replace(/\bnext\.?js\b/gi, 'Next.js').replace(/\bunreal engine\b/gi, 'Unreal Engine').replace(/[A-Za-z0-9]+/g, (w, i, str) => (w === w.toLowerCase() && ACRO[w] && w !== 'ar' && str[i - 1] !== '.') ? ACRO[w] : w); }
 function cap(s) { s = s.trim(); return /^[a-z][A-Z]/.test(s) ? s : s.charAt(0).toUpperCase() + s.slice(1); }
 
 function generate(idea) {
   idea = String(idea || '').trim().slice(0, 600);
   if (idea.length < 4 || !/[a-z0-9]{2,}/i.test(idea)) throw new Error('Tell me a bit more about your idea (at least a few words).');
   const keys = detectTypes(idea);
-  const primary = keys[0] === 'extension' && VSCODE.test(idea.toLowerCase()) ? { ...TYPES.extension, label: 'VS Code Extension' } : TYPES[keys[0]];
+  let primary = keys[0] === 'extension' && VSCODE.test(idea.toLowerCase()) ? { ...TYPES.extension, label: 'VS Code Extension' } : TYPES[keys[0]];
   const secondary = keys[1] ? TYPES[keys[1]] : null;
   const name = projectName(idea);
   const lower = idea.toLowerCase();
 
   const engine = keys[0] === 'game' ? gameEngine(lower) : null;
   const vscode = keys[0] === 'extension' && VSCODE.test(lower);
-  const stack = (engine ? GAME_ENGINES[engine] : vscode ? VSCODE_STACK : primary.stack).map(([tech, why]) => ({ tech, why }));
+  const fabric = keys[0] === 'mcmod' && /\b(mod|fabric|forge|neoforge|modpack)\b/.test(lower) && !/\b(plugin|paper|spigot|bukkit|server)\b/.test(lower);
+  if (fabric) primary = { ...primary, label: 'Minecraft Mod' };
+  const stack = (engine ? GAME_ENGINES[engine] : vscode ? VSCODE_STACK : fabric ? MCMOD_FABRIC : primary.stack).map(([tech, why]) => ({ tech, why }));
   if (engine && engine !== 'roblox' && (engine === 'unreal' || /\b(3d|three dimensional|vr|virtual reality)\b|\bthree\.?js\b/.test(lower))) stack.push({ tech: 'Blender + Blender MCP (optional)', why: 'Lets Claude Code or Cursor model and export simple 3D assets for you, so you are not stuck on art.' });
   const botSdk = () => {
     const sdk = /\btelegram\b/.test(lower) ? ['Node.js + grammY (Telegram)', 'Modern, well-documented Telegram bot framework; easy for AI tools to write.']
@@ -198,11 +237,12 @@ function generate(idea) {
   const cozy = keys[0] === 'game' && COZY.test(lower) && !/\b(flight|racing|space|combat|battle|war|mech) (sim|simulator)\b/.test(lower);
   if (secondary) for (const [tech, why] of secondary.stack.slice(0, 2)) if (!stack.find(s => s.tech === tech)) stack.push({ tech, why: why + ' (for the ' + lbl(secondary.label) + ' side)' });
   botSdk();
-  if ((/\b(ai|llm|gpt|agent|smart|summar)/.test(lower) || (/\bgenerat/.test(lower) && !/\bprocedural/.test(lower))) && !keys.includes('agent')) stack.push({ tech: 'An LLM API behind a single wrapper function', why: 'Your idea sounds AI-powered; keep the model swappable.' });
+  if ((/\b(ai|llm|gpt|agent|smart|summar)/.test(lower) || (/\bgenerat/.test(lower) && !/\bprocedural/.test(lower))) && !keys.includes('agent') && keys[0] !== 'mcp') stack.push({ tech: 'An LLM API behind a single wrapper function', why: 'Your idea sounds AI-powered; keep the model swappable.' });
 
   const turn = keys[0] === 'game' && !cozy && TURN.test(lower);
-  const must = cozy ? [...COZY_MUST] : turn ? [...TURN_MUST] : vscode ? [...VSCODE_MUST] : [...primary.must];
-  const boss = cozy ? COZY_BOSS : turn ? TURN_BOSS : vscode ? VSCODE_BOSS : primary.boss;
+  const roblox = engine === 'roblox' && !cozy && !turn;
+  const must = cozy ? [...COZY_MUST] : turn ? [...TURN_MUST] : roblox ? [...ROBLOX_MUST] : fabric ? [...MCMOD_FABRIC_MUST] : vscode ? [...VSCODE_MUST] : [...primary.must];
+  const boss = cozy ? COZY_BOSS : turn ? TURN_BOSS : roblox ? ROBLOX_BOSS : vscode ? VSCODE_BOSS : primary.boss;
   if (secondary) must.push('Integration point with your ' + lbl(secondary.label) + ' component');
   const loot = new Set();
   for (const f of FLAVOR) if (f.kw.some(k => hasWord(lower, k) || (k.length > 4 && lower.includes(k)))) f.loot.forEach(l => loot.add(l));
