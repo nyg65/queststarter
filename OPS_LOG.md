@@ -67,3 +67,27 @@
 15. "an MCP server that lets my coding agent read my Notion roadmap" plans as AI Agent + MCP Server (agent-loop must-haves); "coding agent" as the client shouldn't make it an agent.
 16. Pitch keeps lowercase "vs code"; "explains my git diff" gets no LLM in the stack.
 17. "a habit tracker app" still plans as a Data / API Tool (FEEDBACK backlog 19).
+
+## 2026-10-20 (daily run, ~8:00 AM CT)
+- Health: local :4173 up (restarted on new code). Render (https://queststarter.onrender.com) was very slow to wake: two health checks timed out after 90s and 120s while Render's "waking up" page showed; the box's other HTTPS was fine. After the deploy it answers in ~0.15s. /, /health, /robots.txt, /sitemap.xml, /llms.txt, /og.png, /q/<id> 200; bad /q id and unknown paths 404; bad JSON and junk ideas give 400.
+- Output test: 20 new varied ideas (Claude Code spend tracker, asteroid browser game, Notion MCP server, git diff VS Code extension, workout log, text adventure, Minecraft plugin, Fabric mod, Roblox obby, raid reminder bot, Gmail triage agent, Steam Deck comparer, OBS splits overlay, pixel art generator, Twitch trivia, finance dashboard, Shorts hider, water tracker, Next.js scaffolder CLI, Godot racing) plus a 56-idea regression set diffed against yesterday's generator (only intended changes).
+- Fixed in generator.js:
+  - New CLI Tool type (Node.js + TypeScript, commander + @clack/prompts, tsup, npx via npm). "a CLI that scaffolds a new Next.js project" and "a command line tool that renames my screenshots" were Next.js web apps.
+  - New Minecraft Plugin type: Paper (Java) plan with plugin.yml, config.yml and a local test server; Fabric/Forge mod ideas get a Fabric + Loom plan labeled Minecraft Mod (FEEDBACK backlog 16; was a Next.js web app).
+  - Text adventures and interactive fiction get an Ink + inkjs plan instead of Phaser (backlog 11).
+  - Roblox obbies/action games get their own MVP (checkpoints and respawn, server-checked progress, DataStore saves, leaderstats) and boss (FEEDBACK backlog 14).
+  - "an MCP server that lets my coding agent read my Notion roadmap" planned as AI Agent + MCP; when the MCP server is the subject it's MCP-only and no longer adds an LLM API (backlog 15).
+  - Tools about games were planned as games: "a website that compares Steam Deck game performance" (Phaser + Next.js) and "a pixel art generator for game sprites" (Phaser) are web apps now (compare, performance, generator, sprites, assets, overlay, wiki, guide, launcher).
+  - "a workout log for my phone" was a Web App named "Phone Logger"; "for/on my phone" counts as mobile and noun uses like "workout log" or "meal plan" stay in the name (backlog 20).
+  - Names: "How Much Spend Tracker" is "Claude Code Spend Tracker" (backlog 13); "Browser Game" is "Dodge Asteroids Game" (backlog 14); "MCP Server" is "Notion MCP Server"/"Spotify MCP Server" (backlog 12); "Chrome Extension" is "YouTube Shorts Hider"; "AI Agent" is "Gmail Triager"; "Npx Tool" is "Package JSON Checker"; "Website Built" is "Next.js Website".
+  - Pitch casing: Next.js, OBS, CSV, JSON; no longer turns "package.json" into "package.JSON".
+- SEO: added a 1200x630 share image (public/og.png) with og:image, size and alt tags, a large Twitter/X card (was a text-only summary card), and the image on the WebApplication JSON-LD. Links shared on X and Discord now show a preview card.
+- LLM discoverability: new FAQ "Can it plan a CLI tool or a Minecraft plugin?" on the page, FAQPage JSON-LD (7 Qs, valid JSON) and llms.txt; llms.txt idea list now names CLI tools, Minecraft plugins/mods and personal trackers.
+- Committed e4ca0de and pushed; Render deployed (live API names "Next.js Scaffolder", /og.png 200, llms.txt has the new FAQ). This push also shipped the 4 commits from yesterday's X watch runs that were waiting (game launch step and retention prompt, trackers as web/mobile apps, FEEDBACK) and the newsletter commit.
+- The repo is public, so that push briefly published newsletter/ (issue 1 draft and the monetization/sponsor review). Untracked newsletter/ and added it to .gitignore (40311d6); the files stay local but remain in git history. FEEDBACK.md (with the X reply drafts) and OPS_LOG.md were already public from earlier pushes.
+
+### Backlog
+21. Racing and flight games still get "player character + one enemy" must-haves; add a driving/vehicle variant (handling, track/lap, timer, ghost or AI opponent).
+22. "a minecraft server plugin that adds quests" is named "Minecraft Server"; should be "Minecraft Quests Plugin".
+23. "a speedrun splits overlay for OBS" plans a Next.js + Supabase app with a landing page; OBS browser-source overlays need a static page, no auth or DB.
+24. Consider moving FEEDBACK.md/OPS_LOG.md out of the public repo (or making the repo private) if John doesn't want drafts and ops notes visible.
