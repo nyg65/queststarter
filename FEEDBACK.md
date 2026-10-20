@@ -214,3 +214,33 @@ Maintained by the "X feedback watch" routine (twice daily). Public X reads only;
     > Most of the ones I've seen are 2. The few that earn put them on CrazyGames or Poki for the ad share and treat finding players as half the project. Building got easy; distribution didn't.
 16. Reply to @Tigerless_labs, https://x.com/Tigerless_labs/status/2112213435257848094
     > Do it. Pick one loop (move, avoid, score), get it playable on day one, then spend day two on the first minute. If you want a scoped plan and build prompts from a one-line idea, I made this free: https://queststarter.onrender.com
+
+## 2026-10-20 (9:00 AM CT run)
+
+### Mentions of QuestStarter
+- No mentions of QuestStarter, the site URL, or @JohnPesce2011 since the 5 PM run (the account's mentions are empty). The only search hit was an unrelated "Side Quest Starter Bundle" Etsy listing from @JaidenAnderson. Launch post (https://x.com/JohnPesce2011/status/2111246359865307447) is still at 4 impressions, 0 likes, 0 replies; the account has 3 followers and 1 post.
+- Site check: https://queststarter.onrender.com/health 200 (12s cold start); local :4173 200.
+- **Real user feedback, feature requests, bug reports: still none.** Drafts 1-16 are still waiting on John's approval; nothing has been posted.
+
+### What builders are saying (since 5 PM CT yesterday)
+- Security of vibe-coded apps is the loudest practical theme: @stealThisWF posted a no-code two-account test (make accounts A and B, create data in A, try to see it from B by changing IDs, then signed out) and sells a $29 "Ship It Launch Kit" (guide, checklist, prompts to the first 100 users), another paid version of what QuestStarter gives away. @folabolarinwa says a vibe-coded app shipped a rule that let any user make themselves owner; @zephosdev cites a coffee chain dashboard whose data shipped in the page source behind a login screen. QuestStarter's security prompt didn't cover role escalation or client-side leaks, so it got stronger (below).
+- Browser game shipping: @0xbobaaa (2.7K followers) published an article, "How to Build and Ship Your Own Browser Game with Claude Opus 5.5 (Full Course)": empty folder to a live game portal in 9 days, including art, a trailer and passing the portal's QA (https://x.com/0xbobaaa/status/2112514472078115173, 628 impressions, 31 bookmarks). Supports the CrazyGames step added yesterday.
+- Unity via agents: @lucas_martinic (5.6K followers) had Claude Code install Unity 6 and build the first version headless (https://x.com/lucas_martinic/status/2112514417300758643, 3.5K impressions). Supports the Unity + MCP plan.
+- "Knowing what to build is the hard part" keeps repeating in small accounts (@BenchstackAi, @darshann20, @BezaIeI, @broIMxd, @DmitryBBLV); @blingdivinity joked about "vibe vibe coding", handing your idea to a person (995 impressions, 33 likes).
+- Direct asks: @ruwayfiahmed has spent 2 months vibe coding random stuff and wants to stick with one idea and ship an MVP fast (https://x.com/ruwayfiahmed/status/2112413473024135209, 33 followers). @Skatersurvivors is 4 days into a first Godot game with Cursor, mixing skateboarding into a survivors game, and asks for help (https://x.com/Skatersurvivors/status/2112312512603681245).
+- Competition and adjacent: @RopadDev announced Ropad, an AI agent for building Roblox games from idea to scripts (0 followers, "coming soon"); @pullwishapp is still reply-spamming its feature board. On X News: Wabi 2.0 (a group-chat agent that builds mini-apps like trackers) launched Oct 19, and a story on builders who'd rather vibe code games than play them (Anthropic's Thariq).
+- Unverified claims seen in small accounts: Epic shipped a "vibe-coded" launcher, and Google Play now has private apps with one user. Not confirmed in X News; don't use in copy until checked.
+
+### Actions taken this run
+- Fixed: the "Pre-launch security check" prompt (all quest types) now also checks for users who can raise their own role (including through database rules) and for data or secrets sent to the browser that a logged-out visitor could see, and it asks for a two-account test when the project has user accounts. Checked on a habit tracker, a Discord bot and a browser game; prompt counts unchanged (8, 8, 9). Restarted local :4173; /, /llms.txt, /health and /api/generate are 200.
+- Committed locally, not pushed (pushing waits on the daily run or John's OK). The live site doesn't have this change yet.
+
+### Backlog (new this run)
+25. Browser games: an optional "Pass portal QA" step or loot item (CrazyGames/Poki requirements like load size, no external links, mobile controls), from @0xbobaaa's course.
+26. Scope-lock nudge for people who keep starting new ideas (@ruwayfiahmed): a "stick with it" line in Level 1 or the rules file, such as no new idea until Level 6 is done.
+
+### Drafts for John's approval (not posted)
+17. Reply to @ruwayfiahmed, https://x.com/ruwayfiahmed/status/2112413473024135209
+    > Write the 3-4 things it must do before you prompt anything, and treat everything else as v2. Ship the ugly version to 5 people the day those work. If you want help scoping one idea into a plan and build prompts, I made this free: https://queststarter.onrender.com
+18. Reply to @Skatersurvivors, https://x.com/Skatersurvivors/status/2112312512603681245
+    > Get one run fun first: move, skate trick, one enemy, die, restart. Lock that before adding upgrades. In Godot, ask your AI tool for one scene per mechanic so it can't break the others. Nice combo, by the way.
