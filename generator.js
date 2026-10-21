@@ -38,6 +38,12 @@ const TYPES = {
     must: ['One command that does the core job, with --help', 'Clear errors and non-zero exit codes when something fails', 'Read options from flags first, then a config file or env vars', 'Runnable with npx from a fresh folder'],
     boss: 'Working the same on macOS, Windows and Linux (paths, shells, line endings) with error messages people can act on',
   },
+  overlay: {
+    label: 'Stream Overlay', kw: ['overlay', 'browser source', 'obs '],
+    stack: [['Vite + TypeScript (a static page)', 'An OBS Browser Source is just a web page: no server, login or database needed.'], ['Transparent CSS on a fixed 1920x1080 canvas', 'Lines up exactly with the OBS scene so you can position it once and forget it.'], ['URL query params for settings', 'Each streamer configures it by editing the link, with no account.'], ['GitHub Pages / Netlify', 'Free static hosting; paste the URL into an OBS Browser Source.']],
+    must: ['A page with a transparent background that looks right as an OBS Browser Source at 1920x1080', 'The core display updates live without a page refresh', 'Settings (colors, position, channel) read from URL params', 'State kept in localStorage so it survives OBS reloading the source'],
+    boss: 'Running all stream long: reconnecting when the data source drops, and staying light so OBS does not drop frames',
+  },
   extension: {
     label: 'Browser Extension', kw: ['extension', 'chrome', 'browser plugin', 'userscript'],
     stack: [['Chrome Extension MV3 + Vite (CRXJS)', 'Modern manifest with hot reload.'], ['TypeScript', 'Safer message passing between scripts.'], ['chrome.storage', 'Built-in persistence.']],
@@ -110,6 +116,10 @@ const VSCODE_BOSS = 'Extension host lifecycle and keeping the editor fast (activ
 const TURN = /\b(turn[- ]based|card game|deckbuilder|deck builder|board game|chess|checkers|tic tac toe|strategy game|tactics|trivia|quiz game|word game|wordle|text adventure|interactive fiction|visual novel|sudoku)\b/;
 const TURN_MUST = ['Game state model (board, hand, or story position) that the UI reads from', 'One full turn: player acts, game resolves, opponent or game responds', 'Win / lose condition and restart', 'Clear feedback on what just happened each turn'];
 const TURN_BOSS = 'Rules and balance: making every turn resolve correctly and choices feel meaningful';
+const VEHICLE = /\b(racing|racer|kart|karts|drift\w*|driving|flight sim\w*|flying game|plane game|planes)\b/;
+const VEHICLE_MUST = ['A vehicle with tuned handling (acceleration, braking, steering or drifting)', 'One track or course with checkpoints and a finish (lap line, gate or landing)', 'A run timer with the best time saved', 'A ghost of your best run or one AI opponent to race against'];
+const VEHICLE_BOSS = 'Handling and camera feel at speed, plus checkpoints that stop players cutting the course';
+const FABRIC_BOSS = 'Version compatibility: Minecraft updates break mods, so pin one version, keep mixins small and test in a clean instance';
 const PERSONAL = /\b(habits?|workouts?|gym|exercises?|mood|water intake|sleep|reading|journal|study|streaks?|meditation|fitness|calories?|weight|chores?|goals?)\b/;
 const STOP = new Set('a an the to for of and or that i my me with on in it is be build make create want app project idea simple'.split(' '));
 
@@ -137,6 +147,9 @@ function detectTypes(text) {
   if (keys[0] !== 'game' && keys.includes('game') && !gameGenre && !/\b(unity|godot|three\.?js)\b/.test(t)) keys.splice(keys.indexOf('game'), 1);
   // "an MCP server that lets my coding agent read X": the agent is the client, so plan only the MCP server
   if (keys.includes('mcp') && /^\s*(an? |my |the )?(\w+ ){0,2}mcp server\b/.test(t)) { const i = keys.indexOf('agent'); if (i >= 0) keys.splice(i, 1); keys.splice(keys.indexOf('mcp'), 1); keys.unshift('mcp'); }
+  // an OBS / stream overlay is a static page loaded as a Browser Source, not a full web app or a bot
+  if (keys.includes('overlay') && /\b(overlay|browser source)\b/.test(t) && /\b(obs|stream|streaming|streamer|streams|twitch|kick|streamlabs|browser source|youtube live|livestream\w*|speedrun\w*|splits)\b/.test(t)) { keys.length = 0; keys.push('overlay'); }
+  else if (keys.includes('overlay')) keys.splice(keys.indexOf('overlay'), 1);
   // a personal tracker ("a habit tracker app", "a workout log") is an app the user fills in, not a data fetcher
   if (keys[0] === 'data' && PERSONAL.test(t) && !/\b(scrap\w*|alerts?|api|monitor\w*|prices?|deals?|patch\w*|news|digest|feed|spend\w*|costs?)\b/.test(t)) { keys.shift(); const m = /\b(mobile|ios|android|iphone|phone)\b/.test(t) ? 'mobile' : 'web'; if (!keys.includes(m)) keys.unshift(m); else { keys.splice(keys.indexOf(m), 1); keys.unshift(m); } }
   return keys.length ? keys.slice(0, 2) : ['web'];
@@ -216,8 +229,15 @@ function generate(idea) {
   const keys = detectTypes(idea);
   let primary = keys[0] === 'extension' && VSCODE.test(idea.toLowerCase()) ? { ...TYPES.extension, label: 'VS Code Extension' } : TYPES[keys[0]];
   const secondary = keys[1] ? TYPES[keys[1]] : null;
-  const name = projectName(idea);
   const lower = idea.toLowerCase();
+  let name = projectName(idea);
+  // "a minecraft server plugin that adds quests" -> "Minecraft Quests Plugin"
+  const mcAdds = keys[0] === 'mcmod' && lower.match(/\b(?:adds?|adding)\s+((?:(?:a|an|the|new|some|custom|more)\s+)*)([a-z0-9]+(?:\s+[a-z0-9]+)?)/);
+  if (mcAdds) {
+    const obj = mcAdds[2].split(' ').filter(w => !BREAK.test(w) && !STOP.has(w) && !FILLER.has(w) && !/^(to|for|players?)$/.test(w));
+    const base = /\bminecraft\b/.test(lower) ? 'minecraft' : (lower.match(/\b(fabric|forge|neoforge|paper|spigot|bukkit)\b/) || ['minecraft'])[0];
+    if (obj.length) name = titleCase(base + ' ' + obj.join(' ')) + (/\bmod\b/.test(lower) && !/\bplugin\b/.test(lower) ? ' Mod' : ' Plugin');
+  }
 
   const engine = keys[0] === 'game' ? gameEngine(lower) : null;
   const vscode = keys[0] === 'extension' && VSCODE.test(lower);
@@ -237,12 +257,17 @@ function generate(idea) {
   const cozy = keys[0] === 'game' && COZY.test(lower) && !/\b(flight|racing|space|combat|battle|war|mech) (sim|simulator)\b/.test(lower);
   if (secondary) for (const [tech, why] of secondary.stack.slice(0, 2)) if (!stack.find(s => s.tech === tech)) stack.push({ tech, why: why + ' (for the ' + lbl(secondary.label) + ' side)' });
   botSdk();
+  if (keys[0] === 'overlay') {
+    if (/\btwitch\b/.test(lower)) stack.push({ tech: 'tmi.js (read-only Twitch chat)', why: 'Reads chat anonymously from the page, so the overlay needs no login or server.' });
+    if (/\bspotify\b/.test(lower)) stack.push({ tech: 'Spotify Web API (currently-playing endpoint)', why: 'Shows the song that is playing; needs a one-time Spotify login (PKCE) by the streamer.' });
+  }
   if ((/\b(ai|llm|gpt|agent|smart|summar)/.test(lower) || (/\bgenerat/.test(lower) && !/\bprocedural/.test(lower))) && !keys.includes('agent') && keys[0] !== 'mcp') stack.push({ tech: 'An LLM API behind a single wrapper function', why: 'Your idea sounds AI-powered; keep the model swappable.' });
 
   const turn = keys[0] === 'game' && !cozy && TURN.test(lower);
   const roblox = engine === 'roblox' && !cozy && !turn;
-  const must = cozy ? [...COZY_MUST] : turn ? [...TURN_MUST] : roblox ? [...ROBLOX_MUST] : fabric ? [...MCMOD_FABRIC_MUST] : vscode ? [...VSCODE_MUST] : [...primary.must];
-  const boss = cozy ? COZY_BOSS : turn ? TURN_BOSS : roblox ? ROBLOX_BOSS : vscode ? VSCODE_BOSS : primary.boss;
+  const vehicle = keys[0] === 'game' && !cozy && !turn && !roblox && VEHICLE.test(lower);
+  const must = cozy ? [...COZY_MUST] : turn ? [...TURN_MUST] : roblox ? [...ROBLOX_MUST] : vehicle ? [...VEHICLE_MUST] : fabric ? [...MCMOD_FABRIC_MUST] : vscode ? [...VSCODE_MUST] : [...primary.must];
+  const boss = cozy ? COZY_BOSS : turn ? TURN_BOSS : roblox ? ROBLOX_BOSS : vehicle ? VEHICLE_BOSS : fabric ? FABRIC_BOSS : vscode ? VSCODE_BOSS : primary.boss;
   if (secondary) must.push('Integration point with your ' + lbl(secondary.label) + ' component');
   const loot = new Set();
   for (const f of FLAVOR) if (f.kw.some(k => hasWord(lower, k) || (k.length > 4 && lower.includes(k)))) f.loot.forEach(l => loot.add(l));
