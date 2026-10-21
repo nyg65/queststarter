@@ -91,3 +91,22 @@
 22. "a minecraft server plugin that adds quests" is named "Minecraft Server"; should be "Minecraft Quests Plugin".
 23. "a speedrun splits overlay for OBS" plans a Next.js + Supabase app with a landing page; OBS browser-source overlays need a static page, no auth or DB.
 24. Consider moving FEEDBACK.md/OPS_LOG.md out of the public repo (or making the repo private) if John doesn't want drafts and ops notes visible.
+
+## 2026-10-21 (daily run, ~8:00 AM CT)
+- Health: local :4173 up (restarted on new code). Render (https://queststarter.onrender.com) up; /health 200 with ~13s cold start. /, /health, /robots.txt, /sitemap.xml, /llms.txt, /og.png, /q/<id> 200; bad /q id and unknown paths 404; bad JSON and junk ideas give 400; a script-tag idea is escaped on /q/ pages.
+- Output test: 35 varied ideas (racing/kart/boat/flight games, Minecraft plugins and a Fabric mod, OBS/Twitch/Spotify/YouTube Live/Kick overlays, Notion MCP server, git diff VS Code extension, habit and workout trackers, text adventure, Roblox obby, Gmail triage agent, CLI scaffolder, cozy sim, card game, RAG chatbot, invoicing SaaS) plus false-positive checks, diffed against the previous generator (only intended changes).
+- Fixed in generator.js:
+  - New Stream Overlay type: OBS/stream overlays were a Next.js + Supabase web app or, for Twitch, a chat bot. Now a static Vite + TypeScript page for an OBS Browser Source (transparent 1920x1080, URL-param settings, localStorage, GitHub Pages/Netlify), plus tmi.js for Twitch chat or the Spotify currently-playing API when mentioned (backlog 23). Only fires when the idea says overlay/browser source and has stream context, so "an OBS plugin" or "a dark overlay on YouTube" are unaffected.
+  - Racing, kart, drifting and flight games get a vehicle MVP (handling, track with checkpoints, best-time timer, ghost or AI opponent) and a handling/checkpoint boss instead of "player character + one enemy" (backlog 21). "race against a rising flood" in a platformer stays a platformer.
+  - Minecraft names come from what the plugin adds: "Minecraft Server" is "Minecraft Quests Plugin" (backlog 22), "Minecraft Daily Rewards Plugin", "Minecraft Dragons Mod", "Paper Economy Plugin", "Fabric Ores Mod".
+  - Fabric/Forge mods had the Paper server-performance boss; now a mod version-compatibility boss.
+- SEO: 5 more example quests (Notion MCP server, OBS splits overlay, drift racing game, Minecraft quests plugin, Next.js scaffolder CLI) are listed in sitemap.xml (12 URLs, was 7) and llms.txt, so crawlers find more server-rendered /q/ pages. Homepage chips unchanged.
+- LLM discoverability: new FAQ "Can it plan a stream overlay or a racing game?" on the page, FAQPage JSON-LD (8 Qs, valid JSON) and llms.txt; "What kinds of ideas work?" now names OBS and stream overlays.
+- Committed 92d764b and pushed (also shipped 17d35fd from yesterday's 5 PM X watch run); Render deployed (live llms.txt has the new FAQ, sitemap has 12 URLs, live API names "Minecraft Quests Plugin"). newsletter/ stays ignored.
+
+### Backlog
+10. Render free tier cold-starts (~13s+); consider a paid instance or keep-alive ping when traffic starts.
+24. Consider moving FEEDBACK.md/OPS_LOG.md out of the public repo (or making it private) if John doesn't want drafts and ops notes visible.
+25. "a rag chatbot over my obsidian notes" gets the agent-loop MVP (tools, max steps); RAG chat needs an ingest/embed/retrieve/cite plan instead.
+26. Weak names: "a saas for freelancers to send invoices" is "Invoices Sender"; "a stream overlay that shows current song from spotify" is "Current Song Viewer"; "a chrome extension that adds a dark overlay to youtube" is "Chrome Extension"; "an obs plugin that auto switches scenes" is "OBS Plugin" and plans as a Next.js web app (OBS plugins are C++/obs-websocket scripts).
+27. "a personal finance dashboard from my bank CSV" plans a fetch/diff/alert data tool; a CSV import dashboard needs upload, parse, categorize, charts.
