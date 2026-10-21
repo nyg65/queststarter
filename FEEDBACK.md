@@ -272,3 +272,35 @@ Maintained by the "X feedback watch" routine (twice daily). Public X reads only;
 ### Drafts for John's approval (not posted)
 19. Reply to @LukeDownie5, https://x.com/LukeDownie5/status/2112629078725414986
     > Lesson 1 is the one almost everyone learns after shipping. Congrats on getting paying users anyway. I just added a 15-minute "find 3 people asking for this" step to the start of every plan in my free planner because of posts like this: https://queststarter.onrender.com
+
+## 2026-10-21 (9:00 AM CT run)
+
+### Mentions of QuestStarter
+- No mentions of QuestStarter, the site URL, or @JohnPesce2011 since the 5 PM run (search returned 0). Launch post (https://x.com/JohnPesce2011/status/2111246359865307447) is still at 4 impressions, 0 likes, 0 replies.
+- Site check: https://queststarter.onrender.com/health 200 (13s cold start); local :4173 200.
+- **Real user feedback, feature requests, bug reports: still none.** Drafts 1-19 are still waiting on John's approval; nothing has been posted.
+
+### What builders are saying (since 5 PM CT yesterday)
+- "Knowing what to build is still the hard part": @itsvishaltwt (1.9K followers) "vibe coding is just as hard as coding by hand... you still need to know what to build" (https://x.com/itsvishaltwt/status/2112737413546311919, 30 likes, 28 replies); echoed by @GlenBytes and @bageventio. @AyushKhatr21401 sells a Claude Code kit pitched at "What should I build? Which stack? Where to host? How to get found?", nearly QuestStarter's exact pitch (another small paid competitor). @bruteforcearete (BuildersOfX) keeps pushing "filter for a proven niche, grab the MVP blueprint".
+- Nobody uses what they ship: @JustBroOnX "Launched 50 vibe-coded apps. Current users: me." and @AlexMano12 asks if anyone makes even $1 since every segment is full of vibe-coded tools. Supports yesterday's demand check. Counterpoint: @shippedandpaid (new) lists AI-built apps with verified revenue.
+- Apps break as they grow: @dhananjay_kohar says people quit vibe-coded projects "because the app starts to break after every iteration"; @ArgileNoland's article "Write the Spec, Write the Tests, Then Let the Agent Build" (https://x.com/ArgileNoland/status/2112900603760263284). QuestStarter had done-checks per level but no tests in the build prompts, so it got that (below).
+- Leaked secrets: two small accounts (@Warditor, @Bobelfish) repeat a claim that 1 in 23 vibe-coded apps shipped a secret in public code (scan attributed to "Reeve"; not verified, don't quote the number) with the tip to search the site's JS for "sk_live" or "service_role". @oegerikus (8.7K followers, GitHub Copilot co-launcher) says vibe coding "created a security epidemic" (3K impressions).
+- Game builders: @ConnorEllison (2.3K followers) open-sourced an agent setup for making games with Claude Code or Cursor on the Blazium engine (MIT, Godot-based), first prompt to a played game (https://x.com/ConnorEllison/status/2112752479842476090, 173K impressions, 20 bookmarks). Tripo launched a 3D CLI for Claude Code / Codex / Cursor that generates textured characters and props (@karankendre). @GamePixDev is recruiting vibe-coded games for its portal. @JacquesHBastien built his 7-year-old's game idea with Claude Code in an hour. The @vibevibefun "vibe coding a game" workshop ran live this morning. Pushback continues (@kaybeeguy2: "garbage, uninspired slop").
+- Direct ask: @BabDabbalina asked how to start vibe coding a game; @grok already answered with tool suggestions.
+
+### Actions taken this run
+- Built: the Level 2 "build the core loop" prompt now has the AI write 2-3 checks that pass only when the core loop works (automated tests if the stack has a runner, otherwise a TESTING.md checklist) before the feature code, and keep them passing on later changes, aimed at "it breaks after every iteration".
+- Improved: the "Pre-launch security check" prompt now says to build the front end and search the output for secret key names (sk_live, service_role, secret, private_key).
+- Checked on a habit tracker, a browser game and a Discord bot (prompt counts unchanged at 8, 9, 8); restarted local :4173; /, /health, /llms.txt and /api/generate are 200.
+- Committed locally, not pushed (pushing waits on the daily run or John's OK). The live site doesn't have this change yet.
+
+### Backlog (new this run)
+29. Godot game quests: mention Blazium and its agent skills as an option once checked (free, MIT, Godot-based).
+30. 3D game loot: Tripo CLI for generated characters and props (alongside the Viggle idea in 22), once verified.
+31. Browser game launch step: list GamePix next to CrazyGames as another portal, once its terms are checked.
+
+### Drafts for John's approval (not posted)
+20. Reply to @itsvishaltwt, https://x.com/itsvishaltwt/status/2112737413546311919
+    > Agree on "knowing what to build". What helped me: before prompting anything, write the 3-4 things it must do and the one sentence that means it's done. The AI is great at the how and useless at the what.
+21. Reply to @JustBroOnX, https://x.com/JustBroOnX/status/2112813794435252720
+    > Been there. The fix for me was spending 15 minutes finding 3 people already asking for the thing before building it. If you can't find 3, the 51st app won't have users either.
