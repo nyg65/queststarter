@@ -304,3 +304,31 @@ Maintained by the "X feedback watch" routine (twice daily). Public X reads only;
     > Agree on "knowing what to build". What helped me: before prompting anything, write the 3-4 things it must do and the one sentence that means it's done. The AI is great at the how and useless at the what.
 21. Reply to @JustBroOnX, https://x.com/JustBroOnX/status/2112813794435252720
     > Been there. The fix for me was spending 15 minutes finding 3 people already asking for the thing before building it. If you can't find 3, the 51st app won't have users either.
+
+## 2026-10-21 (5:00 PM CT run)
+
+### Mentions of QuestStarter
+- No mentions of QuestStarter, the site URL, or @JohnPesce2011 since the 9 AM run (search returned 0). Launch post (https://x.com/JohnPesce2011/status/2111246359865307447) is still at 4 impressions, 0 likes, 0 replies.
+- Site check: https://queststarter.onrender.com/health 200 (12s cold start); local :4173 200.
+- **Real user feedback, feature requests, bug reports: still none.** Drafts 1-21 are still waiting on John's approval; nothing has been posted.
+
+### What builders are saying (since 9 AM CT)
+- Deploy pain: @DeployDojo (new, 0 followers) collected the 5 problems that keep showing up in "stuck deploying my vibe-coded app" threads: env vars, 404 on refresh, login redirecting to localhost, RLS off, DNS (https://x.com/DeployDojo/status/2112954185847333049). QuestStarter's launch level just said "Deploy", so it got a post-deploy check (below).
+- "What to build" keeps coming up: @PleistosceneLyf says the terrain shifts so fast "you don't even know what to build"; @Josephyala (4.7K followers) says knowing what to build and how to structure it is still the skill; @j3rah_ notes product experience is what makes Claude Code scary-good.
+- Proof it can pay: @PrajwalTomar_ (57K followers) shared a vibe-coded iOS app with 4K downloads and zero ads, plus lessons from shipping 25+ apps (https://x.com/PrajwalTomar_/status/2112915062851850379, 1.2K impressions, 18 bookmarks). @ronaldships covers @marclou vibe-coding MailCheap after a Beehiiv bill jump (an "annoyed by a bill, build the cheaper one" idea pattern).
+- Hardware weekend projects continue: @hoopcutter designs 3D-printed parts with Claude; @Tetriss112 hacking an oven LCD to show Tetris (1K impressions, 16 bookmarks). Backs backlog 27.
+- Game builders: @shipscode is vibe coding a first game and finds LLMs "amazing how bad" at game work; @levelsio had Claude Code build a GTA San Andreas mission (via @rdominguezibar). @intcnerzero worries about "vibe coded AI shooter slop".
+- Low-signal: a "$74 to $820K trading bot" claim from a 9-follower account (@myrakaben), ignored.
+
+### Actions taken this run
+- Built: Level 6 (non-game) now has a post-deploy check step, and the "Polish and launch" prompt asks the AI for a test-and-fix check of the 5 common go-live breaks (host env vars, refresh 404s, localhost login redirects, database access rules off, DNS), skipping ones that don't apply to the stack. From @DeployDojo's list.
+- Checked on a habit tracker, a browser game and a Discord bot (prompt counts unchanged at 8, 9, 8); restarted local :4173; /, /health, /llms.txt and /api/generate are 200.
+- Committed locally, not pushed (pushing waits on the daily run or John's OK). The live site doesn't have this change yet.
+
+### Backlog (new this run)
+32. Idea starter "a cheaper version of a tool you're overpaying for" (MailCheap pattern) as an example quest or idea prompt.
+33. 3D-print / CAD quests (OpenSCAD or CadQuery via Claude) as a hardware plan type next to the Home Assistant one in 27.
+
+### Drafts for John's approval (not posted)
+22. Reply to @DeployDojo, https://x.com/DeployDojo/status/2112954185847333049
+    > #6 for me: the free host's cold start. First visitor waits 15+ seconds, assumes it's broken and leaves. A ping every few minutes or a "waking up" screen fixes it.
