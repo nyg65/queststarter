@@ -127,3 +127,4 @@
 27. "a personal finance dashboard from my bank CSV" plans a fetch/diff/alert data tool; a CSV import dashboard needs upload, parse, categorize, charts.
 28. "a chatbot that roleplays as a pirate" gets the agent loop with tools; a persona chatbot needs a system prompt, chat history and a streaming chat UI, no tools.
 29. "a semantic search engine for my bookmarks" is a plain Next.js web app; it should get embeddings + vector search like the RAG plan, without the chat step.
+- Committed 26e55e2 and pushed (also shipped 2b29a82 and a5f71f8 from yesterday's X watch runs); Render deployed (live sitemap has 13 URLs, llms.txt has the RAG FAQ, live API names "Obsidian Notes Chat"). newsletter/ stays ignored.
