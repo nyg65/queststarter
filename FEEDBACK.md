@@ -365,3 +365,36 @@ Maintained by the "X feedback watch" routine (twice daily). Public X reads only;
     > Same here. The thing that helped most: before building, find 3 posts where someone is already asking for it. If I can't find 3, I sharpen the idea instead of shipping another app nobody tries.
 24. Reply to @ArielMGore, https://x.com/ArielMGore/status/2113077164149198878
     > The getting-stuck part is so real. What helps me: when it loops on a bug, start a fresh chat, paste the exact error plus the one file, and ask it to explain the cause before writing any fix.
+
+## 2026-10-22 (5:00 PM CT run)
+
+### Mentions of QuestStarter
+- No mentions of QuestStarter, the site URL, or @JohnPesce2011 since the 9 AM run (search returned 0). Launch post (https://x.com/JohnPesce2011/status/2111246359865307447) is still at 4 impressions, 0 likes, 0 replies.
+- Site check: https://queststarter.onrender.com/health 200 (13s cold start); local :4173 200.
+- **Real user feedback, feature requests, bug reports: still none.** Drafts 1-24 are still waiting on John's approval; nothing has been posted.
+
+### What builders are saying (since 9 AM CT)
+- Direct competitors in the idea space: @htmlfolk launched "Patch", a chat that asks about your hobbies and daily annoyances, finds a website or app idea, then hands it to your agent to build with @spacefasthq (https://x.com/htmlfolk/status/2113269758397452598, 18 followers, 61 impressions). @tonydotstyle built a game idea generator that looks for gaps between existing games instead of asking an LLM to invent one (https://x.com/tonydotstyle/status/2113297784031916384). Both tiny so far; worth watching. QuestStarter still starts from your idea rather than finding one, which is backlog material (see 37).
+- "Knowing what to build" keeps coming up: @nzduck "there's still a gap around knowing what to build and how to properly get there" (https://x.com/nzduck/status/2113386857203630281); @DavidCrysler "Vibe coding answers: can you build this? Operator experience answers: do you know what to build?"; @iiheb_ says now that AI can build them, people forgot the ideas they had.
+- Game quality: @YmerLabs gave Claude a good prompt for a Unity game idea, it executed perfectly, "and holy hell does it suck"; @TheBeli35552787 says AI-made games all look the same and "no one will play". Built (below).
+- First app, no traction: @olivia_qqiao (2 followers) has vibe coded since March, posted her first app and got crickets, then got stuck on "how do I monetize ASAP". QuestStarter's demand check and launch level target this.
+- What breaks first: @paublds read 957 posts about AI-built apps breaking (174 firsthand) and says the first break usually isn't what checklists warn about (https://x.com/paublds/status/2113382762757361882, article). Worth reading for the post-deploy check; not read yet.
+- Hardware/hacking weekend projects continue: @mithunraj12 removed ads from an Android TV with Claude Code; @bitcrafter_ had Claude Code diagnose slow WiFi; @rikittan asked Claude Code to reflash a Tesla and it refused (warranty). Backs backlog 27.
+- Tool picks: @anitdotguru's stack list (Cursor, Claude Code, Lovable, Supabase, Clerk, Vercel, Stripe, Resend) asks what to swap. Matches QuestStarter's web defaults closely.
+- Backlog 35 resolved: @csaba_kissi's launch is a leaderboard of who burns the most Claude Code / Codex tokens, via one command that reads local logs and uploads only daily totals, plus an open-source Mac menu bar app (launch post https://x.com/csaba_kissi/status/2113224664705388770, 14K impressions, 29 replies). Not a competitor; a possible newsletter mention.
+- Low-signal: a "Fable 5.1 writes 100% of my code" quote attributed to Boris Cherny from a 932-follower account (@proAlishke), unverified, ignored.
+
+### Actions taken this run
+- Built: game plans now get a "fun check before art" step in Level 2 (play the loop with placeholder shapes for 10 minutes, have a friend try it, change one rule if it isn't fun) and an "own look" step in Level 5 (one palette, one font, one art pack, written into AGENTS.md so it doesn't read as another default AI game). Non-game plans are unchanged. From @YmerLabs and @TheBeli35552787.
+- Checked a browser game, a habit tracker and a Discord bot (game Level 2 and 5 steps went from 3 to 4; others unchanged); restarted local :4173; /, /health, /llms.txt and /api/generate are 200.
+- Committed locally, not pushed (pushing waits on the daily run or John's OK). The live site doesn't have this change yet.
+
+### Backlog (new this run)
+37. "No idea yet?" mode: a few questions (hobbies, daily annoyances, a tool you overpay for) that suggest 3 ideas, then feed the chosen one into the normal plan. Patch (@htmlfolk) does a version of this; pairs with backlog 32.
+38. Read @paublds' "What Breaks First When You Build With AI" article and update the post-deploy check if its top breaks differ from the current 5.
+
+### Drafts for John's approval (not posted)
+25. Reply to @nzduck, https://x.com/nzduck/status/2113386857203630281
+    > Same gap for me. What helps: write the smallest version that proves the idea in one sentence, then split the build into 5 or 6 levels where each one ends with something you can run. The "how to get there" part gets a lot less fuzzy.
+26. Reply to @YmerLabs, https://x.com/YmerLabs/status/2113355244986134749
+    > Ha, been there. The AI nails the code but not the fun. I've had better luck building the loop with plain boxes first and tweaking one rule at a time (speed, goal, what pushes back) until it's fun, then adding art.
