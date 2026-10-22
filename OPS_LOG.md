@@ -110,3 +110,20 @@
 25. "a rag chatbot over my obsidian notes" gets the agent-loop MVP (tools, max steps); RAG chat needs an ingest/embed/retrieve/cite plan instead.
 26. Weak names: "a saas for freelancers to send invoices" is "Invoices Sender"; "a stream overlay that shows current song from spotify" is "Current Song Viewer"; "a chrome extension that adds a dark overlay to youtube" is "Chrome Extension"; "an obs plugin that auto switches scenes" is "OBS Plugin" and plans as a Next.js web app (OBS plugins are C++/obs-websocket scripts).
 27. "a personal finance dashboard from my bank CSV" plans a fetch/diff/alert data tool; a CSV import dashboard needs upload, parse, categorize, charts.
+
+## 2026-10-22 (daily run, ~8:15 AM CT)
+- Health: local :4173 was down (no process); restarted on new code. Render (https://queststarter.onrender.com) /health 200 with ~12s cold start. Locally /, /health, /robots.txt, /sitemap.xml, /llms.txt, /og.png, /q/<id> 200; bad /q id and unknown paths 404; bad JSON and junk ideas give 400.
+- Output test: 34 varied ideas (RAG/docs chat, PDF chat, help-center support bot, Discord wiki bot, textbook tutor, codebase Q&A, agents that act, roleplay chatbot, invoicing SaaS, CSV finance dashboard, OBS plugin, overlays, deckbuilder, habit tracker, MCP server, crypto alerts bot, Godot 3D platformer, CLI renamer, Minecraft plugin, semantic search, voice assistant, Claude Code spend tracker), diffed against the previous generator (only intended changes).
+- Fixed in generator.js:
+  - New RAG Chatbot type (backlog 25): chat/Q&A over your own notes, docs, PDFs, wiki, help center or codebase used to get the tool-calling agent loop (two tools, max steps). Now: embeddings + local vector store (pgvector/sqlite-vec/Chroma), loader + splitter, a 10-20 question eval set; MVP is ingest, retrieve, answer only from retrieved chunks with citations, and say "not found" instead of guessing; boss is retrieval quality. Only fires when an agent/AI idea is about the user's documents AND has a chat/question/search signal, so "an ai agent that files bugs from my notes app" stays an agent. A Discord bot that answers from a wiki becomes Bot + RAG Chatbot and gets the vector store in its stack.
+  - Names: "RAG Chatbot" is "Obsidian Notes Chat", "AI Assistant" is "Company Docs Chat", "Support Chatbot Trained" is "Help Center Articles Chat", "Pdfs Chat" is "PDFs Chat", "Ask Questions" is "Codebase Chat"; "MCP Server" for an Obsidian vault is "Obsidian MCP Server".
+- SEO: "A RAG chatbot over my Obsidian notes" example quest added to sitemap.xml (13 URLs) and llms.txt.
+- LLM discoverability: new FAQ "Can it plan a RAG chatbot over my own notes or docs?" on the page, FAQPage JSON-LD (9 Qs, valid JSON) and llms.txt.
+
+### Backlog
+10. Render free tier cold-starts (~12s+); consider a paid instance or keep-alive ping when traffic starts.
+24. Consider moving FEEDBACK.md/OPS_LOG.md out of the public repo (or making it private) if John doesn't want drafts and ops notes visible.
+26. Weak names: "Invoices Sender", "Current Song Viewer", "Chrome Extension" (dark overlay on YouTube), "OBS Plugin" (also plans as a Next.js web app; OBS plugins are C++ or obs-websocket scripts), "Them Organizer" ("an assistant that reads my files and organizes them"), "AI Agent" ("an ai agent that files bugs from my notes app"), "Discord Bot" for the wiki Q&A bot.
+27. "a personal finance dashboard from my bank CSV" plans a fetch/diff/alert data tool; a CSV import dashboard needs upload, parse, categorize, charts.
+28. "a chatbot that roleplays as a pirate" gets the agent loop with tools; a persona chatbot needs a system prompt, chat history and a streaming chat UI, no tools.
+29. "a semantic search engine for my bookmarks" is a plain Next.js web app; it should get embeddings + vector search like the RAG plan, without the chat step.

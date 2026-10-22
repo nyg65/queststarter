@@ -62,6 +62,12 @@ const TYPES = {
     must: ['Fetch data from one reliable source', 'Store and diff against the last snapshot', 'Deliver one alert or digest', 'Simple page or command to view current state'],
     boss: 'Source reliability: rate limits, changing formats, and de-duplicating alerts',
   },
+  rag: {
+    label: 'RAG Chatbot', kw: [],
+    stack: [['TypeScript or Python', 'Both have mature LLM and embedding SDKs.'], ['OpenAI / Anthropic / xAI API (behind one wrapper)', 'Keep the chat model swappable.'], ['An embeddings model + a local vector store (pgvector, sqlite-vec or Chroma)', 'Turns your documents into searchable chunks; no hosted vector database needed to start.'], ['A loader + text splitter for your source (Markdown, PDF or HTML)', 'Clean chunks that keep their title and link are most of the answer quality.'], ['A small eval set (10-20 real questions with the expected source)', 'Shows whether a change to chunking or the prompt made answers better or worse.']],
+    must: ['Ingest: load your documents, split them into chunks and store embeddings with each chunk\'s source and title', 'Retrieve: for a question, fetch the few best-matching chunks', 'Answer only from the retrieved chunks, citing the source of each claim', 'Say it could not find the answer in your documents instead of guessing'],
+    boss: 'Retrieval quality: chunking, finding the right passages, and refusing to answer when the documents do not say',
+  },
   web: {
     label: 'Web App', kw: ['web', 'website', 'app', 'site', 'saas', 'platform', 'landing', 'portfolio', 'tool'],
     stack: [['Next.js (App Router) + TypeScript', 'Most-documented stack for AI coding tools.'], ['Tailwind CSS + shadcn/ui', 'Good-looking UI with minimal design work.'], ['Supabase (Postgres + Auth)', 'Backend in an afternoon.'], ['Vercel', 'Free deploy on every push.']],
@@ -121,6 +127,8 @@ const VEHICLE_MUST = ['A vehicle with tuned handling (acceleration, braking, ste
 const VEHICLE_BOSS = 'Handling and camera feel at speed, plus checkpoints that stop players cutting the course';
 const FABRIC_BOSS = 'Version compatibility: Minecraft updates break mods, so pin one version, keep mixins small and test in a clean instance';
 const PERSONAL = /\b(habits?|workouts?|gym|exercises?|mood|water intake|sleep|reading|journal|study|streaks?|meditation|fitness|calories?|weight|chores?|goals?)\b/;
+const RAG_DOCS = '(notes|docs|documents|pdfs?|files|wiki|knowledge ?base|articles|help ?center|handbook|manuals?|vault|transcripts|papers|textbooks?|codebase|readme|documentation)';
+const RAG = new RegExp('\\b(rag|retrieval[- ]augmented|retrieval)\\b|\\b(over|about|from|on|for|with|across|using|of|in)\\s+(my|our|your|the|their|a|all)?\\s*([a-z0-9]+\\s+){0,3}' + RAG_DOCS + '\\b|\\b(chat with|talk to|ask|question)\\s+(my|our|your|a|any)?\\s*([a-z0-9]+\\s+){0,2}' + RAG_DOCS + '\\b');
 const STOP = new Set('a an the to for of and or that i my me with on in it is be build make create want app project idea simple'.split(' '));
 
 function detectTypes(text) {
@@ -152,14 +160,16 @@ function detectTypes(text) {
   else if (keys.includes('overlay')) keys.splice(keys.indexOf('overlay'), 1);
   // a personal tracker ("a habit tracker app", "a workout log") is an app the user fills in, not a data fetcher
   if (keys[0] === 'data' && PERSONAL.test(t) && !/\b(scrap\w*|alerts?|api|monitor\w*|prices?|deals?|patch\w*|news|digest|feed|spend\w*|costs?)\b/.test(t)) { keys.shift(); const m = /\b(mobile|ios|android|iphone|phone)\b/.test(t) ? 'mobile' : 'web'; if (!keys.includes(m)) keys.unshift(m); else { keys.splice(keys.indexOf(m), 1); keys.unshift(m); } }
+  // chat or Q&A over the user's own documents is retrieval (ingest, retrieve, cite), not a tool-calling agent loop
+  if (keys.includes('agent') && RAG.test(t) && /\b(rag|retrieval|chat\w*|ask\w*|answer\w*|questions?|q&a|search\w*|tutor|quiz\w*|talk to|trained on|knowledge)\b/.test(t)) keys[keys.indexOf('agent')] = 'rag';
   return keys.length ? keys.slice(0, 2) : ['web'];
 }
 
-const ACRO = { ai: 'AI', rag: 'RAG', mcp: 'MCP', cli: 'CLI', saas: 'SaaS', claude: 'Claude', cursor: 'Cursor', vscode: 'VS Code', turnbased: 'Turn-Based', api: 'API', llm: 'LLM', gpt: 'GPT', ios: 'iOS', iphone: 'iPhone', mvp: 'MVP', rpg: 'RPG', ui: 'UI', '2d': '2D', '3d': '3D', npc: 'NPC', mmo: 'MMO', fps: 'FPS', pc: 'PC', vr: 'VR', ar: 'AR', youtube: 'YouTube', github: 'GitHub', tiktok: 'TikTok', gpu: 'GPU', cpu: 'CPU', pdf: 'PDF', seo: 'SEO', sql: 'SQL', npcs: 'NPCs', unity: 'Unity', godot: 'Godot', unreal: 'Unreal', ue5: 'UE5', obby: 'Obby', threejs: 'Three.js', webgl: 'WebGL', discord: 'Discord', telegram: 'Telegram', slack: 'Slack', twitter: 'Twitter', reddit: 'Reddit', steam: 'Steam', chrome: 'Chrome', android: 'Android', notion: 'Notion', spotify: 'Spotify', twitch: 'Twitch', minecraft: 'Minecraft', roblox: 'Roblox', xbox: 'Xbox', playstation: 'PlayStation', openai: 'OpenAI', chatgpt: 'ChatGPT', nextjs: 'Next.js', obs: 'OBS', csv: 'CSV', json: 'JSON', npx: 'npx' };
+const ACRO = { ai: 'AI', rag: 'RAG', mcp: 'MCP', cli: 'CLI', pdfs: 'PDFs', obsidian: 'Obsidian', saas: 'SaaS', claude: 'Claude', cursor: 'Cursor', vscode: 'VS Code', turnbased: 'Turn-Based', api: 'API', llm: 'LLM', gpt: 'GPT', ios: 'iOS', iphone: 'iPhone', mvp: 'MVP', rpg: 'RPG', ui: 'UI', '2d': '2D', '3d': '3D', npc: 'NPC', mmo: 'MMO', fps: 'FPS', pc: 'PC', vr: 'VR', ar: 'AR', youtube: 'YouTube', github: 'GitHub', tiktok: 'TikTok', gpu: 'GPU', cpu: 'CPU', pdf: 'PDF', seo: 'SEO', sql: 'SQL', npcs: 'NPCs', unity: 'Unity', godot: 'Godot', unreal: 'Unreal', ue5: 'UE5', obby: 'Obby', threejs: 'Three.js', webgl: 'WebGL', discord: 'Discord', telegram: 'Telegram', slack: 'Slack', twitter: 'Twitter', reddit: 'Reddit', steam: 'Steam', chrome: 'Chrome', android: 'Android', notion: 'Notion', spotify: 'Spotify', twitch: 'Twitch', minecraft: 'Minecraft', roblox: 'Roblox', xbox: 'Xbox', playstation: 'PlayStation', openai: 'OpenAI', chatgpt: 'ChatGPT', nextjs: 'Next.js', obs: 'OBS', csv: 'CSV', json: 'JSON', npx: 'npx' };
 function titleCase(s) { return s.split(' ').map(w => ACRO[w] || w.replace(/\b\w/g, c => c.toUpperCase())).join(' '); }
 function hasWord(text, k) { return new RegExp('(^|[^a-z0-9])' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '($|[^a-z0-9])').test(text); }
-function lbl(l) { return l.toLowerCase().replace(/\bai\b/g, 'AI').replace(/\bapi\b/g, 'API').replace(/\bmcp\b/g, 'MCP').replace(/\bvs code\b/g, 'VS Code').replace(/\bminecraft\b/g, 'Minecraft').replace(/\bcli\b/g, 'CLI'); }
-function article(w) { if (/^[A-Z]{2,}/.test(w)) return /^[AEFHILMNORSX]/.test(w) ? 'an' : 'a'; return /^[aeiou]/i.test(w) ? 'an' : 'a'; }
+function lbl(l) { return l.toLowerCase().replace(/\bai\b/g, 'AI').replace(/\bapi\b/g, 'API').replace(/\bmcp\b/g, 'MCP').replace(/\bvs code\b/g, 'VS Code').replace(/\bminecraft\b/g, 'Minecraft').replace(/\bcli\b/g, 'CLI').replace(/\brag\b/g, 'RAG'); }
+function article(w) { if (/^RAG\b/.test(w)) return 'a'; if (/^[A-Z]{2,}/.test(w)) return /^[AEFHILMNORSX]/.test(w) ? 'an' : 'a'; return /^[aeiou]/i.test(w) ? 'an' : 'a'; }
 
 const FILLER = new Set('helps help lets let allows allow can will you your which who where when using use uses via from into just some every all also really like new built made so tells shows gives are was were has have get gets play plays playing style'.split(' '));
 const KIND = new Set('cli bot tool extension plugin agent website site webapp saas platform thing chrome browser discord telegram slack mobile ios android iphone web'.split(' '));
@@ -239,6 +249,10 @@ function generate(idea) {
     if (obj.length) name = titleCase(base + ' ' + obj.join(' ')) + (/\bmod\b/.test(lower) && !/\bplugin\b/.test(lower) ? ' Mod' : ' Plugin');
   }
 
+  // "a rag chatbot over my obsidian notes" -> "Obsidian Notes Chat"
+  const ragSrc = keys[0] === 'rag' && lower.match(new RegExp('\\b(?:over|about|from|on|for|with|across|using|of|in|chat with|talk to|ask)\\s+(?:my|our|your|the|their|a|all)?\\s*((?:[a-z0-9]+\\s+){0,3}' + RAG_DOCS + ')\\b'));
+  if (ragSrc) { let w = ragSrc[1].split(/\s+/); const cut = w.map((x, i) => BREAK.test(x) || /^(my|our|your|the|their)$/.test(x) ? i : -1).reduce((m, i) => Math.max(m, i), -1); w = w.slice(cut + 1).filter(x => !/^(a|an|the|all|questions?|answers?|chat|chatbot|bot|ai|any|some)$/.test(x)).slice(-3); if (w.length) name = titleCase(w.join(' ')) + ' Chat'; }
+
   const engine = keys[0] === 'game' ? gameEngine(lower) : null;
   const vscode = keys[0] === 'extension' && VSCODE.test(lower);
   const fabric = keys[0] === 'mcmod' && /\b(mod|fabric|forge|neoforge|modpack)\b/.test(lower) && !/\b(plugin|paper|spigot|bukkit|server)\b/.test(lower);
@@ -256,12 +270,13 @@ function generate(idea) {
   };
   const cozy = keys[0] === 'game' && COZY.test(lower) && !/\b(flight|racing|space|combat|battle|war|mech) (sim|simulator)\b/.test(lower);
   if (secondary) for (const [tech, why] of secondary.stack.slice(0, 2)) if (!stack.find(s => s.tech === tech)) stack.push({ tech, why: why + ' (for the ' + lbl(secondary.label) + ' side)' });
+  if (keys[1] === 'rag' && !stack.find(s => s.tech === TYPES.rag.stack[2][0])) stack.push({ tech: TYPES.rag.stack[2][0], why: TYPES.rag.stack[2][1] + ' (for the RAG chatbot side)' });
   botSdk();
   if (keys[0] === 'overlay') {
     if (/\btwitch\b/.test(lower)) stack.push({ tech: 'tmi.js (read-only Twitch chat)', why: 'Reads chat anonymously from the page, so the overlay needs no login or server.' });
     if (/\bspotify\b/.test(lower)) stack.push({ tech: 'Spotify Web API (currently-playing endpoint)', why: 'Shows the song that is playing; needs a one-time Spotify login (PKCE) by the streamer.' });
   }
-  if ((/\b(ai|llm|gpt|agent|smart|summar)/.test(lower) || (/\bgenerat/.test(lower) && !/\bprocedural/.test(lower))) && !keys.includes('agent') && keys[0] !== 'mcp') stack.push({ tech: 'An LLM API behind a single wrapper function', why: 'Your idea sounds AI-powered; keep the model swappable.' });
+  if ((/\b(ai|llm|gpt|agent|smart|summar)/.test(lower) || (/\bgenerat/.test(lower) && !/\bprocedural/.test(lower))) && !keys.includes('agent') && !keys.includes('rag') && keys[0] !== 'mcp') stack.push({ tech: 'An LLM API behind a single wrapper function', why: 'Your idea sounds AI-powered; keep the model swappable.' });
 
   const turn = keys[0] === 'game' && !cozy && TURN.test(lower);
   const roblox = engine === 'roblox' && !cozy && !turn;
