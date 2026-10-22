@@ -332,3 +332,36 @@ Maintained by the "X feedback watch" routine (twice daily). Public X reads only;
 ### Drafts for John's approval (not posted)
 22. Reply to @DeployDojo, https://x.com/DeployDojo/status/2112954185847333049
     > #6 for me: the free host's cold start. First visitor waits 15+ seconds, assumes it's broken and leaves. A ping every few minutes or a "waking up" screen fixes it.
+
+## 2026-10-22 (9:00 AM CT run)
+
+### Mentions of QuestStarter
+- No mentions of QuestStarter, the site URL, or @JohnPesce2011 since the 5 PM run (search returned 0). Launch post (https://x.com/JohnPesce2011/status/2111246359865307447) is still at 4 impressions, 0 likes, 0 replies.
+- Site check: https://queststarter.onrender.com/health 200 (12s cold start); local :4173 200.
+- **Real user feedback, feature requests, bug reports: still none.** Drafts 1-22 are still waiting on John's approval; nothing has been posted.
+
+### What builders are saying (since 5 PM CT yesterday)
+- "Deciding what to build" again: @Gezinmek12 (reply to @emollick) "writing the code got fast. Deciding what to build and getting real people to try it did not"; @sysrootix "My job now: decide what to build and check the output"; @DmitryBBLV (763 followers, startup CTO) spends his days "helping founders decide what to build first". Same pain QuestStarter targets.
+- Getting stuck: @ArielMGore (1.4K followers) tried vibe coding six months ago, "eventually it gets stuck... I couldn't get unstuck", and says it's much better this week (https://x.com/ArielMGore/status/2113077164149198878). QuestStarter already has a Debug helper prompt.
+- One rules file for every tool: @huhufor's tip, keep one short always-on file (run/test, never-touch, ask-before-delete) and make line 1 of CLAUDE.md "@AGENTS.md" so Claude Code and Cursor share it (https://x.com/huhufor/status/2113259477965398109). Built (below).
+- Skepticism: @collymonster (2K followers) "Retired from Vibe Coding" after dozens of apps (https://x.com/collymonster/status/2113200788809936957); @_kekule15 asks for a vibe-coded YC app with real users; @jennieblox asks how Lovable is still worth $13.3B.
+- Proof points: @vibecodeceo built two Claude plugins after a @gregisenberg post, 24 signups in week one, one listed as a Claude connector; @0xRishi (8.1K followers) launched OG Clash, a browser zombie-wave survival shooter (4.4K impressions); @nxcturnez made a first game (AFK survivor plus dungeon crawler) in 3 hours with Claude; @michelle_hardi a 3D map of Hannibal's Alps crossing; @Syntrixx1 says people are pointing Claude Code at smart TVs to strip ads off the home screen (a hardware/hacking weekend project, fits backlog 27).
+- @csaba_kissi (256K followers) is launching a "slightly unhinged side project" for people who run Claude Code or Codex all day (5.4K impressions). Watch what it is.
+- Market research: @soloopai is cold-replying to vibe coders offering $30 for 30-minute interviews about building their first app. A cheap way to learn the audience; noted for John, not acting on it.
+- Security: @manan_0308 (22K followers) PSA asks vibe coders to check exposure to an "eMudhra incident" (not verified, don't repeat it).
+
+### Actions taken this run
+- Built: the Level 1 setup step and the rules-file prompt now say to save the rules as AGENTS.md (read by Cursor, Codex and others) and, for Claude Code, put "@AGENTS.md" on line 1 of CLAUDE.md so all tools share one file. The rules also now say to ask before deleting files or data, and never edit .env files or commit secrets.
+- Checked on a habit tracker, a browser game and a Discord bot (prompt counts unchanged at 8, 9, 8); restarted local :4173; / and /api/generate are 200.
+- Committed locally, not pushed (pushing waits on the daily run or John's OK). The live site doesn't have this change yet.
+
+### Backlog (new this run)
+34. "When you're stuck" step: make the Debug helper easier to find (e.g. a "stuck for 20 minutes? paste this" line at the end of each level), from @ArielMGore.
+35. Check what @csaba_kissi launches for heavy Claude Code / Codex users; possible competitor, partner or newsletter mention.
+36. User interviews: consider a few short chats with vibe coders who post about a first app (the @soloopai approach), once QuestStarter has users. Needs John's OK; anything under his name stays a draft.
+
+### Drafts for John's approval (not posted)
+23. Reply to @Gezinmek12, https://x.com/Gezinmek12/status/2113204592142156216
+    > Same here. The thing that helped most: before building, find 3 posts where someone is already asking for it. If I can't find 3, I sharpen the idea instead of shipping another app nobody tries.
+24. Reply to @ArielMGore, https://x.com/ArielMGore/status/2113077164149198878
+    > The getting-stuck part is so real. What helps me: when it loops on a bug, start a fresh chat, paste the exact error plus the one file, and ask it to explain the cause before writing any fix.
