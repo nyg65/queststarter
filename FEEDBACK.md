@@ -398,3 +398,33 @@ Maintained by the "X feedback watch" routine (twice daily). Public X reads only;
     > Same gap for me. What helps: write the smallest version that proves the idea in one sentence, then split the build into 5 or 6 levels where each one ends with something you can run. The "how to get there" part gets a lot less fuzzy.
 26. Reply to @YmerLabs, https://x.com/YmerLabs/status/2113355244986134749
     > Ha, been there. The AI nails the code but not the fun. I've had better luck building the loop with plain boxes first and tweaking one rule at a time (speed, goal, what pushes back) until it's fun, then adding art.
+
+## 2026-10-23 (9:00 AM CT run)
+
+### Mentions of QuestStarter
+- No mentions of QuestStarter, the site URL, or @JohnPesce2011 since the 5 PM run (search returned 0). Launch post (https://x.com/JohnPesce2011/status/2111246359865307447) is still at 4 impressions, 0 likes, 0 replies.
+- Site check: https://queststarter.onrender.com/health 200 (12s cold start); local :4173 200.
+- **Real user feedback, feature requests, bug reports: still none.** Drafts 1-26 are still waiting on John's approval; nothing has been posted.
+
+### What builders are saying (since 5 PM CT yesterday)
+- New close competitor: @Koffdai launched "kuron", a free open-source student project where you write an app idea and Claude plays the whole app (screens, data, button presses) so you can test the idea in minutes, then get a spec and build plan (https://x.com/Koffdai/status/2113600421436789120, 7 followers, 44 impressions). Overlaps QuestStarter's plan output; the "try it before building" angle is new (see 39).
+- "Knowing what to build" again: @divyanshbht "The hard part is knowing what to build, and explaining it clearly enough that someone, or something, can build it"; @Shehnazbabar "Knowing what to build, and making it survive real users, is" the hard part; @bkarishma360 (1.7K followers) "Vibe coding is crazy when you know what to build".
+- Getting stuck / v2 problems: @TiwariHash6 says v2 is where solo founders get stuck (auth, billing, data migrations, first security review); @iavinashtr (7K followers) posted a "when your vibe coded app breaks" checklist; @diyaz44916930 is selling "Ship It" reviews for apps stuck before launch ("every fix breaks something else", "almost done for weeks"). Built the stuck step (below).
+- Agent tooling for stuck runs: @ziwenxu_ (19K followers, 2.9K impressions) says Claude Code's default auto mode stalls asking about subagents while unattended; @aidimondimon's Caprock flags agents looping on the same command; @callme_mcp phones you when an agent is stuck. Not QuestStarter's problem, but confirms "stuck" is the common pain.
+- Hardware/hacking weekend projects keep coming: @tezzarc's 9 smart-TV repos post (1.4K impressions), @kumarumt on cleaning smart TVs with ADB and Claude Code, @donaldsilveira doing Tizen/Fire TV/webOS. Backs backlog 27.
+- Low-signal: the "Claude writes 100% of the code" Boris Cherny Stanford quote is being re-shared by @hqmank (14K followers); still unverified, ignored.
+
+### Actions taken this run
+- Built backlog 34: Level 2 (core loop) and Level 4 (boss fight) now end with "Stuck on a bug for 20+ minutes? Start a fresh chat, paste the Debug helper prompt with the exact error and the one file involved, and ask for the cause before any fix". The Debug helper prompt now also says to stop after 2 failed fixes, list what's been ruled out, and suggest a fresh chat. From @ArielMGore (earlier) and today's stuck posts.
+- Checked a habit tracker, a browser game and a Discord bot (Level 2 and 4 each gained one step); restarted local :4173; /, /health, /llms.txt and /api/generate are 200.
+- Committed locally, not pushed (pushing waits on the daily run or John's OK). The live site doesn't have this change yet.
+
+### Backlog (new this run)
+39. "Try it before you build it": an optional prompt that asks the AI tool to role-play the finished app screen by screen from the MVP list, so you can feel the core loop before Level 1. kuron (@Koffdai) does this as its whole product.
+40. "Level 7: v2" plan section for auth, billing and data migrations once the MVP has users, from @TiwariHash6.
+
+### Drafts for John's approval (not posted)
+27. Reply to @divyanshbht, https://x.com/divyanshbht/status/2113616794883674347
+    > Agreed. The explaining part is underrated. When I write the MVP as 3 must-haves plus a list of what's out of scope, the AI builds way closer to what I meant.
+28. Reply to @TiwariHash6, https://x.com/TiwariHash6/status/2113522048299655440
+    > Big one for me is data migrations. v1 data shape is always wrong, and changing it once real users exist is where things quietly break. Worth asking the AI for a migration plan before touching the schema.
