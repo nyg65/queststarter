@@ -68,6 +68,12 @@ const TYPES = {
     must: ['Ingest: load your documents, split them into chunks and store embeddings with each chunk\'s source and title', 'Retrieve: for a question, fetch the few best-matching chunks', 'Answer only from the retrieved chunks, citing the source of each claim', 'Say it could not find the answer in your documents instead of guessing'],
     boss: 'Retrieval quality: chunking, finding the right passages, and refusing to answer when the documents do not say',
   },
+  persona: {
+    label: 'AI Chatbot', kw: [],
+    stack: [['Next.js + TypeScript + the Vercel AI SDK', 'Streams replies token by token into a chat UI with a few lines of code.'], ['OpenAI / Anthropic / xAI API (behind one wrapper)', 'Keep the chat model swappable.'], ['A versioned system prompt file (persona, voice, rules, 3-5 example exchanges)', 'The character lives in the prompt, so keep it in git and test changes against saved chats.'], ['localStorage or SQLite for chat history', 'The bot needs the conversation so far to stay in character; trim or summarize old turns to control cost.']],
+    must: ['A system prompt that defines the character: voice, backstory, what it knows and what it will not do', 'A chat UI that streams replies', 'Conversation history sent with each message (trimmed to a token budget)', 'A reset button and a per-user message limit'],
+    boss: 'Staying in character over long chats without drifting, repeating itself or being talked out of its rules',
+  },
   web: {
     label: 'Web App', kw: ['web', 'website', 'app', 'site', 'saas', 'platform', 'landing', 'portfolio', 'tool'],
     stack: [['Next.js (App Router) + TypeScript', 'Most-documented stack for AI coding tools.'], ['Tailwind CSS + shadcn/ui', 'Good-looking UI with minimal design work.'], ['Supabase (Postgres + Auth)', 'Backend in an afternoon.'], ['Vercel', 'Free deploy on every push.']],
@@ -129,6 +135,7 @@ const FABRIC_BOSS = 'Version compatibility: Minecraft updates break mods, so pin
 const PERSONAL = /\b(habits?|workouts?|gym|exercises?|mood|water intake|sleep|reading|journal|study|streaks?|meditation|fitness|calories?|weight|chores?|goals?)\b/;
 const RAG_DOCS = '(notes|docs|documents|pdfs?|files|wiki|knowledge ?base|articles|help ?center|handbook|manuals?|vault|transcripts|papers|textbooks?|codebase|readme|documentation)';
 const RAG = new RegExp('\\b(rag|retrieval[- ]augmented|retrieval)\\b|\\b(over|about|from|on|for|with|across|using|of|in)\\s+(my|our|your|the|their|a|all)?\\s*([a-z0-9]+\\s+){0,3}' + RAG_DOCS + '\\b|\\b(chat with|talk to|ask|question)\\s+(my|our|your|a|any)?\\s*([a-z0-9]+\\s+){0,2}' + RAG_DOCS + '\\b');
+const PERSONA = /\b(role ?plays?|roleplaying|persona|companion|pretends? to be|in character|(talks?|speaks?|acts?|chats?) (like|as) (a|an|my|the)\b)/;
 const STOP = new Set('a an the to for of and or that i my me with on in it is be build make create want app project idea simple'.split(' '));
 
 function detectTypes(text) {
@@ -137,7 +144,8 @@ function detectTypes(text) {
   for (const [key, def] of Object.entries(TYPES)) {
     let s = 0;
     const tt = key === 'game' ? t.replace(/\bgam(er|ers|ing)\b/g, ' ') : t;
-    for (const k of def.kw) if (tt.includes(k.length <= 3 ? ' ' + k : k)) s += k.length > 3 ? 2 : 1;
+    // match keywords at the start of a word so "community" is not "unity" and "dispatch" is not "patch"
+    for (const k of def.kw) if (k.length <= 3 ? tt.includes(' ' + k) : new RegExp('(^|[^a-z0-9])' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(tt)) s += k.length > 3 ? 2 : 1;
     if (s) scored.push([key, s]);
   }
   scored.sort((a, b) => b[1] - a[1]);
@@ -162,6 +170,8 @@ function detectTypes(text) {
   if (keys[0] === 'data' && PERSONAL.test(t) && !/\b(scrap\w*|alerts?|api|monitor\w*|prices?|deals?|patch\w*|news|digest|feed|spend\w*|costs?)\b/.test(t)) { keys.shift(); const m = /\b(mobile|ios|android|iphone|phone)\b/.test(t) ? 'mobile' : 'web'; if (!keys.includes(m)) keys.unshift(m); else { keys.splice(keys.indexOf(m), 1); keys.unshift(m); } }
   // chat or Q&A over the user's own documents is retrieval (ingest, retrieve, cite), not a tool-calling agent loop
   if (keys.includes('agent') && RAG.test(t) && /\b(rag|retrieval|chat\w*|ask\w*|answer\w*|questions?|q&a|search\w*|tutor|quiz\w*|talk to|trained on|knowledge)\b/.test(t)) keys[keys.indexOf('agent')] = 'rag';
+  // a character or roleplay chatbot just talks: a persona prompt, chat history and a streaming UI, no tools or agent loop
+  if (keys[0] === 'agent' && PERSONA.test(t) && !/\b(files?|sends?|books?|posts?|reads? my|emails?|schedules?|orders?|buys?|deploys?|creates? (issues|tickets|bugs))\b/.test(t)) keys[0] = 'persona';
   return keys.length ? keys.slice(0, 2) : ['web'];
 }
 
@@ -253,6 +263,10 @@ function generate(idea) {
   const ragSrc = keys[0] === 'rag' && lower.match(new RegExp('\\b(?:over|about|from|on|for|with|across|using|of|in|chat with|talk to|ask)\\s+(?:my|our|your|the|their|a|all)?\\s*((?:[a-z0-9]+\\s+){0,3}' + RAG_DOCS + ')\\b'));
   if (ragSrc) { let w = ragSrc[1].split(/\s+/); const cut = w.map((x, i) => BREAK.test(x) || /^(my|our|your|the|their)$/.test(x) ? i : -1).reduce((m, i) => Math.max(m, i), -1); w = w.slice(cut + 1).filter(x => !/^(a|an|the|all|questions?|answers?|chat|chatbot|bot|ai|any|some)$/.test(x)).slice(-3); if (w.length) name = titleCase(w.join(' ')) + ' Chat'; }
 
+  // "a chatbot that roleplays as a pirate" -> "Pirate Chatbot"
+  const who = keys[0] === 'persona' && lower.match(/\b(?:role ?plays?|pretends? to be|talks?|speaks?|acts?|chats?)\s+(?:as|like)?\s*(?:a|an|my|the)?\s*(?:favou?rite\s+)?([a-z0-9]+(?:\s+[a-z0-9]+)?)/);
+  if (who) { const w = who[1].split(' ').filter(x => !BREAK.test(x) && !STOP.has(x) && !FILLER.has(x)); if (w.length) name = titleCase(w.join(' ')) + ' Chatbot'; }
+
   const engine = keys[0] === 'game' ? gameEngine(lower) : null;
   const vscode = keys[0] === 'extension' && VSCODE.test(lower);
   const fabric = keys[0] === 'mcmod' && /\b(mod|fabric|forge|neoforge|modpack)\b/.test(lower) && !/\b(plugin|paper|spigot|bukkit|server)\b/.test(lower);
@@ -276,7 +290,7 @@ function generate(idea) {
     if (/\btwitch\b/.test(lower)) stack.push({ tech: 'tmi.js (read-only Twitch chat)', why: 'Reads chat anonymously from the page, so the overlay needs no login or server.' });
     if (/\bspotify\b/.test(lower)) stack.push({ tech: 'Spotify Web API (currently-playing endpoint)', why: 'Shows the song that is playing; needs a one-time Spotify login (PKCE) by the streamer.' });
   }
-  if ((/\b(ai|llm|gpt|agent|smart|summar)/.test(lower) || (/\bgenerat/.test(lower) && !/\bprocedural/.test(lower))) && !keys.includes('agent') && !keys.includes('rag') && keys[0] !== 'mcp') stack.push({ tech: 'An LLM API behind a single wrapper function', why: 'Your idea sounds AI-powered; keep the model swappable.' });
+  if ((/\b(ai|llm|gpt|agent|smart|summar)/.test(lower) || (/\bgenerat/.test(lower) && !/\bprocedural/.test(lower))) && !keys.includes('agent') && !keys.includes('rag') && !keys.includes('persona') && keys[0] !== 'mcp') stack.push({ tech: 'An LLM API behind a single wrapper function', why: 'Your idea sounds AI-powered; keep the model swappable.' });
 
   const turn = keys[0] === 'game' && !cozy && TURN.test(lower);
   const roblox = engine === 'roblox' && !cozy && !turn;

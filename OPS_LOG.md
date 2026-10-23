@@ -128,3 +128,22 @@
 28. "a chatbot that roleplays as a pirate" gets the agent loop with tools; a persona chatbot needs a system prompt, chat history and a streaming chat UI, no tools.
 29. "a semantic search engine for my bookmarks" is a plain Next.js web app; it should get embeddings + vector search like the RAG plan, without the chat step.
 - Committed 26e55e2 and pushed (also shipped 2b29a82 and a5f71f8 from yesterday's X watch runs); Render deployed (live sitemap has 13 URLs, llms.txt has the RAG FAQ, live API names "Obsidian Notes Chat"). newsletter/ stays ignored.
+
+## 2026-10-23 (daily run, ~8:05 AM CT)
+- Health: local :4173 up (restarted on new code). Render (https://queststarter.onrender.com) /health 200 with ~12s cold start. Locally /, /health, /robots.txt, /sitemap.xml, /llms.txt, /og.png, /q/<id> 200; bad /q id and unknown paths 404; bad JSON gives 400; JSON-LD parses.
+- Output test: 28 varied ideas (pirate and anime-character chatbots, companion app, Discord DM bot, semantic bookmark search, CSV finance dashboard, invoicing SaaS, OBS plugin, overlays, tower defense, Valorant crosshair site, crypto Telegram bot, reading streak app, regex VS Code extension, LinkedIn post writer, chess, Twitch giveaways, pomodoro timer, AI dungeon master, speedrun leaderboard, Shopify support bot) plus a 72-idea regression set from the logs, diffed against the previous generator (3 changed, all intended).
+- Fixed in generator.js:
+  - Bug: type keywords matched inside other words, so "a leaderboard site for my speedrun community" matched "unity" and got a Phaser game plan (Game + Web App). Keywords now have to start a word ("community" is not "unity", "dispatch" is not "patch", "ideal" is not "deal"). No other regression ideas changed.
+  - New AI Chatbot (persona) type (backlog 28): roleplay/character/companion chatbots got the tool-calling agent loop. Now: Next.js + Vercel AI SDK streaming chat, a versioned system prompt with the character's voice, rules and example exchanges, chat history trimmed to a token budget, reset and per-user message limit; boss is staying in character. Ideas that act on things (files, sends, emails, books, posts) stay agents; RAG still wins for chat over your own docs.
+  - Names: "Roleplays Chatbot" is "Pirate Chatbot"; "AI Companion" (talks like my favorite anime character) is "Anime Character Chatbot".
+- SEO: "A chatbot that roleplays as a pirate" example quest added to sitemap.xml (14 URLs) and llms.txt.
+- LLM discoverability: new FAQ "Can it plan a roleplay or character chatbot?" on the page, FAQPage JSON-LD (10 Qs, valid JSON) and llms.txt.
+
+### Backlog
+10. Render free tier cold-starts (~12s); consider a paid instance or keep-alive ping when traffic starts.
+24. Consider moving FEEDBACK.md/OPS_LOG.md out of the public repo (or making it private).
+26. Weak names: "Invoices Sender", "Current Song Viewer", "Chrome Extension" (dark overlay on YouTube), "OBS Plugin" (still plans as a Next.js web app), "AI Agent" ("files bugs from my notes app"), "Discord Bot" (roleplays as a dungeon master), "Valorant Crosshair Code" (drops "sharing site"), "Gaming Community" (discord bot).
+27. "a personal finance dashboard from my bank CSV" still plans a fetch/diff/alert data tool.
+29. "a semantic search engine for my bookmarks" is still a plain Next.js web app.
+30. "a tower defense game with zombies" gets "Player character that moves"; tower defense needs paths, waves, tower placement and an upgrade economy.
+31. "a customer support chatbot for my shopify store" gets the agent loop; it should be RAG over store FAQ/policies (plus an order-lookup tool).
