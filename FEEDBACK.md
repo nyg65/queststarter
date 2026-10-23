@@ -428,3 +428,34 @@ Maintained by the "X feedback watch" routine (twice daily). Public X reads only;
     > Agreed. The explaining part is underrated. When I write the MVP as 3 must-haves plus a list of what's out of scope, the AI builds way closer to what I meant.
 28. Reply to @TiwariHash6, https://x.com/TiwariHash6/status/2113522048299655440
     > Big one for me is data migrations. v1 data shape is always wrong, and changing it once real users exist is where things quietly break. Worth asking the AI for a migration plan before touching the schema.
+
+## 2026-10-23 (5:00 PM CT run)
+
+### Mentions of QuestStarter
+- No mentions of QuestStarter, the site URL, or @JohnPesce2011 since the 9 AM run (search returned 0). Launch post (https://x.com/JohnPesce2011/status/2111246359865307447) is still at 4 impressions, 0 likes, 0 replies.
+- Site check: https://queststarter.onrender.com/health 200 (12s cold start); local :4173 200.
+- **Real user feedback, feature requests, bug reports: still none.** Drafts 1-28 are still waiting on John's approval; nothing has been posted.
+
+### What builders are saying (since 9 AM CT)
+- New pre-build tool: @alan_creatives open-sourced "6W", an agent skill they run before any new vibe coding project to work out who it's for, what to build, and what could go wrong (https://x.com/alan_creatives/status/2113680406784684060, 0 followers, 27 impressions). Same slot as QuestStarter; the "what could go wrong" angle overlaps backlog 41.
+- Stuck-on-errors tools keep appearing: @Unstuckit launched a free page where you paste a Lovable/Bolt/Cursor/Replit/v0/Windsurf error and get a plain-English meaning plus a fix prompt (60 common errors; https://x.com/Unstuckit/status/2113644886092341542, 1 follower). @rodasjateno's Debo and @DenisDS8's Mac notch chime both alert you when a Claude Code session is stuck. Confirms the stuck step built this morning.
+- Harness over model: @AlekVectis says unattended agent runs go sideways because of the harness, and the first thing to have is a short AGENTS.md with build, test and lint commands plus the mistakes the agent keeps making in this repo (https://x.com/AlekVectis/status/2113663449012007211). Built (below).
+- "Start with the most annoying thing you do every week": @RyanKnuppel (5.8K followers) on where to start with AI (https://x.com/RyanKnuppel/status/2113739078927552900). Same question set as backlog 37.
+- Distribution: @vibecodeceo built two Claude plugins in a day and got one into Claude's connector directory, with an article on the first days (https://x.com/vibecodeceo/status/2113686633463611644). Possible launch channel idea for Level 6; not read yet.
+- Project-knowledge article from @sermakarevich (2.6K impressions, 78 bookmarks) on organizing docs and specs for AI coding agents. Relevant to bigger projects than QuestStarter targets.
+- Low-signal: more unverified Boris Cherny quotes (@Shinmaboroshi, @RealAlphaApp), trading-bot profit claims (@coldfloatrp), and Grok Bot account-linking support posts. Ignored.
+
+### Actions taken this run
+- Built: the AGENTS.md rules prompt now ends with a "Commands" section (run, test, lint, filled in once Level 1 runs) and a "Mistakes to avoid in this repo" list where you add one line each time the AI repeats a mistake. From @AlekVectis.
+- Checked a habit tracker plan and a Discord bot request; restarted local :4173; /, /health, /llms.txt and /api/generate are 200.
+- Committed locally, not pushed (pushing waits on the daily run or John's OK). The live site doesn't have this change yet.
+
+### Backlog (new this run)
+41. "What could go wrong" box in the plan: 3 likely failure points for this idea (a risky dependency, a data or privacy issue, a scope trap), from 6W (@alan_creatives).
+42. Level 6 launch step: list AI tool marketplaces and directories (plugin or connector directories) as a free distribution channel when the idea fits, from @vibecodeceo.
+
+### Drafts for John's approval (not posted)
+29. Reply to @AlekVectis, https://x.com/AlekVectis/status/2113663449012007211
+    > The "mistakes it keeps making" list is the underrated part. I add one line every time it repeats something I've already corrected, and the repeats mostly stop.
+30. Reply to @RyanKnuppel, https://x.com/RyanKnuppel/status/2113739078927552900
+    > This works for side projects too. The weekly annoyance makes a better first build than a big idea, because you already know what "done" looks like.
