@@ -147,3 +147,4 @@
 29. "a semantic search engine for my bookmarks" is still a plain Next.js web app.
 30. "a tower defense game with zombies" gets "Player character that moves"; tower defense needs paths, waves, tower placement and an upgrade economy.
 31. "a customer support chatbot for my shopify store" gets the agent loop; it should be RAG over store FAQ/policies (plus an order-lookup tool).
+- Committed 60ab579 and pushed; Render deployed (live llms.txt has the roleplay FAQ, sitemap has 14 URLs, live API plans the speedrun community leaderboard as a Web App). newsletter/ stays ignored.
