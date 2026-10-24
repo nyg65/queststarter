@@ -148,3 +148,22 @@
 30. "a tower defense game with zombies" gets "Player character that moves"; tower defense needs paths, waves, tower placement and an upgrade economy.
 31. "a customer support chatbot for my shopify store" gets the agent loop; it should be RAG over store FAQ/policies (plus an order-lookup tool).
 - Committed 60ab579 and pushed; Render deployed (live llms.txt has the roleplay FAQ, sitemap has 14 URLs, live API plans the speedrun community leaderboard as a Web App). newsletter/ stays ignored.
+
+## 2026-10-24 (daily run, ~8:05 AM CT)
+- Health: local :4173 up (restarted on new code). Render (https://queststarter.onrender.com) /health 200 with ~12s cold start. Locally /, /health, /robots.txt, /sitemap.xml, /llms.txt, /og.png, /q/<id> 200; bad /q id and unknown paths 404; bad JSON gives 400; JSON-LD parses.
+- Output test: 28 varied ideas (tower defense variants incl. Roblox, Godot, card and Discord ones, platformer, deckbuilder, drift racing, cozy farming/fishing sims, obby, chess, Twitch overlay, pirate chatbot, RAG notes chat, Shopify support bot, habit tracker, Minecraft plugin, speedrun leaderboard, deals bot, CLI, MCP server, invoicing SaaS, zombie shooter) plus the 46 ideas quoted in OPS_LOG/FEEDBACK, diffed against the previous generator (only tower defense ideas changed).
+- Fixed in generator.js:
+  - New tower defense plan (backlog 30): tower defense games got "Player character that moves + one enemy". Now: enemy path from spawn to base, tower placement with range/damage/fire rate, ramping waves with lives, kill money for buying and upgrading towers; boss is wave balance, the economy and fast pathing/targeting with 100+ enemies. Roblox tower defense also gets server-run waves saved with DataStoreService. Wins over the turn-based/card rules ("a tower defense card game"); "a racing game with tower defense elements" stays a racing plan.
+  - Names: "Tower Defense Game" (with zombies) is "Zombie Tower Defense"; "where robots attack" is "Robot Tower Defense".
+  - Bug: "a cozy fishing sim" was not seen as a game at all and got a Next.js web app plan with an auth/data-model boss. Added fishing sim, cozy sim, space sim, driving sim and "tower defence" as game keywords; driving sims get the vehicle plan, not the cozy loop.
+- SEO: "A tower defense game with zombies" example quest added to sitemap.xml (15 URLs) and llms.txt.
+- LLM discoverability: new FAQ "Can it plan a tower defense game?" on the page, FAQPage JSON-LD (11 Qs, valid JSON) and llms.txt.
+
+### Backlog
+10. Render free tier cold-starts (~12s); consider a paid instance or keep-alive ping when traffic starts.
+24. Consider moving FEEDBACK.md/OPS_LOG.md out of the public repo (or making it private).
+26. Weak names: "Invoices Sender", "Current Song Viewer", "Chrome Extension" (dark overlay on YouTube), "OBS Plugin" (still plans as a Next.js web app), "AI Agent" ("files bugs from my notes app"), "Valorant Crosshair Code", "Gaming Community", "Cozy Sim" ("a cozy sim about running a cafe").
+27. "a personal finance dashboard from my bank CSV" still plans a fetch/diff/alert data tool.
+29. "a semantic search engine for my bookmarks" is still a plain Next.js web app.
+31. "a customer support chatbot for my shopify store" gets the agent loop; it should be RAG over store FAQ/policies (plus an order-lookup tool).
+32. "a space sim" gets the generic player-and-enemy game plan; a ship flight/trade loop would fit better.

@@ -9,7 +9,7 @@ const TYPES = {
     boss: 'Reliable data ingestion / API integration without hitting rate limits',
   },
   game: {
-    label: 'Game', kw: ['game', 'platformer', 'rpg', 'roguelike', 'shooter', 'puzzle', 'arcade', 'tower defense', 'card game', 'multiplayer', 'unity', 'godot', 'flight sim', 'racing sim', 'city builder', 'colony sim', 'life sim', 'tycoon', 'escape room', 'vr game', 'sim game', 'farming sim', 'simulator', 'roblox', 'obby', 'unreal', 'deckbuilder', 'board game', 'chess', 'tic tac toe', 'strategy game', 'turn-based', 'turn based', 'text adventure', 'trivia game', 'word game'],
+    label: 'Game', kw: ['game', 'platformer', 'rpg', 'roguelike', 'shooter', 'puzzle', 'arcade', 'tower defense', 'tower defence', 'card game', 'multiplayer', 'unity', 'godot', 'flight sim', 'racing sim', 'city builder', 'colony sim', 'life sim', 'tycoon', 'escape room', 'vr game', 'sim game', 'farming sim', 'fishing sim', 'cozy sim', 'space sim', 'driving sim', 'simulator', 'roblox', 'obby', 'unreal', 'deckbuilder', 'board game', 'chess', 'tic tac toe', 'strategy game', 'turn-based', 'turn based', 'text adventure', 'trivia game', 'word game'],
     stack: [['Phaser 3 + Vite', 'Fast 2D browser game framework; huge example base AI knows well.'], ['TypeScript', 'Catches bugs in game-state logic early.'], ['Itch.io / Netlify', 'Free, instant sharing of playable builds.'], ['Kenney.nl assets', 'Free CC0 art/sound so you can ship without an artist.']],
     must: ['Player character that moves and has a goal', 'One enemy or obstacle type', 'Win / lose condition and restart', 'Score or progress display'],
     boss: 'Game feel: collision, difficulty curve, and juice (sound, particles, screen shake)',
@@ -131,6 +131,9 @@ const TURN_BOSS = 'Rules and balance: making every turn resolve correctly and ch
 const VEHICLE = /\b(racing|racer|kart|karts|drift\w*|driving|flight sim\w*|flying game|plane game|planes)\b/;
 const VEHICLE_MUST = ['A vehicle with tuned handling (acceleration, braking, steering or drifting)', 'One track or course with checkpoints and a finish (lap line, gate or landing)', 'A run timer with the best time saved', 'A ghost of your best run or one AI opponent to race against'];
 const VEHICLE_BOSS = 'Handling and camera feel at speed, plus checkpoints that stop players cutting the course';
+const TOWER = /\b(tower[- ]defen[cs]e|td game|defend (the|your|a) (base|castle|lane))\b/;
+const TOWER_MUST = ['A path (or grid) that enemies walk from spawn to your base', 'Placing towers on allowed tiles, each with range, damage and fire rate', 'Waves that ramp up, with lives lost when an enemy reaches the base', 'Money from kills to buy and upgrade towers between waves'];
+const TOWER_BOSS = 'Wave balance and the economy: difficulty that ramps fairly, towers that each have a use, and pathing/targeting that stays fast with 100+ enemies';
 const FABRIC_BOSS = 'Version compatibility: Minecraft updates break mods, so pin one version, keep mixins small and test in a clean instance';
 const PERSONAL = /\b(habits?|workouts?|gym|exercises?|mood|water intake|sleep|reading|journal|study|streaks?|meditation|fitness|calories?|weight|chores?|goals?)\b/;
 const RAG_DOCS = '(notes|docs|documents|pdfs?|files|wiki|knowledge ?base|articles|help ?center|handbook|manuals?|vault|transcripts|papers|textbooks?|codebase|readme|documentation)';
@@ -227,6 +230,8 @@ function projectName(idea) {
   if (words.length === 2 && /^(threejs|unity|godot|phaser|roblox|unreal|browser|web|online|simple|small|tiny|little|fun|mobile)$/.test(words[0]) && words[1] === 'game' && stopAt < all.length) words.shift();
   // "an MCP server that reads my Notion roadmap" -> "Notion MCP Server"
   if (words.join(' ') === 'mcp server' && stopAt < all.length) { const brand = all.slice(stopAt).find(w => ACRO[w] && !/^(ai|mcp|api|llm|gpt|claude|cursor|vscode|cli|ui|mvp)$/.test(w)); if (brand) return titleCase(brand + ' mcp server'); }
+  // "a tower defense game with zombies" -> "Zombie Tower Defense"
+  if (/^tower defen[cs]e game$/.test(words.join(' ')) && /^(with|where|against|of|about|featuring)$/.test(all[all.indexOf('game') + 1] || '')) { const th = []; for (const w of all.slice(all.indexOf('game') + 2)) { if (BREAK.test(w) || /^(attack|invade|come|try|want)\w*$/.test(w)) break; if (!STOP.has(w) && !FILLER.has(w) && !KIND.has(w) && !/^(enem(y|ies)|waves?|towers?|levels?)$/.test(w)) th.push(w); } const theme = th[th.length - 1]; if (theme) return titleCase(theme.replace(/(zomb|cook|pix|goal)ies$/, '$1ie').replace(/ies$/, 'y').replace(/([^s])s$/, '$1') + ' ' + words.slice(0, 2).join(' ')); }
   if (words.length === 1 && stopAt < all.length) {
     const more = [];
     for (const w of all.slice(stopAt + 1)) {
@@ -282,7 +287,7 @@ function generate(idea) {
     const i = stack.findIndex(s => s.tech.startsWith(TYPES.bot.stack[0][0]));
     if (sdk && i >= 0) stack[i] = { tech: sdk[0], why: sdk[1] + (i > 0 ? ' (for the bot side)' : '') };
   };
-  const cozy = keys[0] === 'game' && COZY.test(lower) && !/\b(flight|racing|space|combat|battle|war|mech) (sim|simulator)\b/.test(lower);
+  const cozy = keys[0] === 'game' && COZY.test(lower) && !/\b(flight|racing|driving|space|combat|battle|war|mech) (sim|simulator)\b/.test(lower);
   if (secondary) for (const [tech, why] of secondary.stack.slice(0, 2)) if (!stack.find(s => s.tech === tech)) stack.push({ tech, why: why + ' (for the ' + lbl(secondary.label) + ' side)' });
   if (keys[1] === 'rag' && !stack.find(s => s.tech === TYPES.rag.stack[2][0])) stack.push({ tech: TYPES.rag.stack[2][0], why: TYPES.rag.stack[2][1] + ' (for the RAG chatbot side)' });
   botSdk();
@@ -292,11 +297,13 @@ function generate(idea) {
   }
   if ((/\b(ai|llm|gpt|agent|smart|summar)/.test(lower) || (/\bgenerat/.test(lower) && !/\bprocedural/.test(lower))) && !keys.includes('agent') && !keys.includes('rag') && !keys.includes('persona') && keys[0] !== 'mcp') stack.push({ tech: 'An LLM API behind a single wrapper function', why: 'Your idea sounds AI-powered; keep the model swappable.' });
 
-  const turn = keys[0] === 'game' && !cozy && TURN.test(lower);
-  const roblox = engine === 'roblox' && !cozy && !turn;
-  const vehicle = keys[0] === 'game' && !cozy && !turn && !roblox && VEHICLE.test(lower);
-  const must = cozy ? [...COZY_MUST] : turn ? [...TURN_MUST] : roblox ? [...ROBLOX_MUST] : vehicle ? [...VEHICLE_MUST] : fabric ? [...MCMOD_FABRIC_MUST] : vscode ? [...VSCODE_MUST] : [...primary.must];
-  const boss = cozy ? COZY_BOSS : turn ? TURN_BOSS : roblox ? ROBLOX_BOSS : vehicle ? VEHICLE_BOSS : fabric ? FABRIC_BOSS : vscode ? VSCODE_BOSS : primary.boss;
+  const tower = keys[0] === 'game' && !cozy && TOWER.test(lower) && !(VEHICLE.test(lower) && lower.search(VEHICLE) < lower.search(TOWER));
+  const turn = keys[0] === 'game' && !cozy && !tower && TURN.test(lower);
+  const roblox = engine === 'roblox' && !cozy && !turn && !tower;
+  const vehicle = keys[0] === 'game' && !cozy && !turn && !roblox && !tower && VEHICLE.test(lower);
+  const must = cozy ? [...COZY_MUST] : tower ? [...TOWER_MUST] : turn ? [...TURN_MUST] : roblox ? [...ROBLOX_MUST] : vehicle ? [...VEHICLE_MUST] : fabric ? [...MCMOD_FABRIC_MUST] : vscode ? [...VSCODE_MUST] : [...primary.must];
+  const boss = cozy ? COZY_BOSS : tower ? TOWER_BOSS : turn ? TURN_BOSS : roblox ? ROBLOX_BOSS : vehicle ? VEHICLE_BOSS : fabric ? FABRIC_BOSS : vscode ? VSCODE_BOSS : primary.boss;
+  if (tower && engine === 'roblox') must.push('Waves and money run on the server, saved with DataStoreService');
   if (secondary) must.push('Integration point with your ' + lbl(secondary.label) + ' component');
   const loot = new Set();
   for (const f of FLAVOR) if (f.kw.some(k => hasWord(lower, k) || (k.length > 4 && lower.includes(k)))) f.loot.forEach(l => loot.add(l));
