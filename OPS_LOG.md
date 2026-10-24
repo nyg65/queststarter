@@ -167,3 +167,4 @@
 29. "a semantic search engine for my bookmarks" is still a plain Next.js web app.
 31. "a customer support chatbot for my shopify store" gets the agent loop; it should be RAG over store FAQ/policies (plus an order-lookup tool).
 32. "a space sim" gets the generic player-and-enemy game plan; a ship flight/trade loop would fit better.
+- Committed 5577055 and pushed (also shipped 2fabdc3 and 58b4b83 from yesterday's X watch runs); Render deployed (live llms.txt has the tower defense FAQ, sitemap has 15 URLs, live API plans "a cozy fishing sim" as a Game). newsletter/ stays ignored.
