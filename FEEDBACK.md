@@ -491,3 +491,34 @@ Maintained by the "X feedback watch" routine (twice daily). Public X reads only;
     > Love that you're finally building it. One thing that helped me on first projects: pick the 3 features the app can't live without (for dating, maybe profiles, matching, chat) and build only those before anything else.
 32. Reply to @BiaO2212, https://x.com/BiaO2212/status/2113761876429398355
     > The test one bit me too. I added a line to my rules file: "if a test fails, fix the code, not the test, and ask me if the test is wrong." It mostly stopped.
+
+## 2026-10-24 (5:00 PM CT run)
+
+### Mentions of QuestStarter
+- No mentions of QuestStarter, the site URL, or @JohnPesce2011 since the 9 AM run (search returned 0). Launch post (https://x.com/JohnPesce2011/status/2111246359865307447) is still at 4 impressions, 0 likes, 0 replies.
+- Site check: https://queststarter.onrender.com/health 200 (12s cold start); local :4173 200.
+- **Real user feedback, feature requests, bug reports: still none.** Drafts 1-32 are still waiting on John's approval; nothing has been posted.
+
+### What builders are saying (since 9 AM CT)
+- "Tools aren't the problem, knowing what to build is" is everywhere today: @Obi_Ryder (858 followers, 4 replies, https://x.com/Obi_Ryder/status/2114092260514320739), @mahek_0_6, @aqdasthetic__, @ProffyPi. QuestStarter's exact pitch.
+- Direct competitor messaging: @AIDevPlanner (74 followers) posts "Vibe coding makes building fast. It doesn't make choosing WHAT to build any easier" with a link to their planner (https://x.com/AIDevPlanner/status/2114083254051430432). Worth a look at what they offer; not opened yet.
+- Domain knowledge beats the tool: @walls_jason1 (4.2K followers) is an electrician who built with Claude Code; "the model wrote the code and the trade told it what to build" (https://x.com/walls_jason1/status/2114039541573255608). Backlog 45.
+- Stuck-retry rule: @Landlyu suggests an AGENTS.md line "Same error? Retry at most 2 times, then stop... tell me the exact error and what you need" (https://x.com/Landlyu/status/2114071426064167213). Built (below).
+- First-project posts: @shubsara is learning by building their first project with Claude Code from a PRD (https://x.com/shubsara/status/2114009891790889138).
+- Stuck-agent tools keep launching: herdr from @GlitchyMagic_ (28K followers, 324 impressions), a 3D agent office from @Ldataengineer, VibeTerm. Not QuestStarter's lane.
+- Low-signal: @trq212 leaving Anthropic chatter, model cost-per-task tables, Claude Code vs Codex debates, a WhatsApp signup-help spam post. Ignored.
+
+### Actions taken this run
+- Built: the AGENTS.md rules prompt now says "If the same error comes back after 2 fix attempts, stop. Tell me the exact error, what you tried, and what you need from me." From @Landlyu.
+- Restarted local :4173; /, /health, /llms.txt and /api/generate are 200, and a habit-tracker plan includes the new rule.
+- Committed locally, not pushed (pushing waits on the daily run or John's OK). The live site doesn't have this change yet.
+
+### Backlog (new this run)
+45. "What do you know that others don't?" field on the idea form (your job, hobby or trade), fed into the plan so the MVP leans on the builder's own expertise. From @walls_jason1.
+46. Look at @AIDevPlanner's planner and note how it differs from QuestStarter.
+
+### Drafts for John's approval (not posted)
+33. Reply to @Obi_Ryder, https://x.com/Obi_Ryder/status/2114092260514320739
+    > Agreed. What helped me was picking one small problem I actually have, then cutting it down to 3 must-have features before opening any tool.
+34. Reply to @walls_jason1, https://x.com/walls_jason1/status/2114039541573255608
+    > This is the best case for non-devs building. You already know the problem better than any developer would; the AI just handles the typing.
