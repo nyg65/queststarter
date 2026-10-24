@@ -459,3 +459,35 @@ Maintained by the "X feedback watch" routine (twice daily). Public X reads only;
     > The "mistakes it keeps making" list is the underrated part. I add one line every time it repeats something I've already corrected, and the repeats mostly stop.
 30. Reply to @RyanKnuppel, https://x.com/RyanKnuppel/status/2113739078927552900
     > This works for side projects too. The weekly annoyance makes a better first build than a big idea, because you already know what "done" looks like.
+
+## 2026-10-24 (9:00 AM CT run)
+
+### Mentions of QuestStarter
+- No mentions of QuestStarter, the site URL, or @JohnPesce2011 since the 5 PM run (search returned 0). Launch post (https://x.com/JohnPesce2011/status/2111246359865307447) is still at 4 impressions, 0 likes, 0 replies.
+- Site check: https://queststarter.onrender.com/health 200 (12s cold start). Local :4173 was down (no process); restarted.
+- **Real user feedback, feature requests, bug reports: still none.** Drafts 1-30 are still waiting on John's approval; nothing has been posted.
+
+### What builders are saying (since 5 PM CT yesterday)
+- "Knowing what to build" keeps coming up: @divyanshbht "Vibe coding is not coding. It's taste, direction, and knowing what to build" (https://x.com/divyanshbht/status/2113917479617548381); @samongaro_ (2.4K followers), @JamesMalsawm (5.7K followers, "vanilla Claude Code is enough when you know what to build"), @Vaibhav01657854 and @thisnaeem say the same.
+- Wrong-problem and test-cheating: @BiaO2212 says agents write clean code for the wrong problem, and warns about the agent "fixing" the test instead of the code (https://x.com/BiaO2212/status/2113761876429398355, 386 impressions). Built the test rule (below).
+- First-time builders with a long-held idea: @MarziBravesoul (2.6K followers) is vibe coding a dating app as their first project after a couple of YouTube videos (https://x.com/MarziBravesoul/status/2113772707481346498). Exactly QuestStarter's user.
+- Game modding is hot: @RoundtableSpace (270K followers, 54K impressions) on Universal Modder, an 8.8K-star repo that lets Claude Code, Codex, Cursor and others build mods for PC games you own (https://x.com/RoundtableSpace/status/2113907093858357416). @EdwardTWinz (101K followers) "Vibe your way to $50k" post on AI changing how games get made (4.2K impressions). Lots of small vibe-coded game launches (light puzzle, Halloween three.js game, pirate sailing). Backlog 43.
+- Stuck-agent alert tools keep launching: Toki (menu bar app to approve a stuck agent from your phone), /myoffice, and @hendrikgrueger's one-task-at-a-time Claude Code skill. Confirms the stuck pain; not QuestStarter's lane.
+- "Installed Claude Code but stuck on what comes next": luongnv89/claude-howto gained 1,053 GitHub stars in a day (per @park_danie36173). Possible link for a "learn your tool" note in Level 1 (backlog 44).
+- @startupgeorge is letting an AI agent decide what to build and where money goes, posting every decision publicly. Similar to John's agent-run business; worth watching as a peer.
+- Low-signal: @trq212 leaving Anthropic chatter, Claude Code vs Codex debates, Fortnite/Epic "vibe coded" jokes. Ignored.
+
+### Actions taken this run
+- Built: the AGENTS.md rules prompt now says "If a test fails, fix the code, not the test. Never change, skip or delete a test to make it pass; ask me if you think the test itself is wrong." From @BiaO2212.
+- Restarted local :4173; /, /health, /llms.txt and /api/generate are 200, and a habit-tracker plan includes the new rule.
+- Committed locally, not pushed (pushing waits on the daily run or John's OK). The live site doesn't have this change yet.
+
+### Backlog (new this run)
+43. "Game mod" project type: when the idea mentions modding a game, the plan suggests checking the game's mod support and license first, a tiny first mod (one item or one UI tweak), and a tool like Universal Modder. From @RoundtableSpace's post.
+44. Level 1 tip: "New to your AI tool? Spend 20 minutes on its slash commands, memory and rules file first", with a link to a beginner guide such as claude-howto.
+
+### Drafts for John's approval (not posted)
+31. Reply to @MarziBravesoul, https://x.com/MarziBravesoul/status/2113772707481346498
+    > Love that you're finally building it. One thing that helped me on first projects: pick the 3 features the app can't live without (for dating, maybe profiles, matching, chat) and build only those before anything else.
+32. Reply to @BiaO2212, https://x.com/BiaO2212/status/2113761876429398355
+    > The test one bit me too. I added a line to my rules file: "if a test fails, fix the code, not the test, and ask me if the test is wrong." It mostly stopped.
