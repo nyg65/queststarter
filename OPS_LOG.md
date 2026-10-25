@@ -168,3 +168,22 @@
 31. "a customer support chatbot for my shopify store" gets the agent loop; it should be RAG over store FAQ/policies (plus an order-lookup tool).
 32. "a space sim" gets the generic player-and-enemy game plan; a ship flight/trade loop would fit better.
 - Committed 5577055 and pushed (also shipped 2fabdc3 and 58b4b83 from yesterday's X watch runs); Render deployed (live llms.txt has the tower defense FAQ, sitemap has 15 URLs, live API plans "a cozy fishing sim" as a Game). newsletter/ stays ignored.
+
+## 2026-10-25 (daily run, ~8:10 AM CT)
+- Health: local :4173 up (restarted on new code). Render (https://queststarter.onrender.com) /health 200 with ~12s cold start. Locally /, /health, /robots.txt, /sitemap.xml, /llms.txt, /og.png 200; bad /q id and unknown paths 404; bad JSON gives 400; JSON-LD parses.
+- Output test: 28 varied ideas (Shopify/Etsy/SaaS/restaurant/Discord support bots, pirate chatbot, RAG notes chat, semantic bookmark search, CSV finance dashboard, tower defense, space and cafe sims, OBS plugin, Twitch overlay, habit tracker, MCP server, CLI, Roblox obby, speedrun leaderboard, crypto Telegram bot, Chrome extension, invoicing SaaS, AI dungeon master, VR rhythm game, AI meal planner, Pokemon card tracker, duo finder) plus the 45 ideas quoted in OPS_LOG/FEEDBACK, diffed against the previous generator (only the support-bot ideas changed).
+- Fixed in generator.js:
+  - New support chatbot plan (backlog 31): "a customer support chatbot for my shopify store" got the tool-calling agent loop. Support/FAQ chatbots for a store, SaaS, website, company or server now get the RAG plan (answer only from your FAQ and policies, cite, say "not found"), plus a must-have to hand off to a human, and store bots get one read-only order-status lookup (Shopify Admin API / WooCommerce REST API), never refunds or edits. A support bot on Discord/Telegram becomes Bot + RAG Chatbot. Ideas that act (refunds, creates tickets) stay agents.
+  - Names: "Customer Support Chatbot" is "Shopify Store Support Chat"; "Support Bot" (etsy shop) is "Etsy Shop Support Bot"; "Customer Service Chatbot" is "SaaS Support Chat"; "AI Chatbot" (restaurant website) is "Restaurant Support Chat"; "Discord Bot" (answers faq for my server) is "Discord Server Support Bot". WooCommerce is cased correctly.
+- SEO: "A customer support chatbot for my Shopify store" example quest added to sitemap.xml (16 URLs) and llms.txt.
+- LLM discoverability: new FAQ "Can it plan a customer support chatbot for my store?" on the page, FAQPage JSON-LD (12 Qs, valid JSON) and llms.txt.
+
+### Backlog
+10. Render free tier cold-starts (~12s); consider a paid instance or keep-alive ping when traffic starts.
+24. Consider moving FEEDBACK.md/OPS_LOG.md out of the public repo (or making it private).
+26. Weak names: "Invoices Sender", "Current Song Viewer", "Chrome Extension" (dark overlay on YouTube), "OBS Plugin" (still plans as a Next.js web app), "AI Agent" ("files bugs from my notes app"), "Cozy Sim" (cafe), "MCP Server" ("lets claude read my linear tickets"), "Slack Bot" ("answers hr questions for our company"), "Tickets Creator" (AI help desk).
+27. "a personal finance dashboard from my bank CSV" still plans a fetch/diff/alert data tool.
+29. "a semantic search engine for my bookmarks" is still a plain Next.js web app.
+32. "a space sim" gets the generic player-and-enemy game plan.
+33. "a meal planner that uses ai to suggest recipes" plans as an AI Agent loop; it is a web app with one LLM call.
+34. Bot + RAG support bots keep the bot boss ("data ingestion / API integration"); a retrieval-quality boss would fit better.

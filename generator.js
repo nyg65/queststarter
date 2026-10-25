@@ -138,6 +138,9 @@ const FABRIC_BOSS = 'Version compatibility: Minecraft updates break mods, so pin
 const PERSONAL = /\b(habits?|workouts?|gym|exercises?|mood|water intake|sleep|reading|journal|study|streaks?|meditation|fitness|calories?|weight|chores?|goals?)\b/;
 const RAG_DOCS = '(notes|docs|documents|pdfs?|files|wiki|knowledge ?base|articles|help ?center|handbook|manuals?|vault|transcripts|papers|textbooks?|codebase|readme|documentation)';
 const RAG = new RegExp('\\b(rag|retrieval[- ]augmented|retrieval)\\b|\\b(over|about|from|on|for|with|across|using|of|in)\\s+(my|our|your|the|their|a|all)?\\s*([a-z0-9]+\\s+){0,3}' + RAG_DOCS + '\\b|\\b(chat with|talk to|ask|question)\\s+(my|our|your|a|any)?\\s*([a-z0-9]+\\s+){0,2}' + RAG_DOCS + '\\b');
+const SUPPORT = /\b(customer (support|service|questions)|support|help ?desk|faqs?)\b|\banswers? (customer |common |simple )?questions (for|about|on) (my|our)\b/;
+const BIZ = /\b(store|shop|business|saas|website|site|app|product|restaurant|server|company|startup|customers?|etsy|shopify|woocommerce|clinic|salon|gym|course)\b/;
+const STORE = /\b(store|shop|etsy|shopify|woocommerce|ecommerce|e-commerce|orders?)\b/;
 const PERSONA = /\b(role ?plays?|roleplaying|persona|companion|pretends? to be|in character|(talks?|speaks?|acts?|chats?) (like|as) (a|an|my|the)\b)/;
 const STOP = new Set('a an the to for of and or that i my me with on in it is be build make create want app project idea simple'.split(' '));
 
@@ -173,12 +176,17 @@ function detectTypes(text) {
   if (keys[0] === 'data' && PERSONAL.test(t) && !/\b(scrap\w*|alerts?|api|monitor\w*|prices?|deals?|patch\w*|news|digest|feed|spend\w*|costs?)\b/.test(t)) { keys.shift(); const m = /\b(mobile|ios|android|iphone|phone)\b/.test(t) ? 'mobile' : 'web'; if (!keys.includes(m)) keys.unshift(m); else { keys.splice(keys.indexOf(m), 1); keys.unshift(m); } }
   // chat or Q&A over the user's own documents is retrieval (ingest, retrieve, cite), not a tool-calling agent loop
   if (keys.includes('agent') && RAG.test(t) && /\b(rag|retrieval|chat\w*|ask\w*|answer\w*|questions?|q&a|search\w*|tutor|quiz\w*|talk to|trained on|knowledge)\b/.test(t)) keys[keys.indexOf('agent')] = 'rag';
+  // a support / FAQ chatbot for a store or product answers from that business's FAQ and policies: retrieval, not an agent loop
+  if (SUPPORT.test(t) && BIZ.test(t) && /\b(chat\w*|bots?|assistant|agent|answers?)\b/.test(t) && !/\b(files?|sends?|books?|posts?|schedules?|refunds?|deploys?|creates? (issues|tickets|bugs))\b/.test(t)) {
+    if (keys.includes('agent')) keys[keys.indexOf('agent')] = 'rag';
+    else if (keys[0] === 'bot' && !keys.includes('rag')) keys.splice(1, 1, 'rag');
+  }
   // a character or roleplay chatbot just talks: a persona prompt, chat history and a streaming UI, no tools or agent loop
   if (keys[0] === 'agent' && PERSONA.test(t) && !/\b(files?|sends?|books?|posts?|reads? my|emails?|schedules?|orders?|buys?|deploys?|creates? (issues|tickets|bugs))\b/.test(t)) keys[0] = 'persona';
   return keys.length ? keys.slice(0, 2) : ['web'];
 }
 
-const ACRO = { ai: 'AI', rag: 'RAG', mcp: 'MCP', cli: 'CLI', pdfs: 'PDFs', obsidian: 'Obsidian', saas: 'SaaS', claude: 'Claude', cursor: 'Cursor', vscode: 'VS Code', turnbased: 'Turn-Based', api: 'API', llm: 'LLM', gpt: 'GPT', ios: 'iOS', iphone: 'iPhone', mvp: 'MVP', rpg: 'RPG', ui: 'UI', '2d': '2D', '3d': '3D', npc: 'NPC', mmo: 'MMO', fps: 'FPS', pc: 'PC', vr: 'VR', ar: 'AR', youtube: 'YouTube', github: 'GitHub', tiktok: 'TikTok', gpu: 'GPU', cpu: 'CPU', pdf: 'PDF', seo: 'SEO', sql: 'SQL', npcs: 'NPCs', unity: 'Unity', godot: 'Godot', unreal: 'Unreal', ue5: 'UE5', obby: 'Obby', threejs: 'Three.js', webgl: 'WebGL', discord: 'Discord', telegram: 'Telegram', slack: 'Slack', twitter: 'Twitter', reddit: 'Reddit', steam: 'Steam', chrome: 'Chrome', android: 'Android', notion: 'Notion', spotify: 'Spotify', twitch: 'Twitch', minecraft: 'Minecraft', roblox: 'Roblox', xbox: 'Xbox', playstation: 'PlayStation', openai: 'OpenAI', chatgpt: 'ChatGPT', nextjs: 'Next.js', obs: 'OBS', csv: 'CSV', json: 'JSON', npx: 'npx' };
+const ACRO = { ai: 'AI', rag: 'RAG', mcp: 'MCP', cli: 'CLI', pdfs: 'PDFs', obsidian: 'Obsidian', saas: 'SaaS', claude: 'Claude', cursor: 'Cursor', vscode: 'VS Code', turnbased: 'Turn-Based', api: 'API', llm: 'LLM', gpt: 'GPT', ios: 'iOS', iphone: 'iPhone', mvp: 'MVP', rpg: 'RPG', ui: 'UI', '2d': '2D', '3d': '3D', npc: 'NPC', mmo: 'MMO', fps: 'FPS', pc: 'PC', vr: 'VR', ar: 'AR', youtube: 'YouTube', github: 'GitHub', tiktok: 'TikTok', gpu: 'GPU', cpu: 'CPU', pdf: 'PDF', seo: 'SEO', sql: 'SQL', npcs: 'NPCs', unity: 'Unity', godot: 'Godot', unreal: 'Unreal', ue5: 'UE5', obby: 'Obby', threejs: 'Three.js', webgl: 'WebGL', discord: 'Discord', telegram: 'Telegram', slack: 'Slack', twitter: 'Twitter', reddit: 'Reddit', steam: 'Steam', chrome: 'Chrome', android: 'Android', notion: 'Notion', spotify: 'Spotify', twitch: 'Twitch', minecraft: 'Minecraft', roblox: 'Roblox', xbox: 'Xbox', playstation: 'PlayStation', openai: 'OpenAI', chatgpt: 'ChatGPT', nextjs: 'Next.js', obs: 'OBS', csv: 'CSV', json: 'JSON', npx: 'npx', woocommerce: 'WooCommerce' };
 function titleCase(s) { return s.split(' ').map(w => ACRO[w] || w.replace(/\b\w/g, c => c.toUpperCase())).join(' '); }
 function hasWord(text, k) { return new RegExp('(^|[^a-z0-9])' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '($|[^a-z0-9])').test(text); }
 function lbl(l) { return l.toLowerCase().replace(/\bai\b/g, 'AI').replace(/\bapi\b/g, 'API').replace(/\bmcp\b/g, 'MCP').replace(/\bvs code\b/g, 'VS Code').replace(/\bminecraft\b/g, 'Minecraft').replace(/\bcli\b/g, 'CLI').replace(/\brag\b/g, 'RAG'); }
@@ -268,6 +276,10 @@ function generate(idea) {
   const ragSrc = keys[0] === 'rag' && lower.match(new RegExp('\\b(?:over|about|from|on|for|with|across|using|of|in|chat with|talk to|ask)\\s+(?:my|our|your|the|their|a|all)?\\s*((?:[a-z0-9]+\\s+){0,3}' + RAG_DOCS + ')\\b'));
   if (ragSrc) { let w = ragSrc[1].split(/\s+/); const cut = w.map((x, i) => BREAK.test(x) || /^(my|our|your|the|their)$/.test(x) ? i : -1).reduce((m, i) => Math.max(m, i), -1); w = w.slice(cut + 1).filter(x => !/^(a|an|the|all|questions?|answers?|chat|chatbot|bot|ai|any|some)$/.test(x)).slice(-3); if (w.length) name = titleCase(w.join(' ')) + ' Chat'; }
 
+  // "a customer support chatbot for my shopify store" -> "Shopify Store Support Chat"
+  const supportFor = keys.includes('rag') && !ragSrc && SUPPORT.test(lower) && lower.match(/\b(?:for|on|of)\s+(?:my|our|a|the)\s+((?:[a-z0-9]+\s+){0,2}?)(store|shop|business|saas|website|site|app|product|restaurant|server|company|startup|clinic|salon|gym|course)\b/);
+  if (supportFor) { let w = (supportFor[1].trim() + ' ' + supportFor[2]).trim().split(/\s+/).filter(x => !STOP.has(x) && !FILLER.has(x) && !/^(online|small|little|new)$/.test(x)); if (w.length > 1 && /^(website|site)$/.test(w[w.length - 1])) w.pop(); if (keys[0] === 'bot' && /\bdiscord\b/.test(lower) && w.join(' ') === 'server') w = ['discord', 'server']; if (w.length) name = titleCase(w.join(' ')) + (keys[0] === 'bot' ? ' Support Bot' : ' Support Chat'); }
+
   // "a chatbot that roleplays as a pirate" -> "Pirate Chatbot"
   const who = keys[0] === 'persona' && lower.match(/\b(?:role ?plays?|pretends? to be|talks?|speaks?|acts?|chats?)\s+(?:as|like)?\s*(?:a|an|my|the)?\s*(?:favou?rite\s+)?([a-z0-9]+(?:\s+[a-z0-9]+)?)/);
   if (who) { const w = who[1].split(' ').filter(x => !BREAK.test(x) && !STOP.has(x) && !FILLER.has(x)); if (w.length) name = titleCase(w.join(' ')) + ' Chatbot'; }
@@ -304,6 +316,7 @@ function generate(idea) {
   const must = cozy ? [...COZY_MUST] : tower ? [...TOWER_MUST] : turn ? [...TURN_MUST] : roblox ? [...ROBLOX_MUST] : vehicle ? [...VEHICLE_MUST] : fabric ? [...MCMOD_FABRIC_MUST] : vscode ? [...VSCODE_MUST] : [...primary.must];
   const boss = cozy ? COZY_BOSS : tower ? TOWER_BOSS : turn ? TURN_BOSS : roblox ? ROBLOX_BOSS : vehicle ? VEHICLE_BOSS : fabric ? FABRIC_BOSS : vscode ? VSCODE_BOSS : primary.boss;
   if (tower && engine === 'roblox') must.push('Waves and money run on the server, saved with DataStoreService');
+  if (keys.includes('rag') && SUPPORT.test(lower)) { must.push('Hand off to a human (email or ticket link) when the bot cannot answer or the customer asks for one'); if (STORE.test(lower)) must.push('One read-only order-status lookup by order number + email' + (/\bshopify\b/.test(lower) ? ' (Shopify Admin API)' : /\bwoocommerce\b/.test(lower) ? ' (WooCommerce REST API)' : '') + ', never refunds or edits'); }
   if (secondary) must.push('Integration point with your ' + lbl(secondary.label) + ' component');
   const loot = new Set();
   for (const f of FLAVOR) if (f.kw.some(k => hasWord(lower, k) || (k.length > 4 && lower.includes(k)))) f.loot.forEach(l => loot.add(l));
