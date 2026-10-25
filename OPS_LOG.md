@@ -187,3 +187,4 @@
 32. "a space sim" gets the generic player-and-enemy game plan.
 33. "a meal planner that uses ai to suggest recipes" plans as an AI Agent loop; it is a web app with one LLM call.
 34. Bot + RAG support bots keep the bot boss ("data ingestion / API integration"); a retrieval-quality boss would fit better.
+- Committed eaa7659 and pushed; Render deployed (live llms.txt has the support chatbot FAQ, sitemap has 16 URLs, live API names "Shopify Store Support Chat" as a RAG Chatbot). newsletter/ stays ignored.
