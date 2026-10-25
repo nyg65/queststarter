@@ -522,3 +522,34 @@ Maintained by the "X feedback watch" routine (twice daily). Public X reads only;
     > Agreed. What helped me was picking one small problem I actually have, then cutting it down to 3 must-have features before opening any tool.
 34. Reply to @walls_jason1, https://x.com/walls_jason1/status/2114039541573255608
     > This is the best case for non-devs building. You already know the problem better than any developer would; the AI just handles the typing.
+
+## 2026-10-25 (9:00 AM CT run)
+
+### Mentions of QuestStarter
+- No mentions of QuestStarter, the site URL, or @JohnPesce2011 since the 5 PM run (search returned 0). Launch post (https://x.com/JohnPesce2011/status/2111246359865307447) is still at 4 impressions, 0 likes, 0 replies.
+- Site check: https://queststarter.onrender.com/health 200 (12s cold start); local :4173 200.
+- **Real user feedback, feature requests, bug reports: still none.** Drafts 1-34 are still waiting on John's approval; nothing has been posted.
+
+### What builders are saying (since 5 PM CT yesterday)
+- "The hard part is knowing what to build" again: @abhisaas (https://x.com/abhisaas/status/2114336037162176873), @Saas_addy (2.7K followers, "taste and judgment to know what to build next", https://x.com/Saas_addy/status/2114234424954867975).
+- Scope creep and knowing when to stop: @asumandeveloper says vibe coding "made it easier to keep adding features forever... the harder part is knowing what to build, what to leave out, and when to stop" (https://x.com/asumandeveloper/status/2114348657193464248). Built the "MVP is done" rule (below).
+- Games keep sparking first and returning builders: @rebellucion is vibe coding a game based on one from 30 years ago (https://x.com/rebellucion/status/2114157277032677773); @joebedarts (1.6K followers) is experimenting with games and got unstuck on old inventions (https://x.com/joebedarts/status/2114131644877599220). Supports backlog 43.
+- Career-changer story: @Pumpnasterr (2.5K followers), tourism grad, says a year of vibe coding changed their life (https://x.com/Pumpnasterr/status/2114120032628207970). Good audience profile.
+- "Can't debug what you never understood": @StevenR41985 (https://x.com/StevenR41985/status/2114332902246735900). Backlog 47.
+- Peer: @_JacobArcher posted a 12-step "one founder, eight agents" roadmap using Grok Bot, Claude Code, Codex and Cursor (https://x.com/_JacobArcher/status/2114280879019212837). Similar to John's agent-run business.
+- Stuck-agent tools keep launching: Perch, Harp, /call-me, Gauge CLI. Not QuestStarter's lane.
+- Low-signal: harness-vs-model benchmark debate, @trq212 farewell replies, "what is vibe coding" explainers, a promo thread for @vibevibefun. Ignored.
+
+### Actions taken this run
+- Built: the AGENTS.md rules prompt now says "Once every MVP must-have works and I've tested it, tell me the MVP is done and suggest I launch it before adding anything new." From @asumandeveloper.
+- Restarted local :4173; /, /health, /llms.txt and /api/generate are 200, and a habit-tracker plan includes the new rule.
+- Committed locally, not pushed (pushing waits on the daily run or John's OK). The live site doesn't have this change yet.
+
+### Backlog (new this run)
+47. "Explain it back" step at the end of each level: a prompt asking the AI to explain in plain words what was just built and how the pieces connect, so the builder can debug later. From @StevenR41985.
+
+### Drafts for John's approval (not posted)
+35. Reply to @asumandeveloper, https://x.com/asumandeveloper/status/2114348657193464248
+    > "When to stop" is the one nobody talks about. I write down a done list before I start, and when it's all checked off I ship, even if I have ten more ideas.
+36. Reply to @rebellucion, https://x.com/rebellucion/status/2114157277032677773
+    > Rebuilding a game you loved 30 years ago is such a good first or fiftieth project. You already know exactly how it should feel, which is most of the battle.
