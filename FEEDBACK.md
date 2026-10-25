@@ -553,3 +553,28 @@ Maintained by the "X feedback watch" routine (twice daily). Public X reads only;
     > "When to stop" is the one nobody talks about. I write down a done list before I start, and when it's all checked off I ship, even if I have ten more ideas.
 36. Reply to @rebellucion, https://x.com/rebellucion/status/2114157277032677773
     > Rebuilding a game you loved 30 years ago is such a good first or fiftieth project. You already know exactly how it should feel, which is most of the battle.
+
+## 2026-10-25 (5:00 PM CT run)
+
+### Mentions of QuestStarter
+- No mentions of QuestStarter, queststarter.onrender.com, or @JohnPesce2011 since the morning run. **Real user feedback, feature requests, bug reports: none yet.**
+
+### What builders are saying (signals, today)
+- Core problem, said out loud again: @OliverBugar (1.2K followers, 12 replies) "The hardest part of vibe coding isn't getting the AI to write the code. It's knowing what to build. And then finding people who actually want it." (https://x.com/OliverBugar/status/2114358819832864822). Copied word for word by @konig0000. Same theme from @edkrystosik, @Siddd_AI, @nullpilot94, @stackdropai ("talk to 5 people who'd use it"). This is QuestStarter's pitch, and it points at a gap: we help with "what to build" but barely with "who wants it".
+- One-sentence MVP: @KaelVossDFP "The one thing this first version must let a user do is ___" (https://x.com/KaelVossDFP/status/2114469045449965760). Our MVP must-haves and done-checks already cover this.
+- Leaky vibe-coded apps: @whodeven says most weren't hacked, they shipped with database access rules off (https://x.com/whodeven/status/2114382189135839677). Already covered by the security-check prompt and the Level 6 post-deploy check.
+- Time pushback: @paarangatrai (800 followers, 8 replies) "not everyone has free evenings, a coding setup, and the patience to fight bugs at 1am" (https://x.com/paarangatrai/status/2114447981625929905). Supports backlog 15 (time budget question).
+- Competitor-ish: @raunakkonda's vibe coding platform now offers free "battle tested templates" to remove the what-to-build problem (reply to @OliverBugar).
+- Low-signal: stuck-agent notifier launches (/call-me, @sakshamships), Rust/stock/crypto posts, StubHub complaint. Ignored.
+
+### Actions taken this run
+- Built: non-game Level 6 "Ship It" now says "Send it to 5 people who have the problem it solves and ask them to try it, then post it on X / Discord / Reddit with a short demo clip." From the "finding people who want it" thread (@OliverBugar, @stackdropai).
+- Restarted local :4173; /, /health, /llms.txt and /api/generate are 200 and a habit-tracker plan shows the new step.
+- Committed locally, not pushed (pushing waits on the daily run or John's OK).
+
+### Backlog (new this run)
+48. "Who wants it" step before building: a short prompt that names the exact person with this problem, where they hang out online, and a one-line message to ask 5 of them if they'd use it. From @OliverBugar's thread.
+
+### Drafts for John's approval (not posted)
+37. Reply to @OliverBugar, https://x.com/OliverBugar/status/2114358819832864822
+    > Agreed on both halves. What's worked for me: pick a problem you or your friends already have, so your first 5 users are people you can text. Then build only the one thing they'd miss.
