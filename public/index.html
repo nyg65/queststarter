@@ -67,7 +67,8 @@ async function run(ns){
 $('go').onclick=run;
 const enc=s=>btoa(String.fromCharCode(...new TextEncoder().encode(s))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 const dec=s=>new TextDecoder().decode(Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0)));
-function share(b){const url=location.origin+'/q/'+enc($('idea').value.trim());history.replaceState(null,'','/q/'+enc($('idea').value.trim()));
+function ev(e){try{navigator.sendBeacon('/api/event',JSON.stringify({e}))}catch(_){}}
+function share(b){ev('share_click');const url=location.origin+'/q/'+enc($('idea').value.trim());history.replaceState(null,'','/q/'+enc($('idea').value.trim()));
  const done=()=>{b.textContent='Link copied!';setTimeout(()=>b.textContent='🔗 Share',1500)};
  (navigator.clipboard?navigator.clipboard.writeText(url):Promise.reject()).then(done,()=>{prompt('Copy this link',url)})}
 const m0=location.pathname.match(/^\/q\/([\w-]+)/);
@@ -94,7 +95,7 @@ function render(j,ns){
 }
 function xp(){const s=[...document.querySelectorAll('input[data-i]:checked')].map(x=>+x.dataset.i);const g=s.reduce((a,i)=>a+cur.plan[i].xp,0);
  $('bar').style.width=(100*g/cur.totalXp)+'%';$('xptxt').textContent=g+' / '+cur.totalXp+' XP'+(g===cur.totalXp?' — 🏆 QUEST COMPLETE!':'')}
-function cp(i,b){navigator.clipboard.writeText(cur.prompts[i].text);b.textContent='Copied!';setTimeout(()=>b.textContent='Copy',1200)}
-function dl(){const j=cur,m=j.mvp;let t=`# Quest: ${m.name}\n\n${m.pitch}\n\n## Must-haves\n${m.mustHave.map(x=>'- '+x).join('\n')}\n\n## Out of scope\n${m.outOfScope.map(x=>'- '+x).join('\n')}\n\n## Boss fight\n${m.boss}\n\n## Stack\n${j.stack.map(s=>`- **${s.tech}** — ${s.why}`).join('\n')}\n\n## Build plan\n${j.plan.map(l=>`### Level ${l.level}: ${l.title} (+${l.xp} XP)\n${l.steps.map(s=>'- [ ] '+s).join('\n')}\nDone when: ${l.done}`).join('\n\n')}\n\n## Prompts\n${j.prompts.map(p=>`### ${p.title}\n\`\`\`\n${p.text}\n\`\`\``).join('\n\n')}\n`;
+function cp(i,b){ev('prompt_copy');navigator.clipboard.writeText(cur.prompts[i].text);b.textContent='Copied!';setTimeout(()=>b.textContent='Copy',1200)}
+function dl(){ev('md_download');const j=cur,m=j.mvp;let t=`# Quest: ${m.name}\n\n${m.pitch}\n\n## Must-haves\n${m.mustHave.map(x=>'- '+x).join('\n')}\n\n## Out of scope\n${m.outOfScope.map(x=>'- '+x).join('\n')}\n\n## Boss fight\n${m.boss}\n\n## Stack\n${j.stack.map(s=>`- **${s.tech}** — ${s.why}`).join('\n')}\n\n## Build plan\n${j.plan.map(l=>`### Level ${l.level}: ${l.title} (+${l.xp} XP)\n${l.steps.map(s=>'- [ ] '+s).join('\n')}\nDone when: ${l.done}`).join('\n\n')}\n\n## Prompts\n${j.prompts.map(p=>`### ${p.title}\n\`\`\`\n${p.text}\n\`\`\``).join('\n\n')}\n`;
  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/markdown'}));a.download=m.name.replace(/\s+/g,'-').toLowerCase()+'-quest.md';a.click()}
 </script></body></html>

@@ -43,14 +43,37 @@ __EXAMPLES__
 ## Good for
 Vibe coders, indie game devs and AI-agent builders who don't know what to build or where to start.
 `;
+// Privacy-friendly usage counter: in-memory totals only. No cookies, IPs, user agents or ideas are stored.
+// Counts reset when the server restarts or redeploys; each event also logs one line to stdout (Render logs).
+const STARTED = new Date().toISOString();
+const EVENTS = ['view_home', 'view_quest', 'view_bot', 'quest_generated', 'prompt_copy', 'share_click', 'md_download'];
+const counts = Object.fromEntries(EVENTS.map(e => [e, 0]));
+const BOT_RE = /bot|crawl|spider|slurp|preview|facebookexternalhit|curl|wget|python|headless/i;
+function track(ev) { if (!(ev in counts)) return false; counts[ev]++; console.log('[stat] ' + ev + ' ' + counts[ev]); return true; }
 http.createServer((req, res) => {
+  if (req.method === 'POST' && req.url === '/api/event') {
+    let body = '';
+    req.on('data', d => { body += d; if (body.length > 200) req.destroy(); });
+    req.on('end', () => {
+      let ev = ''; try { ev = (JSON.parse(body || '{}').e || '') + ''; } catch (e) { ev = body.trim(); }
+      const ok = ['prompt_copy', 'share_click', 'md_download'].includes(ev) && track(ev);
+      res.writeHead(ok ? 204 : 400); res.end();
+    });
+    return;
+  }
+  if (req.method === 'GET' && req.url.split('?')[0] === '/stats') {
+    const key = process.env.STATS_KEY, given = new URL(req.url, 'http://x').searchParams.get('key') || req.headers['x-stats-key'];
+    if (!key || given !== key) { res.writeHead(404); return res.end('Not found'); }
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
+    return res.end(JSON.stringify({ since: STARTED, note: 'In-memory; resets on restart/deploy', counts }, null, 2));
+  }
   if (req.method === 'POST' && req.url === '/api/generate') {
     let body = '';
     req.on('data', d => { body += d; if (body.length > 10000) req.destroy(); });
     req.on('end', async () => {
       try {
         const { idea } = JSON.parse(body || '{}');
-        const out = await generate(idea);
+        const out = await generate(idea); track('quest_generated');
         res.writeHead(200, { 'Content-Type': 'application/json' }); res.end(JSON.stringify(out));
       } catch (e) { res.writeHead(400, { 'Content-Type': 'application/json' }); res.end(JSON.stringify({ error: e.message })); }
     });
@@ -62,6 +85,7 @@ http.createServer((req, res) => {
   if (u === '/sitemap.xml') { res.writeHead(200, { 'Content-Type': 'application/xml' }); return res.end('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>' + base + '/</loc><lastmod>' + LASTMOD + '</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>' + ALL_EXAMPLES.map(e => '<url><loc>' + base + '/q/' + Buffer.from(e).toString('base64url') + '</loc><lastmod>' + LASTMOD + '</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>').join('') + '<url><loc>' + base + '/llms.txt</loc><lastmod>' + LASTMOD + '</lastmod><priority>0.3</priority></url></urlset>\n'); }
   if (u === '/llms.txt') { res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' }); return res.end(LLMS.replace('__EXAMPLES__', ALL_EXAMPLES.map(e => '- [' + e + '](__BASE__/q/' + Buffer.from(e).toString('base64url') + ')').join('\n')).replace(/__BASE__/g, base)); }
   if (u === '/' || u.startsWith('/q/')) {
+    if (req.method === 'GET') track(BOT_RE.test(req.headers['user-agent'] || '') ? 'view_bot' : (u === '/' ? 'view_home' : 'view_quest'));
     let id = u.startsWith('/q/') ? u.slice(3) : '', title = 'QuestStarter — Turn any app idea into a quest', desc = '', ok = true, quest = null;
     if (id) { if (!/^[\w-]{1,4000}$/.test(id)) ok = false; else { try { const full = Buffer.from(id, 'base64url').toString('utf8').trim(), idea = full.slice(0, 70); try { quest = generate(full); } catch (e) { quest = null; } if (idea) { title = 'Quest: ' + idea + ' | QuestStarter'; desc = 'Quest Card for "' + idea + '": scoped MVP, tech stack, 6-level build plan with XP and copy-paste prompts for Cursor and Claude Code. Free.'; } } catch (e) { ok = false; } } }
     const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
