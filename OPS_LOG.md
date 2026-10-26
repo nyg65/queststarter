@@ -208,3 +208,4 @@
 34. Bot + RAG support bots keep the bot boss ("data ingestion / API integration").
 35. "an app that uses gpt to summarize my emails" stays an agent (email access); a Gmail-read + one LLM call plan may fit better.
 36. "a discord bot that plays music" gets the "data ingestion / rate limits" boss; voice/audio streaming is the real boss.
+- Committed 70cfbb5 and pushed; Render deployed (live llms.txt has the AI app FAQ, sitemap has 17 URLs, live API plans the AI meal planner as an AI Web App). newsletter\/ stays ignored.
