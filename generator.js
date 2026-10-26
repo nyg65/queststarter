@@ -74,6 +74,12 @@ const TYPES = {
     must: ['A system prompt that defines the character: voice, backstory, what it knows and what it will not do', 'A chat UI that streams replies', 'Conversation history sent with each message (trimmed to a token budget)', 'A reset button and a per-user message limit'],
     boss: 'Staying in character over long chats without drifting, repeating itself or being talked out of its rules',
   },
+  aiapp: {
+    label: 'AI Web App', kw: [],
+    stack: [['Next.js + TypeScript + the Vercel AI SDK', 'One API route calls the model and streams or returns the result; no agent framework needed.'], ['OpenAI / Anthropic / xAI API (behind one wrapper)', 'Keep the model swappable.'], ['A versioned prompt file + Zod schema for the output (generateObject)', 'Structured output the UI can render, checked before it is shown.'], ['Vercel', 'Free deploy on every push; keep the API key in an env var on the server, never in the browser.']],
+    must: ['One input form for what the user gives you (text, a few options, or an upload)', 'One server-side LLM call with a versioned prompt that returns structured output, validated with Zod', 'A result view with copy and regenerate buttons', 'A per-user rate limit and a max-tokens cap so a stranger cannot run up your bill'],
+    boss: 'Output quality: a prompt that gives consistent, useful results on 10 real inputs, plus structured output that never breaks the UI',
+  },
   web: {
     label: 'Web App', kw: ['web', 'website', 'app', 'site', 'saas', 'platform', 'landing', 'portfolio', 'tool'],
     stack: [['Next.js (App Router) + TypeScript', 'Most-documented stack for AI coding tools.'], ['Tailwind CSS + shadcn/ui', 'Good-looking UI with minimal design work.'], ['Supabase (Postgres + Auth)', 'Backend in an afternoon.'], ['Vercel', 'Free deploy on every push.']],
@@ -183,6 +189,11 @@ function detectTypes(text) {
   }
   // a character or roleplay chatbot just talks: a persona prompt, chat history and a streaming UI, no tools or agent loop
   if (keys[0] === 'agent' && PERSONA.test(t) && !/\b(files?|sends?|books?|posts?|reads? my|emails?|schedules?|orders?|buys?|deploys?|creates? (issues|tickets|bugs))\b/.test(t)) keys[0] = 'persona';
+  // "a meal planner that uses ai to suggest recipes" is one LLM call behind a form, not a tool-calling agent loop
+  const ai1 = keys.indexOf('agent');
+  if (ai1 >= 0 && !/\b(agents?|agentic|autonomous\w*|assistants?|copilots?|chatbots?|chat|bots?|rag|files?|sends?|books?|posts?|reads? my|emails?|inbox|schedules?|orders?|buys?|deploys?|browses?|controls?|automat\w*|monitors?|smart home|creates? (issues|tickets|bugs)|opens? (prs?|pull requests))\b/.test(t) && /\b(suggest\w*|generat\w*|writ(e|es|er|ers|ing)|summar\w*|review\w*|maker|makes|names?|tags?|explain\w*|rewrit\w*|translat\w*|plans?|planner|captions?|descriptions?|turns?|converts?|grades?|scores?|critiques?|roasts?|feedback|ideas)\b/.test(t)) {
+    if (ai1 === 0) { keys[0] = 'aiapp'; const w = keys.indexOf('web'); if (w > 0) keys.splice(w, 1); } else keys.splice(ai1, 1);
+  }
   return keys.length ? keys.slice(0, 2) : ['web'];
 }
 
@@ -201,7 +212,7 @@ const BREAK = /^(to|for|with|on|in|at|by|and|or|when|so|from|using|via|while|bef
 function projectName(idea) {
   const all = idea.toLowerCase().replace(/\bthree\.js\b/g, 'threejs').replace(/\bnext\.?js\b/g, 'nextjs').replace(/\bunreal engine( \d)?\b/g, 'unreal').replace(/\bturn[- ]based\b/g, 'turnbased').replace(/\bvs ?code\b|\bvisual studio code\b/g, 'vscode').replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean);
   // a base-form verb word used as a noun ("a workout log for my phone", "a meal plan app") is part of the name, not the action
-  const nounUse = i => !/s$/.test(all[i]) && i > 0 && !STOP.has(all[i - 1]) && !FILLER.has(all[i - 1]) && !BREAK.test(all[i - 1]) && !/^(i|we|you|they|people|users|gamers|players|can|will|to)$/.test(all[i - 1]) && (i === all.length - 1 || BREAK.test(all[i + 1]) || KIND.has(all[i + 1]) || all[i + 1] === 'app');
+  const nounUse = i => !/s$/.test(all[i]) && i > 0 && !STOP.has(all[i - 1]) && !FILLER.has(all[i - 1]) && !BREAK.test(all[i - 1]) && !/^(i|we|you|they|people|users|gamers|players|can|will|to)$/.test(all[i - 1]) && (i === all.length - 1 || BREAK.test(all[i + 1]) || KIND.has(all[i + 1]) || all[i + 1] === 'app' || /^(generator|maker|builder|creator|planner|tracker|writer)$/.test(all[i + 1]));
   const vi = all.findIndex((w, i) => VERB[w] && i > 0 && !nounUse(i));
   if (vi > 0) {
     // "tracks how much I spend on Claude Code each day" -> "Claude Code Spend Tracker"

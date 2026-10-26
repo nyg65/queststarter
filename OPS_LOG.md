@@ -188,3 +188,23 @@
 33. "a meal planner that uses ai to suggest recipes" plans as an AI Agent loop; it is a web app with one LLM call.
 34. Bot + RAG support bots keep the bot boss ("data ingestion / API integration"); a retrieval-quality boss would fit better.
 - Committed eaa7659 and pushed; Render deployed (live llms.txt has the support chatbot FAQ, sitemap has 16 URLs, live API names "Shopify Store Support Chat" as a RAG Chatbot). newsletter/ stays ignored.
+
+## 2026-10-26 (daily run, ~8:15 AM CT)
+- Health: local :4173 up (restarted on new code). Render (https://queststarter.onrender.com) /health 200 with ~22s cold start. Locally /, /health, /robots.txt, /sitemap.xml, /llms.txt, /og.png, /q/<id> 200; bad /q id and unknown paths 404; bad JSON gives 400; JSON-LD parses.
+- Output test: 24 varied ideas (AI meal planner, workout plan generator, cover letter writer, email summarizer, flashcard maker, D&D namer, photo tagger, resume reviewer, sprite generator, AI email assistant, smart home voice assistant, VS Code explainer, Twitch trivia bot, deckbuilder, Minecraft dragons mod, Discord music bot, habit tracker, Fortnite stats, multiplayer trivia, budget app, band site, space and cafe sims, semantic bookmark search) plus the ideas quoted in OPS_LOG/FEEDBACK (78 total), diffed against the previous generator (9 changed, all intended).
+- Fixed in generator.js:
+  - New AI Web App type (backlog 33): apps that use AI to generate, write, summarize, review, suggest, name or tag something got the tool-calling agent loop (two tools, run log, max steps). Now: Next.js + Vercel AI SDK, one form, one server-side LLM call with a versioned prompt and Zod-checked structured output, copy/regenerate, and a rate limit plus token cap; boss is output quality on 10 real inputs. Ideas that act (send, file, post, email, inbox, control, automate) or say agent/assistant/chatbot/bot stay as before. A web app primary drops its duplicate "Web App" type; as a secondary (VS Code extension, sprite generator web app) the agent component is dropped and the stack gets the single LLM wrapper instead.
+  - Names: "an ai workout plan generator" was "Generator Planner"; now "AI Workout Plan" ("plan" before generator/maker/tracker/planner is a noun). "a meal plan generator" is "Meal Plan Generator".
+- SEO: "A meal planner that uses AI to suggest recipes" example quest added to sitemap.xml (17 URLs) and llms.txt.
+- LLM discoverability: new FAQ "Does every AI idea get an agent plan?" on the page, FAQPage JSON-LD (13 Qs, valid JSON) and llms.txt.
+
+### Backlog
+10. Render free tier cold-starts (~12-22s); consider a paid instance or keep-alive ping when traffic starts.
+24. Consider moving FEEDBACK.md/OPS_LOG.md out of the public repo (or making it private).
+26. Weak names: "Invoices Sender", "Current Song Viewer", "Chrome Extension" (dark overlay on YouTube), "OBS Plugin", "AI Agent" ("files bugs from my notes app"), "Cozy Sim" (cafe), "MCP Server" (linear tickets), "Slack Bot" (hr questions), "Tickets Creator", "Names D D AI" ("an ai that names my D&D characters"), "AI Tool" ("uses ai to tag my photos"), "Them Sender" ("ai email assistant that drafts replies and sends them"), "Discord Bot" (plays music), "AI Workout Plan" (should end in Generator).
+27. "a personal finance dashboard from my bank CSV" still plans a fetch/diff/alert data tool.
+29. "a semantic search engine for my bookmarks" is still a plain Next.js web app.
+32. "a space sim" gets the generic player-and-enemy game plan.
+34. Bot + RAG support bots keep the bot boss ("data ingestion / API integration").
+35. "an app that uses gpt to summarize my emails" stays an agent (email access); a Gmail-read + one LLM call plan may fit better.
+36. "a discord bot that plays music" gets the "data ingestion / rate limits" boss; voice/audio streaming is the real boss.
