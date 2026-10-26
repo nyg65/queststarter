@@ -29,6 +29,7 @@ pre{background:#0b0920;border:1px solid #2f2a5c;border-radius:8px;padding:12px;w
 .row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 .mut{color:var(--mut)}.err{color:#ff7c8a}.hidden{display:none}
 label.q{display:block;margin:6px 0;cursor:pointer}
+.nlf{display:flex;gap:8px;flex-wrap:wrap}.nlf input[type=email]{flex:1;min-width:200px;background:#0f0d24;color:var(--ink);border:2px solid var(--b);border-radius:8px;padding:9px 12px;font:inherit}
 footer{color:var(--mut);margin-top:40px;font-size:.8rem;text-align:center}
 </style></head><body><div class="w">
 <h1><a href="/" style="color:inherit;text-decoration:none">Quest<span>Starter</span> ⚔️</a></h1>
@@ -37,6 +38,10 @@ footer{color:var(--mut);margin-top:40px;font-size:.8rem;text-align:center}
 <div class="chips" id="chips"></div>
 <button id="go">Start Quest ▶</button> <span id="msg" class="err"></span>
 <div id="out" class="hidden"></div>
+<section class="card nl" id="newsletter"><h2>📬 QuestStarter Weekly</h2><p class="mut">Weekly vibe-coding quests, build tips, and AI dev + game news. Free, unsubscribe anytime.</p>
+<form action="https://buttondown.com/api/emails/embed-subscribe/queststarter" method="post" target="popupwindow" class="nlf" onsubmit="ev('newsletter_signup')">
+<label for="bd-email" class="hidden">Email</label><input type="email" name="email" id="bd-email" placeholder="you@example.com" required autocomplete="email"><input type="hidden" value="1" name="embed"><button type="submit">Join the party ▶</button></form>
+<p class="mut" style="font-size:.8rem;margin:8px 0 0">Or subscribe at <a href="https://buttondown.com/queststarter" target="_blank" rel="noopener" style="color:var(--a)">buttondown.com/queststarter</a></p></section>
 <section class="card" id="faq"><h2>❓ FAQ</h2>
 <p><b>What is QuestStarter?</b><br>A free tool that turns a project idea into a scoped MVP, tech stack, 6-level build plan and copy-paste prompts for AI coding tools.</p>
 <p><b>Is it free?</b><br>Yes, no signup needed.</p>

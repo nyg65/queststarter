@@ -25,6 +25,9 @@ const LLMS = `# QuestStarter
 ## Example quests
 __EXAMPLES__
 
+## Newsletter
+QuestStarter Weekly: weekly vibe-coding quests, build tips, and AI dev + game news. Free. Subscribe: https://buttondown.com/queststarter (signup box also on the homepage and below every quest).
+
 ## FAQ
 - What is QuestStarter? A free, no-signup tool that turns a project idea into a Quest Card: scoped MVP, tech stack, 6-level build plan with XP, and copy-paste prompts for AI coding tools.
 - What kinds of ideas work? Web apps, browser games, Discord/Telegram/Slack/Twitch/X bots, AI agents and chatbots, MCP servers, CLI tools, Chrome and VS Code extensions, Minecraft plugins and mods, OBS and stream overlays, mobile apps, personal trackers, and data or alert tools.
@@ -46,7 +49,7 @@ Vibe coders, indie game devs and AI-agent builders who don't know what to build 
 // Privacy-friendly usage counter: in-memory totals only. No cookies, IPs, user agents or ideas are stored.
 // Counts reset when the server restarts or redeploys; each event also logs one line to stdout (Render logs).
 const STARTED = new Date().toISOString();
-const EVENTS = ['view_home', 'view_quest', 'view_bot', 'quest_generated', 'prompt_copy', 'share_click', 'md_download'];
+const EVENTS = ['view_home', 'view_quest', 'view_bot', 'quest_generated', 'prompt_copy', 'share_click', 'md_download', 'newsletter_signup'];
 const counts = Object.fromEntries(EVENTS.map(e => [e, 0]));
 const BOT_RE = /bot|crawl|spider|slurp|preview|facebookexternalhit|curl|wget|python|headless/i;
 function track(ev) { if (!(ev in counts)) return false; counts[ev]++; console.log('[stat] ' + ev + ' ' + counts[ev]); return true; }
@@ -56,7 +59,7 @@ http.createServer((req, res) => {
     req.on('data', d => { body += d; if (body.length > 200) req.destroy(); });
     req.on('end', () => {
       let ev = ''; try { ev = (JSON.parse(body || '{}').e || '') + ''; } catch (e) { ev = body.trim(); }
-      const ok = ['prompt_copy', 'share_click', 'md_download'].includes(ev) && track(ev);
+      const ok = ['prompt_copy', 'share_click', 'md_download', 'newsletter_signup'].includes(ev) && track(ev);
       res.writeHead(ok ? 204 : 400); res.end();
     });
     return;
