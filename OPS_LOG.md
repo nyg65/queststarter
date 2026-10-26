@@ -209,3 +209,10 @@
 35. "an app that uses gpt to summarize my emails" stays an agent (email access); a Gmail-read + one LLM call plan may fit better.
 36. "a discord bot that plays music" gets the "data ingestion / rate limits" boss; voice/audio streaming is the real boss.
 - Committed 70cfbb5 and pushed; Render deployed (live llms.txt has the AI app FAQ, sitemap has 17 URLs, live API plans the AI meal planner as an AI Web App). newsletter\/ stays ignored.
+
+## 2026-10-26 (weekly newsletter + monetization run, ~10:20 AM CT)
+- Drafted newsletter issue 2 and this week's monetization/sponsor review (local only in newsletter/, which is gitignored). Nothing sent.
+- Live check: the 4 issue-2 /q/ links (zombie tower defense, Shopify support chat, AI meal planner, Obsidian notes chat) return 200 on https://queststarter.onrender.com.
+### Backlog (found while picking newsletter examples)
+37. "a meal planner that uses ai to suggest recipes" is named "Recipes Suggester"; should be "AI Meal Planner".
+38. AI Web App stacks list the LLM twice ("OpenAI / Anthropic / xAI API (behind one wrapper)" and "An LLM API behind a single wrapper function"); drop the duplicate.
