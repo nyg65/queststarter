@@ -210,6 +210,9 @@ const BREAK = /^(to|for|with|on|in|at|by|and|or|when|so|from|using|via|while|bef
 
 // "a discord bot that tracks my friends game wins" -> "Friends Game Wins Tracker" (falls back to the first 3 meaningful words)
 function projectName(idea) {
+  // "a meal planner that uses ai to suggest recipes" -> "AI Meal Planner": the thing comes before "that uses ai", the verb after it is a feature
+  const um = idea.toLowerCase().match(/^(?:an?|my)\s+([a-z0-9 -]+?)\s+(?:that|which)\s+uses?\s+(?:ai|gpt|an llm|llms?|claude|chatgpt|openai)\s+to\b/);
+  if (um) { const hw = um[1].split(/\s+/).filter(w => !STOP.has(w) && !FILLER.has(w)); if (hw.length >= 2 && hw.length <= 3 && !/^(app|tool|thing|website|site|webapp|cli|bot|extension|plugin)$/.test(hw[0])) return 'AI ' + titleCase(hw.join(' ')); }
   const all = idea.toLowerCase().replace(/\bthree\.js\b/g, 'threejs').replace(/\bnext\.?js\b/g, 'nextjs').replace(/\bunreal engine( \d)?\b/g, 'unreal').replace(/\bturn[- ]based\b/g, 'turnbased').replace(/\bvs ?code\b|\bvisual studio code\b/g, 'vscode').replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean);
   // a base-form verb word used as a noun ("a workout log for my phone", "a meal plan app") is part of the name, not the action
   const nounUse = i => !/s$/.test(all[i]) && i > 0 && !STOP.has(all[i - 1]) && !FILLER.has(all[i - 1]) && !BREAK.test(all[i - 1]) && !/^(i|we|you|they|people|users|gamers|players|can|will|to)$/.test(all[i - 1]) && (i === all.length - 1 || BREAK.test(all[i + 1]) || KIND.has(all[i + 1]) || all[i + 1] === 'app' || /^(generator|maker|builder|creator|planner|tracker|writer)$/.test(all[i + 1]));
@@ -318,7 +321,7 @@ function generate(idea) {
     if (/\btwitch\b/.test(lower)) stack.push({ tech: 'tmi.js (read-only Twitch chat)', why: 'Reads chat anonymously from the page, so the overlay needs no login or server.' });
     if (/\bspotify\b/.test(lower)) stack.push({ tech: 'Spotify Web API (currently-playing endpoint)', why: 'Shows the song that is playing; needs a one-time Spotify login (PKCE) by the streamer.' });
   }
-  if ((/\b(ai|llm|gpt|agent|smart|summar)/.test(lower) || (/\bgenerat/.test(lower) && !/\bprocedural/.test(lower))) && !keys.includes('agent') && !keys.includes('rag') && !keys.includes('persona') && keys[0] !== 'mcp') stack.push({ tech: 'An LLM API behind a single wrapper function', why: 'Your idea sounds AI-powered; keep the model swappable.' });
+  if ((/\b(ai|llm|gpt|agent|smart|summar)/.test(lower) || (/\bgenerat/.test(lower) && !/\bprocedural/.test(lower))) && !keys.includes('agent') && !keys.includes('rag') && !keys.includes('persona') && !keys.includes('aiapp') && keys[0] !== 'mcp') stack.push({ tech: 'An LLM API behind a single wrapper function', why: 'Your idea sounds AI-powered; keep the model swappable.' });
 
   const tower = keys[0] === 'game' && !cozy && TOWER.test(lower) && !(VEHICLE.test(lower) && lower.search(VEHICLE) < lower.search(TOWER));
   const turn = keys[0] === 'game' && !cozy && !tower && TURN.test(lower);

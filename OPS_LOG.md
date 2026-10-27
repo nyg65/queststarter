@@ -216,3 +216,25 @@
 ### Backlog (found while picking newsletter examples)
 37. "a meal planner that uses ai to suggest recipes" is named "Recipes Suggester"; should be "AI Meal Planner".
 38. AI Web App stacks list the LLM twice ("OpenAI / Anthropic / xAI API (behind one wrapper)" and "An LLM API behind a single wrapper function"); drop the duplicate.
+
+## 2026-10-27 (daily run, ~8:20 AM CT)
+- Health: local :4173 up (restarted on new code). Render (https://queststarter.onrender.com) /health 200 with ~13s cold start. Locally /, /health, /robots.txt, /sitemap.xml, /llms.txt, /og.png 200; unknown paths 404; bad JSON to /api/generate gives 400; JSON-LD parses; all sitemap /q/ links 200.
+- Output test: 15 new varied ideas (AI study planner, AI journal, AI pixel art palettes, AI Discord bot, habit tracker, speedrun timer, Mars farming game, AI photo tagger, Claude recipe site, spoiler blocker, cat deckbuilder, AI commit message CLI, Minecraft trains mod, AI workout tracker) plus ideas quoted in OPS_LOG/FEEDBACK (80 total), diffed against the previous generator (12 changed, all intended).
+- Fixed:
+  - Bug in server.js: a /q/ id that decodes to garbage (e.g. /q/zzz) rendered a 200 page titled with replacement characters, so junk URLs could get indexed. Ids that decode to invalid UTF-8, control characters or nothing now 404 (the 404 check in earlier logs only covered ids with non-base64url characters).
+  - Names (backlog 37): "X that uses AI/GPT/Claude to ..." now names the thing, not the feature: "Recipes Suggester" is "AI Meal Planner", "Palettes Suggester" is "AI Pixel Art Editor", "Week Planner" is "AI Workout Tracker", "Recipes Writer" is "AI Recipe Site", "Study Planner" is "AI Study Planner".
+  - Stack (backlog 38): AI Web App plans no longer list the LLM twice (dropped "An LLM API behind a single wrapper function" when the plan already has the wrapped model API).
+- SEO: "A study planner that uses GPT to make flashcards" example quest added to sitemap.xml and llms.txt.
+- LLM discoverability: new FAQ "Can it plan a study or flashcard app that uses AI?" on the page, FAQPage JSON-LD (14 Qs, valid JSON) and llms.txt.
+
+### Backlog
+10. Render free tier cold-starts (~12-22s); consider a paid instance or keep-alive ping when traffic starts.
+24. Consider moving FEEDBACK.md/OPS_LOG.md out of the public repo (or making it private).
+26. Weak names: "Invoices Sender", "Current Song Viewer", "Chrome Extension" (dark overlay on YouTube), "OBS Plugin", "AI Agent" ("files bugs from my notes app"), "Cozy Sim" (cafe), "MCP Server" (linear tickets), "Slack Bot" (hr questions), "Tickets Creator", "Names D D AI", "Tag Photos AI", "Them Sender", "Discord Bot" (plays music), "AI Workout Plan", "Week Summarizer" ("a journal app that uses ai to summarize my week").
+27. "a personal finance dashboard from my bank CSV" still plans a fetch/diff/alert data tool.
+29. "a semantic search engine for my bookmarks" is still a plain Next.js web app.
+32. "a space sim" gets the generic player-and-enemy game plan.
+34. Bot + RAG support bots keep the bot boss ("data ingestion / API integration").
+35. "an app that uses gpt to summarize my emails" stays an agent; a Gmail-read + one LLM call plan may fit better.
+36. "a discord bot that plays music" gets the "data ingestion / rate limits" boss; voice/audio streaming is the real boss.
+39. "a workout tracker that uses ai to plan my week" and "a recipe site that uses claude to write recipes" plan as plain Web Apps, not AI Web Apps.
