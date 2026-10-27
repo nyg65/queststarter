@@ -238,3 +238,4 @@
 35. "an app that uses gpt to summarize my emails" stays an agent; a Gmail-read + one LLM call plan may fit better.
 36. "a discord bot that plays music" gets the "data ingestion / rate limits" boss; voice/audio streaming is the real boss.
 39. "a workout tracker that uses ai to plan my week" and "a recipe site that uses claude to write recipes" plan as plain Web Apps, not AI Web Apps.
+- Committed a813187 and pushed; Render deployed (live /q/zzz is 404, live llms.txt has the flashcard FAQ, live API names the AI meal planner "AI Meal Planner"). FEEDBACK.md (uncommitted X watch edits) left for its own run; newsletter/ stays ignored.
