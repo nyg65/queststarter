@@ -190,9 +190,11 @@ function detectTypes(text) {
   // a character or roleplay chatbot just talks: a persona prompt, chat history and a streaming UI, no tools or agent loop
   if (keys[0] === 'agent' && PERSONA.test(t) && !/\b(files?|sends?|books?|posts?|reads? my|emails?|schedules?|orders?|buys?|deploys?|creates? (issues|tickets|bugs))\b/.test(t)) keys[0] = 'persona';
   // "a meal planner that uses ai to suggest recipes" is one LLM call behind a form, not a tool-calling agent loop
+  // "a workout tracker that uses ai to plan my week" / "a recipe site that uses claude to write recipes": a web app whose core is that one AI call is an AI Web App too
   const ai1 = keys.indexOf('agent');
-  if (ai1 >= 0 && !/\b(agents?|agentic|autonomous\w*|assistants?|copilots?|chatbots?|chat|bots?|rag|files?|sends?|books?|posts?|reads? my|emails?|inbox|schedules?|orders?|buys?|deploys?|browses?|controls?|automat\w*|monitors?|smart home|creates? (issues|tickets|bugs)|opens? (prs?|pull requests))\b/.test(t) && /\b(suggest\w*|generat\w*|writ(e|es|er|ers|ing)|summar\w*|review\w*|maker|makes|names?|tags?|explain\w*|rewrit\w*|translat\w*|plans?|planner|captions?|descriptions?|turns?|converts?|grades?|scores?|critiques?|roasts?|feedback|ideas)\b/.test(t)) {
-    if (ai1 === 0) { keys[0] = 'aiapp'; const w = keys.indexOf('web'); if (w > 0) keys.splice(w, 1); } else keys.splice(ai1, 1);
+  const aiUse = ai1 >= 0 || (keys[0] === 'web' && /\b(ai|gpt|chatgpt|claude|llm|openai|gemini|grok)\b/.test(t));
+  if (aiUse && !/\b(agents?|agentic|autonomous\w*|assistants?|copilots?|chatbots?|chat|bots?|rag|files?|sends?|books?|(?<!blog |social media )posts?|reads? my|emails?|inbox|schedules?|orders?|buys?|deploys?|browses?|controls?|automat\w*|monitors?|smart home|creates? (issues|tickets|bugs)|opens? (prs?|pull requests))\b/.test(t) && /\b(suggest\w*|generat\w*|writ(e|es|er|ers|ing)|summar\w*|review\w*|maker|makes|names?|tags?|explain\w*|rewrit\w*|translat\w*|plans?|planner|captions?|descriptions?|turns?|converts?|grades?|scores?|critiques?|roasts?|feedback|ideas|prioriti[sz]\w*|rates|rating|ranks|sorts|categori[sz]\w*|classif\w*)\b/.test(t)) {
+    if (ai1 === 0 || keys[0] === 'web') { if (ai1 > 0) keys.splice(ai1, 1); keys[0] = 'aiapp'; const w = keys.indexOf('web'); if (w > 0) keys.splice(w, 1); } else keys.splice(ai1, 1);
   }
   return keys.length ? keys.slice(0, 2) : ['web'];
 }
