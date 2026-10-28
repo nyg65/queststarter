@@ -239,3 +239,30 @@
 36. "a discord bot that plays music" gets the "data ingestion / rate limits" boss; voice/audio streaming is the real boss.
 39. "a workout tracker that uses ai to plan my week" and "a recipe site that uses claude to write recipes" plan as plain Web Apps, not AI Web Apps.
 - Committed a813187 and pushed; Render deployed (live /q/zzz is 404, live llms.txt has the flashcard FAQ, live API names the AI meal planner "AI Meal Planner"). FEEDBACK.md (uncommitted X watch edits) left for its own run; newsletter/ stays ignored.
+
+## 2026-10-28 (daily run, ~8:00-8:25 AM CT)
+- Health: local :4173 up (restarted on new code; an Oct 27 server process was still holding the port and was killed). **Render (https://queststarter.onrender.com) did not respond for ~8 minutes** (8:00-8:09 AM CT: TLS connected but no HTTP response on /health, /, /robots.txt across four tries of 60-150s). Render status page said all systems operational; a fresh clone of main booted and served 200s locally, so the code was fine. It answered again at ~8:12 (85s first response) and then normally (/ 0.27s, /health 0.06s, /q/zzz 404). Likely a stuck free-tier spin-up; watch for repeats (backlog 10).
+- Locally /, /health, /robots.txt, /sitemap.xml, /llms.txt, /og.png 200; /q/zzz and unknown paths 404; bad JSON 400; JSON-LD parses (FAQPage 15 Qs); all 17 sitemap /q/ links 200.
+- Output test: 14 new varied ideas (AI workout tracker, Claude recipe site, AI week journal, plant reminder, cat roguelike, AI tweet writer, YouTube Shorts blocker, Valorant ranks Discord bot, podcast-to-blog AI tool, college budget app, Godot frog platformer, AI todo prioritizer, AI anime rater, receipt scanner iOS) plus 11 more AI-flavored web ideas, and the 80 ideas quoted in OPS_LOG/FEEDBACK diffed against the previous generator (2 changed, both intended).
+- Fixed (backlog 39) in generator.js: a web app whose core is one AI call now plans as an AI Web App (Vercel AI SDK, one LLM call, Zod output) instead of a plain web app or a tool-calling agent:
+  - "a workout tracker that uses ai to plan my week" was a plain Web App with an extra LLM line; now AI Web App.
+  - "a recipe site that uses claude to write recipes" had no LLM in the stack at all; ideas naming Claude/GPT/ChatGPT/OpenAI/Gemini/Grok/LLM now count as AI.
+  - "a todo app that uses ai to prioritize my tasks" and "a website that rates anime with ai" were agent loops; prioritize/rate/rank/sort/categorize/classify now count as one-shot AI verbs.
+  - "a tool that turns my podcast into blog posts with ai" was an agent loop because "posts" read as posting; "blog posts"/"social media posts" no longer count as an action.
+- SEO: "A workout tracker that uses AI to plan my week" example quest added to sitemap.xml (19 URLs) and llms.txt.
+- LLM discoverability: new FAQ "Can it plan a normal app with one AI feature, like a workout tracker or todo list?" on the page, FAQPage JSON-LD (15 Qs) and llms.txt.
+
+### Backlog
+10. Render free tier cold-starts (~12-85s) and a ~8-minute no-response stretch on 10-28; consider a paid instance or keep-alive ping when traffic starts. Deploys took ~13 min today.
+24. Consider moving FEEDBACK.md/OPS_LOG.md out of the public repo (or making it private).
+26. Weak names: "Invoices Sender", "Current Song Viewer", "Chrome Extension" (dark overlay on YouTube), "OBS Plugin", "AI Agent" ("files bugs from my notes app"), "Cozy Sim" (cafe), "MCP Server" (linear tickets), "Slack Bot" (hr questions), "Tickets Creator", "Names D D AI", "Tag Photos AI", "Them Sender", "Discord Bot" (plays music), "AI Workout Plan", "Week Summarizer", "AI Todo" (todo prioritizer), "AI Mobile" ("a mobile app that uses ai to identify plants").
+27. "a personal finance dashboard from my bank CSV" still plans a fetch/diff/alert data tool.
+29. "a semantic search engine for my bookmarks" is still a plain Next.js web app.
+32. "a space sim" gets the generic player-and-enemy game plan.
+34. Bot + RAG support bots keep the bot boss ("data ingestion / API integration").
+35. "an app that uses gpt to summarize my emails" stays an agent; a Gmail-read + one LLM call plan may fit better.
+36. "a discord bot that plays music" gets the "data ingestion / rate limits" boss; voice/audio streaming is the real boss.
+40. "a landing page for my ai startup" and "a portfolio website with an ai chatbot" get an AI Agent component; a landing page about AI needs none, and a site chatbot is RAG/persona.
+41. "a blog with ai generated summaries of each post" is an AI Agent (singular "post" reads as posting); should be a web app with one LLM call.
+42. "a mobile app that uses ai to identify plants" pairs Mobile App with an AI Agent loop; it is one vision-model call.
+- Committed e56277b and pushed; Render deployed (live llms.txt has the one-AI-feature FAQ, sitemap has 19 URLs, live API plans the Claude recipe site as an AI Web App). FEEDBACK.md (uncommitted X watch edits) left for its own run; newsletter/ stays ignored.
