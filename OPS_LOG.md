@@ -266,3 +266,30 @@
 41. "a blog with ai generated summaries of each post" is an AI Agent (singular "post" reads as posting); should be a web app with one LLM call.
 42. "a mobile app that uses ai to identify plants" pairs Mobile App with an AI Agent loop; it is one vision-model call.
 - Committed e56277b and pushed; Render deployed (live llms.txt has the one-AI-feature FAQ, sitemap has 19 URLs, live API plans the Claude recipe site as an AI Web App). FEEDBACK.md (uncommitted X watch edits) left for its own run; newsletter/ stays ignored.
+
+## 2026-10-29 (daily run, ~8:10-8:40 AM CT)
+- Health: Render (https://queststarter.onrender.com) /health 200 after a ~12s cold start (no repeat of yesterday's 8-minute stall). Local :4173 up (restarted on new code). Locally /, /health, /robots.txt, /sitemap.xml, /llms.txt, /og.png 200; /q/zzz and unknown paths 404; bad JSON 400; FAQPage JSON-LD parses (16 Qs); all 18 sitemap /q/ links 200.
+- Output test: 12 new varied ideas (Pokemon team builder, Telegram water reminder, Godot metroidvania, GitHub issue triage agent, YouTube comment hider, AI resume roaster, Unity farming game, Postgres MCP server, solar dashboard, TikTok caption generator, voice memos to notes, D&D character sheet) plus 105 ideas from OPS_LOG/FEEDBACK and backlog, diffed against the previous generator (12 changed, all intended).
+- Fixed in generator.js:
+  - Backlog 42: "a mobile app that uses ai to identify plants" was Mobile App + AI Agent loop, named "AI Mobile". A phone app, extension, bot, CLI, game, plugin or overlay with one AI feature now keeps its own type and drops the agent; identify/recognize/detect/scan/transcribe/extract count as one-shot AI verbs; photo/image ideas get a "vision-capable model API called from one server function" stack line. Now "AI Plant Identifier" (Mobile App).
+  - Bug: "a cli that uses ai to write commit messages" planned as AI Web App (Next.js + Vercel) + CLI Tool; now a plain CLI Tool with the LLM line, named "AI Commit Message Writer".
+  - Backlog 41: "a blog with ai generated summaries of each post" is now an AI Web App ("each/every/the/my post" no longer reads as posting).
+  - "rate/rank/sort" (not just "rates/ranks/sorts") count as one-shot AI verbs: "a website that uses ai to rate my outfits" is an AI Web App, not an agent.
+  - Names: "X that uses AI to VERB Y" with no real thing before "that" is named after the feature: "AI Plant Identifier", "AI Dog Breed Identifier", "AI Resume Roaster" (was "AI Website"), "AI Code Grader", "AI Email Summarizer", "AI Week Summarizer" (backlog 26 partial).
+- SEO: "A mobile app that uses AI to identify plants" example quest added to sitemap.xml and llms.txt.
+- LLM discoverability: new FAQ "Can it plan a mobile app that uses AI to identify things from a photo?" on the page, FAQPage JSON-LD (16 Qs) and llms.txt.
+
+### Backlog
+10. Render free tier cold-starts (~12-85s), one ~8-minute stall on 10-28; consider a paid instance or keep-alive ping when traffic starts.
+24. Consider moving FEEDBACK.md/OPS_LOG.md out of the public repo (or making it private).
+26. Weak names: "Invoices Sender", "Current Song Viewer", "Chrome Extension" (dark overlay on YouTube), "OBS Plugin", "AI Agent" ("files bugs from my notes app"), "Cozy Sim" (cafe), "MCP Server" (linear tickets; also "an mcp server for my postgres database"), "Slack Bot" (hr questions), "Tickets Creator", "Names D D AI", "D D Character" ("a d&d character sheet app"), "Tag Photos AI", "Them Sender", "Discord Bot" (plays music), "AI Workout Plan", "AI Todo", "Farming Game Stardew" ("a stardew-like farming game in unity"), "Essays Grader" (fine-ish), "Voice Memos Converter".
+27. "a personal finance dashboard from my bank CSV" still plans a fetch/diff/alert data tool.
+29. "a semantic search engine for my bookmarks" is still a plain Next.js web app.
+32. "a space sim" gets the generic player-and-enemy game plan.
+34. Bot + RAG support bots keep the bot boss ("data ingestion / API integration"); also "a telegram bot that reminds me to drink water" gets that boss.
+35. "an app that uses gpt to summarize my emails" stays an agent; a Gmail-read + one LLM call plan may fit better.
+36. "a discord bot that plays music" gets the "data ingestion / rate limits" boss; voice/audio streaming is the real boss.
+40. "a landing page for my ai startup" and "a portfolio website with an ai chatbot" get an AI Agent component.
+43. "a tiktok caption generator" (no "ai" word) plans as a plain Web App; generators of captions/names likely want an LLM.
+44. Mobile vision apps keep the generic mobile must-haves ("offline-first local state"); a "take photo, call model, show result" must-have would fit better.
+- Committed ac4e399 and pushed; Render deployed (live llms.txt has the plant identifier example and FAQ, live API names it "AI Plant Identifier"). FEEDBACK.md (uncommitted X watch edits) left for its own run; newsletter/ stays ignored.
