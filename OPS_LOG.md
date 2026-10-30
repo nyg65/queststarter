@@ -293,3 +293,25 @@
 43. "a tiktok caption generator" (no "ai" word) plans as a plain Web App; generators of captions/names likely want an LLM.
 44. Mobile vision apps keep the generic mobile must-haves ("offline-first local state"); a "take photo, call model, show result" must-have would fit better.
 - Committed ac4e399 and pushed; Render deployed (live llms.txt has the plant identifier example and FAQ, live API names it "AI Plant Identifier"). FEEDBACK.md (uncommitted X watch edits) left for its own run; newsletter/ stays ignored.
+
+## 2026-10-30 (daily run, ~8:03-8:30 AM CT)
+- Health: Render (https://queststarter.onrender.com) /health 200 after a ~13s cold start. Local :4173 up (restarted on new code). Locally /, /health, /robots.txt, /sitemap.xml, /llms.txt, /og.png 200; /q/zzz and unknown paths 404; bad JSON 400; FAQPage JSON-LD parses (17 Qs); all 19 sitemap /q/ links 200.
+- Output test: 22 new varied ideas (TikTok caption generator, Twitch emote overlay, Minecraft dragons mod, habit tracker with streaks, Japanese flashcards, AI dungeon master for Discord, fantasy name generator, password generator, QR code generator, cover letter writer, Instagram bio generator, YouTube title generator, meme generator, random number generator, D&D NPC name generator, bedtime story generator, tweet writer, business name generator, color palette generator, file name generator, story generator game) plus 88 ideas from OPS_LOG/FEEDBACK, diffed against the previous generator (10 changed, all intended).
+- Fixed (backlog 43) in generator.js: a generator, writer or maker of short text (captions, bios, names, titles, slogans, tweets, stories, poems, cover letters, etc.) now plans as an AI Web App (one LLM call, Zod output, rate limit) even when the idea never says "ai". "a tiktok caption generator", "a youtube title generator", "a business name generator" and "a cover letter writer" were plain Web Apps with no model in the stack. Password, QR code, palette, meme, random number and file name generators stay plain Web Apps.
+- SEO: "A TikTok caption generator" example quest added to sitemap.xml (20 URLs) and llms.txt.
+- LLM discoverability: new FAQ "Can it plan a caption, name or bio generator that does not mention AI?" on the page, FAQPage JSON-LD (17 Qs) and llms.txt.
+
+### Backlog
+10. Render free tier cold-starts (~12-85s), one ~8-minute stall on 10-28; consider a paid instance or keep-alive ping when traffic starts.
+24. Consider moving FEEDBACK.md/OPS_LOG.md out of the public repo (or making it private).
+26. Weak names: "Invoices Sender", "Current Song Viewer", "Chrome Extension" (dark overlay on YouTube), "OBS Plugin", "AI Agent" ("files bugs from my notes app"), "Cozy Sim" (cafe), "MCP Server" (linear tickets; postgres), "Slack Bot" (hr questions), "Tickets Creator", "Names D D AI", "D D Character", "D D NPC" ("a d&d npc name generator"), "Tag Photos AI", "Them Sender", "Discord Bot" (plays music), "AI Workout Plan", "AI Todo", "Farming Game Stardew", "Voice Memos Converter", "Learning Japanese Flashcard" ("a flashcard app for learning japanese"), "Emotes Viewer" (twitch emote overlay, fine-ish).
+27. "a personal finance dashboard from my bank CSV" still plans a fetch/diff/alert data tool.
+29. "a semantic search engine for my bookmarks" is still a plain Next.js web app.
+32. "a space sim" gets the generic player-and-enemy game plan.
+34. Bot + RAG support bots keep the bot boss ("data ingestion / API integration"); also the Telegram water reminder bot and "an ai dungeon master for discord".
+35. "an app that uses gpt to summarize my emails" stays an agent; a Gmail-read + one LLM call plan may fit better.
+36. "a discord bot that plays music" gets the "data ingestion / rate limits" boss; voice/audio streaming is the real boss.
+40. "a landing page for my ai startup" and "a portfolio website with an ai chatbot" get an AI Agent component.
+44. Mobile vision apps keep the generic mobile must-haves ("offline-first local state").
+45. Stream overlays get game loot ("Steam / game API integration", "Leaderboards", "Achievement badges") from the Twitch/game keywords; overlay loot should be overlay-specific.
+- Committed 73f88a9 and pushed. FEEDBACK.md (uncommitted X watch edits) left for its own run; newsletter/ stays ignored.
