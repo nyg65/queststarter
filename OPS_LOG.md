@@ -314,4 +314,4 @@
 40. "a landing page for my ai startup" and "a portfolio website with an ai chatbot" get an AI Agent component.
 44. Mobile vision apps keep the generic mobile must-haves ("offline-first local state").
 45. Stream overlays get game loot ("Steam / game API integration", "Leaderboards", "Achievement badges") from the Twitch/game keywords; overlay loot should be overlay-specific.
-- Committed 73f88a9 and pushed. FEEDBACK.md (uncommitted X watch edits) left for its own run; newsletter/ stays ignored.
+- Committed 73f88a9 and pushed; Render deployed in about a minute (live llms.txt has the TikTok caption generator example and FAQ, live API plans it as an AI Web App, /q/zzz 404). FEEDBACK.md (uncommitted X watch edits) left for its own run; newsletter/ stays ignored.
