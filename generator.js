@@ -192,7 +192,10 @@ function detectTypes(text) {
   // "a meal planner that uses ai to suggest recipes" is one LLM call behind a form, not a tool-calling agent loop
   // "a workout tracker that uses ai to plan my week" / "a recipe site that uses claude to write recipes": a web app whose core is that one AI call is an AI Web App too
   const ai1 = keys.indexOf('agent');
-  const aiUse = ai1 >= 0 || (keys[0] === 'web' && /\b(ai|gpt|chatgpt|claude|llm|openai|gemini|grok)\b/.test(t));
+  // "a tiktok caption generator" / "a fantasy name generator": a generator or writer of short text is one LLM call even without the word "ai"
+  const TEXTGEN = /\b(captions?|bios?|slogans?|taglines?|tweets?|hashtags?|(?<!file |domain )names?|titles?|headlines?|poems?|lyrics|jokes?|excuses?|cover letters?|descriptions?|pick ?up lines?|stor(y|ies)|prompts?|ideas?|puns?|essays?|quotes?|rhymes?|raps?|limericks?|haikus?) (generator|writer|maker)s?\b/;
+  if (!keys.length && TEXTGEN.test(t)) keys.push('web');
+  const aiUse = ai1 >= 0 || (keys[0] === 'web' && (/\b(ai|gpt|chatgpt|claude|llm|openai|gemini|grok)\b/.test(t) || TEXTGEN.test(t)));
   if (aiUse && !/\b(agents?|agentic|autonomous\w*|assistants?|copilots?|chatbots?|chat|bots?|rag|files?|sends?|books?|(?<!blog |social media |each |every |per |the |a |my |your |our )posts?|reads? my|emails?|inbox|schedules?|orders?|buys?|deploys?|browses?|controls?|automat\w*|monitors?|smart home|creates? (issues|tickets|bugs)|opens? (prs?|pull requests))\b/.test(t) && /\b(suggest\w*|generat\w*|writ(e|es|er|ers|ing)|summar\w*|review\w*|maker|makes|names?|tags?|explain\w*|rewrit\w*|translat\w*|plans?|planner|captions?|descriptions?|turns?|converts?|grades?|scores?|critiques?|roasts?|feedback|ideas|prioriti[sz]\w*|rate|rates|rating|rank|ranks|sort|sorts|categori[sz]\w*|classif\w*|identif\w*|recogni[sz]\w*|detects?|transcrib\w*|extracts?|scans?)\b/.test(t)) {
     // a phone app, extension, bot, CLI or game with one AI feature stays that kind of project; the AI call is a feature, not an agent
     if (ai1 >= 0 && keys.some(k => /^(mobile|extension|bot|cli|game|mcmod|overlay)$/.test(k))) keys.splice(ai1, 1);
