@@ -315,3 +315,29 @@
 44. Mobile vision apps keep the generic mobile must-haves ("offline-first local state").
 45. Stream overlays get game loot ("Steam / game API integration", "Leaderboards", "Achievement badges") from the Twitch/game keywords; overlay loot should be overlay-specific.
 - Committed 73f88a9 and pushed; Render deployed in about a minute (live llms.txt has the TikTok caption generator example and FAQ, live API plans it as an AI Web App, /q/zzz 404). FEEDBACK.md (uncommitted X watch edits) left for its own run; newsletter/ stays ignored.
+- 2026-10-30 5 PM X feedback watch: no QuestStarter mentions, site healthy, added backlog 55 and drafts 56-57.
+
+## 2026-10-31 (daily run, ~8:08-8:30 AM CT)
+- Health: Render (https://queststarter.onrender.com) /health 200 (warm, 0.05s). Local :4173 up (restarted on new code). Locally /, /health, /robots.txt, /sitemap.xml, /llms.txt, /og.png 200; /q/zzz and unknown paths 404; bad JSON 400; FAQPage JSON-LD parses (18 Qs); all 20 sitemap /q/ links 200.
+- Output test: new varied ideas (receipt scanner, pomodoro timer with lofi, Roblox obby, VS Code regex explainer, Slack weather bot, calorie counter from a food photo, bird song identifier, Pokemon card value from a photo, phone step counter, calculator, speedrun timer, Twitch drop-odds bot, Minecraft server status page, sales-data agent, Godot zombie shooter, AI word counter, selfie rater, movie recommender, city ranker, macro calculator) plus 99 ideas from OPS_LOG/FEEDBACK, diffed against the previous generator (5 changed, all intended).
+- Fixed in generator.js:
+  - Bug: "a mobile app that uses ai to count calories from a photo of my food" planned as Mobile App + AI Agent; count/estimate/analyze/calculate now count as one-shot AI verbs, so it is a plain Mobile App with the vision model line. "a website that uses ai to count words in an essay" is now an AI Web App, not Agent + Web App.
+  - Bug: name read "AI Calory Counter"; calories/selfies/movies/cookies/zombies etc. now singularize to "-ie" ("AI Calorie Counter", "AI Selfie Rater", "AI Movie Recommender").
+  - Names: rank/estimate/calculate get feature names ("AI City Ranker" was "AI Website", "AI Macro Calculator").
+  - Backlog 44 done: a phone app with one photo-based AI feature (no secondary type) swaps the generic "offline-first local state" must-have for "take or pick a photo (expo-image-picker), send it to your server function, show the answer as a result card" plus "handle denied camera permission and a blurry/unrelated photo with a friendly retry".
+- SEO: "A mobile app that uses AI to count calories from a photo of my food" example quest added to sitemap.xml (21 URLs) and llms.txt.
+- LLM discoverability: new FAQ "Can it plan an AI calorie counter that works from a photo of my food?" on the page, FAQPage JSON-LD (18 Qs) and llms.txt.
+
+### Backlog
+10. Render free tier cold-starts (~12-85s), one ~8-minute stall on 10-28; consider a paid instance or keep-alive ping when traffic starts.
+24. Consider moving FEEDBACK.md/OPS_LOG.md out of the public repo (or making it private).
+26. Weak names: "Invoices Sender", "Current Song Viewer", "Chrome Extension" (dark overlay on YouTube), "OBS Plugin", "AI Agent" ("files bugs from my notes app"), "Cozy Sim" (cafe), "MCP Server" (linear tickets; postgres), "Slack Bot" (hr questions), "Tickets Creator", "Names D D AI", "D D Character", "D D NPC", "Tag Photos AI", "Them Sender", "Discord Bot" (plays music), "AI Workout Plan", "AI Todo", "Farming Game Stardew", "Voice Memos Converter", "Learning Japanese Flashcard", "Emotes Viewer", "AI Value Pokemon Card Estimator" ("estimate the value of my pokemon cards from a photo").
+27. "a personal finance dashboard from my bank CSV" still plans a fetch/diff/alert data tool.
+29. "a semantic search engine for my bookmarks" is still a plain Next.js web app.
+32. "a space sim" gets the generic player-and-enemy game plan.
+34. Bot + RAG support bots keep the bot boss ("data ingestion / API integration"); also the Telegram water reminder bot and "an ai dungeon master for discord".
+35. "an app that uses gpt to summarize my emails" stays an agent; a Gmail-read + one LLM call plan may fit better.
+36. "a discord bot that plays music" gets the "data ingestion / rate limits" boss; voice/audio streaming is the real boss.
+40. "a landing page for my ai startup" and "a portfolio website with an ai chatbot" get an AI Agent component.
+45. Stream overlays get game loot from the Twitch/game keywords; overlay loot should be overlay-specific.
+46. "an iphone app that identifies birds from their songs" (no "ai" word) is a plain offline-first mobile app; audio identification needs a model or an audio-ID API line.
