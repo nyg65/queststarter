@@ -341,3 +341,4 @@
 40. "a landing page for my ai startup" and "a portfolio website with an ai chatbot" get an AI Agent component.
 45. Stream overlays get game loot from the Twitch/game keywords; overlay loot should be overlay-specific.
 46. "an iphone app that identifies birds from their songs" (no "ai" word) is a plain offline-first mobile app; audio identification needs a model or an audio-ID API line.
+- Committed d541938 and pushed; Render deployed in under a minute (live llms.txt has the calorie counter example and FAQ, live API plans it as a Mobile App named "AI Calorie Counter" with the photo must-have, /q/zzz 404). FEEDBACK.md (uncommitted X watch edits) left for its own run; newsletter/ stays ignored.
