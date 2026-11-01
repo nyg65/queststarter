@@ -369,3 +369,4 @@
 48. "a podcast clip finder that uses ai" and "a cli that renames my screenshots with ai" plan as AI Agents; find/rename are one-shot AI features (AI Web App / CLI + one LLM call).
 49. "an app that transcribes my voice notes with whisper" is a plain Web App with no speech-to-text (Whisper API) line.
 50. "a twitch clips compilation maker" plans as a Bot from the Twitch keyword; it is a video tool (Twitch API clips + ffmpeg).
+- Committed be6759b and pushed; Render deployed in about 30s (live llms.txt has the bird song example and FAQ, live API plans it as a Mobile App named "Bird Song Identifier" with the BirdNET line, "a website for my clinic" is now a plain Web App, /q/zzz 404). FEEDBACK.md (uncommitted X watch edits) left for its own run; newsletter/ stays ignored.
