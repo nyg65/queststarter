@@ -342,3 +342,30 @@
 45. Stream overlays get game loot from the Twitch/game keywords; overlay loot should be overlay-specific.
 46. "an iphone app that identifies birds from their songs" (no "ai" word) is a plain offline-first mobile app; audio identification needs a model or an audio-ID API line.
 - Committed d541938 and pushed; Render deployed in under a minute (live llms.txt has the calorie counter example and FAQ, live API plans it as a Mobile App named "AI Calorie Counter" with the photo must-have, /q/zzz 404). FEEDBACK.md (uncommitted X watch edits) left for its own run; newsletter/ stays ignored.
+- 2026-10-31 9 AM CT X feedback watch: no QuestStarter mentions or real feedback; site healthy; added backlog 56 and drafts 58-59.
+
+## 2026-11-01 (daily run, ~8:10-8:25 AM CT)
+- Health: Render (https://queststarter.onrender.com) /health 200 after a ~12s cold start. Local :4173 up (restarted on new code). Locally /, /health, /robots.txt, /sitemap.xml, /llms.txt, /og.png 200; /q/zzz and unknown paths 404; bad JSON 400; FAQPage JSON-LD parses (19 Qs); all 21 sitemap /q/ links 200.
+- Output test: 22 new varied ideas (bird calls recognizer, what-song-is-playing phone app, guitar tuner, Discord lofi music bot, Twitch latest-subscriber overlay, Valorant crosshair code generator, dentist-booking agent, vibe coding leaderboard, Telegram crypto price alerts, asteroid dodge browser game, VS Code git diff explainer, AI mushroom identifier, Whisper voice note transcriber, YouTube Shorts blocker, Steam wishlist price drop tracker, markdown to PDF site, AI NPC for a Unity game, Slack thread summarizer, AI screenshot renamer CLI, AI podcast clip finder, dog bark detector) plus 114 ideas from OPS_LOG/FEEDBACK and short-keyword probes (click counter, climbing gym tracker, clinic website, TikTok clip downloader, botany quiz), diffed against the previous generator (12 changed in the probe set, 2 in the regression set, all intended).
+- Fixed in generator.js:
+  - Bug: short type keywords matched the start of longer words, so "clip", "click", "climbing" and "clinic" counted as "cli" and "botany"/"bottleneck" as "bot". "a podcast clip finder that uses ai" was AI Agent + CLI Tool, "a website for my clinic" was CLI Tool + Web App, "a click counter" was a CLI Tool, "a botany quiz for students" was a Bot. Short keywords (cli, npx, bot, rpg, mcp, ios, api, llm, gpt, rag) now must end the word (plural or version number ok: bots, gpt4); "web", "app" and "ai " keep the old prefix match.
+  - Backlog 46 done: a phone app that identifies or recognizes something by its sound (bird songs or calls, the song that is playing, a dog barking) swaps the generic "offline-first local state" must-have for "record a 5-15 second clip with the microphone (expo-audio), send it to your server function, show the top match with a confidence score" plus "handle denied microphone permission and a noisy or silent clip", adds an audio-ID stack line (BirdNET for birds, AudD/ACRCloud for songs, YAMNet for other sounds) and an identification-quality boss. Names: "Birds Identifier" -> "Bird Song Identifier", "Bird Calls Identifier" -> "Bird Call Identifier", "What Song Phone" -> "Song Identifier". Spam/phone call ideas are excluded; photo identifiers keep the vision plan.
+- SEO: "An iPhone app that identifies birds from their songs" example quest added to sitemap.xml (22 URLs) and llms.txt.
+- LLM discoverability: new FAQ "Can it plan an app that identifies birds or songs by their sound?" on the page, FAQPage JSON-LD (19 Qs) and llms.txt.
+
+### Backlog
+10. Render free tier cold-starts (~12-85s), one ~8-minute stall on 10-28; consider a paid instance or keep-alive ping when traffic starts.
+24. Consider moving FEEDBACK.md/OPS_LOG.md out of the public repo (or making it private).
+26. Weak names: "Invoices Sender", "Current Song Viewer", "Chrome Extension" (dark overlay on YouTube), "OBS Plugin", "AI Agent" ("files bugs from my notes app"), "Cozy Sim" (cafe), "MCP Server" (linear tickets; postgres), "Slack Bot" (hr questions), "Tickets Creator", "Names D D AI", "D D Character", "D D NPC", "Tag Photos AI", "Them Sender", "Discord Bot" (plays music; plays lofi music in voice chat), "AI Workout Plan", "AI Todo", "Farming Game Stardew", "Voice Memos Converter", "Learning Japanese Flashcard", "Emotes Viewer", "AI Value Pokemon Card Estimator", "Detects Dog Barking Mobile", "Valorant Crosshair Code" (drops "Generator"), "Transcribes Voice Notes".
+27. "a personal finance dashboard from my bank CSV" still plans a fetch/diff/alert data tool.
+29. "a semantic search engine for my bookmarks" is still a plain Next.js web app.
+32. "a space sim" gets the generic player-and-enemy game plan.
+34. Bot + RAG support bots keep the bot boss ("data ingestion / API integration"); also the Telegram water reminder bot and "an ai dungeon master for discord".
+35. "an app that uses gpt to summarize my emails" stays an agent; a Gmail-read + one LLM call plan may fit better.
+36. "a discord bot that plays music" (and "plays lofi music in voice chat") gets the "data ingestion / rate limits" boss; voice/audio streaming is the real boss.
+40. "a landing page for my ai startup" and "a portfolio website with an ai chatbot" get an AI Agent component.
+45. Stream overlays get game loot from the Twitch/game keywords; overlay loot should be overlay-specific.
+47. "a guitar tuner app for my phone" is a plain offline-first mobile app; it needs a microphone + pitch detection must-have.
+48. "a podcast clip finder that uses ai" and "a cli that renames my screenshots with ai" plan as AI Agents; find/rename are one-shot AI features (AI Web App / CLI + one LLM call).
+49. "an app that transcribes my voice notes with whisper" is a plain Web App with no speech-to-text (Whisper API) line.
+50. "a twitch clips compilation maker" plans as a Bot from the Twitch keyword; it is a video tool (Twitch API clips + ffmpeg).

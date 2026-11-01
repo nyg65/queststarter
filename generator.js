@@ -145,6 +145,8 @@ const PERSONAL = /\b(habits?|workouts?|gym|exercises?|mood|water intake|sleep|re
 const RAG_DOCS = '(notes|docs|documents|pdfs?|files|wiki|knowledge ?base|articles|help ?center|handbook|manuals?|vault|transcripts|papers|textbooks?|codebase|readme|documentation)';
 const RAG = new RegExp('\\b(rag|retrieval[- ]augmented|retrieval)\\b|\\b(over|about|from|on|for|with|across|using|of|in)\\s+(my|our|your|the|their|a|all)?\\s*([a-z0-9]+\\s+){0,3}' + RAG_DOCS + '\\b|\\b(chat with|talk to|ask|question)\\s+(my|our|your|a|any)?\\s*([a-z0-9]+\\s+){0,2}' + RAG_DOCS + '\\b');
 const SUPPORT = /\b(customer (support|service|questions)|support|help ?desk|faqs?)\b|\banswers? (customer |common |simple )?questions (for|about|on) (my|our)\b/;
+// identifying or recognizing something by its sound (bird songs, songs playing, a dog barking)
+const AUDIO_ID = /\b(identif\w*|recogni[sz]\w*|detects?|detecting|tells? me what|names? the)\b.*\b(songs?|birdsongs?|sounds?|calls?|audio|recordings?|hum|humming|whistl\w*|chirps?|barks?|barking|music|playing)\b|\bshazam for\b/;
 const BIZ = /\b(store|shop|business|saas|website|site|app|product|restaurant|server|company|startup|customers?|etsy|shopify|woocommerce|clinic|salon|gym|course)\b/;
 const STORE = /\b(store|shop|etsy|shopify|woocommerce|ecommerce|e-commerce|orders?)\b/;
 const PERSONA = /\b(role ?plays?|roleplaying|persona|companion|pretends? to be|in character|(talks?|speaks?|acts?|chats?) (like|as) (a|an|my|the)\b)/;
@@ -156,8 +158,9 @@ function detectTypes(text) {
   for (const [key, def] of Object.entries(TYPES)) {
     let s = 0;
     const tt = key === 'game' ? t.replace(/\bgam(er|ers|ing)\b/g, ' ') : t;
-    // match keywords at the start of a word so "community" is not "unity" and "dispatch" is not "patch"
-    for (const k of def.kw) if (k.length <= 3 ? tt.includes(' ' + k) : new RegExp('(^|[^a-z0-9])' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(tt)) s += k.length > 3 ? 2 : 1;
+    // match keywords at the start of a word so "community" is not "unity" and "dispatch" is not "patch";
+    // short keywords must also end the word (plural/version ok) so "clip", "clinic" and "click" are not "cli" and "bottle" is not "bot" ("web"/"app" stay prefixes: webapp, apps)
+    for (const k of def.kw) if (k.length <= 3 ? (k === 'web' || k === 'app' || /[^a-z0-9]/.test(k) ? tt.includes(' ' + k) : new RegExp('[^a-z0-9]' + k + '(s|\\d+)?(?![a-z0-9])').test(tt)) : new RegExp('(^|[^a-z0-9])' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(tt)) s += k.length > 3 ? 2 : 1;
     if (s) scored.push([key, s]);
   }
   scored.sort((a, b) => b[1] - a[1]);
@@ -338,12 +341,28 @@ function generate(idea) {
   const roblox = engine === 'roblox' && !cozy && !turn && !tower;
   const vehicle = keys[0] === 'game' && !cozy && !turn && !roblox && !tower && VEHICLE.test(lower);
   const must = cozy ? [...COZY_MUST] : tower ? [...TOWER_MUST] : turn ? [...TURN_MUST] : roblox ? [...ROBLOX_MUST] : vehicle ? [...VEHICLE_MUST] : fabric ? [...MCMOD_FABRIC_MUST] : vscode ? [...VSCODE_MUST] : [...primary.must];
-  const boss = cozy ? COZY_BOSS : tower ? TOWER_BOSS : turn ? TURN_BOSS : roblox ? ROBLOX_BOSS : vehicle ? VEHICLE_BOSS : fabric ? FABRIC_BOSS : vscode ? VSCODE_BOSS : primary.boss;
+  let boss = cozy ? COZY_BOSS : tower ? TOWER_BOSS : turn ? TURN_BOSS : roblox ? ROBLOX_BOSS : vehicle ? VEHICLE_BOSS : fabric ? FABRIC_BOSS : vscode ? VSCODE_BOSS : primary.boss;
   if (tower && engine === 'roblox') must.push('Waves and money run on the server, saved with DataStoreService');
   if (keys.includes('rag') && SUPPORT.test(lower)) { must.push('Hand off to a human (email or ticket link) when the bot cannot answer or the customer asks for one'); if (STORE.test(lower)) must.push('One read-only order-status lookup by order number + email' + (/\bshopify\b/.test(lower) ? ' (Shopify Admin API)' : /\bwoocommerce\b/.test(lower) ? ' (WooCommerce REST API)' : '') + ', never refunds or edits'); }
   // "a mobile app that uses ai to identify plants": the core action is photo -> model -> result, not an offline-first local feature
   const visionAI = stack.some(x => /^A vision-capable model/.test(x.tech));
   if (keys[0] === 'mobile' && visionAI && !secondary) { const i = must.indexOf('Core action that works offline-first with local state'); if (i >= 0) must.splice(i, 1, 'Take or pick a photo (expo-image-picker), send it to your server function, and show the model\'s answer as a clear result card', 'Handle the camera permission being denied and a blurry or unrelated photo with a friendly retry message'); }
+  // "an iphone app that identifies birds from their songs": the core action is mic clip -> audio-ID model/API -> result, not a photo or an offline-first local feature
+  const audioID = keys[0] === 'mobile' && !secondary && AUDIO_ID.test(lower) && !/\b(spam|phone|robo)\s*calls?\b/.test(lower);
+  if (audioID) {
+    const tech = /\bbirds?\b|\bbirdsong/.test(lower) ? { tech: 'BirdNET (bird sound ID model) behind one server function', why: 'Send a short clip, get the top species matches with confidence back; free for non-commercial use, check the license before you charge.' }
+      : /\b(songs?|music|playing|hum|humming|whistl\w*)\b/.test(lower) ? { tech: 'A music recognition API (AudD or ACRCloud) called from one server function', why: 'Send a short clip, get the song match back; keep the API key on the server, never in the app.' }
+      : { tech: 'An audio classification model (YAMNet, on-device with TensorFlow Lite or on one server function)', why: 'Labels short sounds like barks, alarms or crying with a confidence score; no training needed to start.' };
+    const vi = stack.findIndex(x => /^A vision-capable model/.test(x.tech) || /^An LLM API behind/.test(x.tech));
+    if (vi >= 0) stack.splice(vi, 1, tech); else stack.push(tech);
+    const i = must.indexOf('Core action that works offline-first with local state');
+    if (i >= 0) must.splice(i, 1, 'Record a 5-15 second clip with the microphone (expo-audio), send it to your server function, and show the top match with a confidence score as a result card', 'Handle the microphone permission being denied and a noisy or silent clip with a friendly retry message');
+    boss = 'Identification quality on real recordings: background noise, short or quiet clips, and a confidence threshold so it says "not sure" instead of guessing';
+    // "Birds Identifier" -> "Bird Song Identifier", "Bird Calls Identifier" -> "Bird Call Identifier", "What Song Phone" -> "Song Identifier"
+    const snd = (lower.match(/\bfrom (?:their|its|the|a|my)?\s*(song|call|sound|chirp)s?\b/) || [])[1];
+    if (/ Identifier$/.test(name)) { name = name.replace(/(\w+?)s Identifier$/, '$1 Identifier'); if (snd && name.split(' ').length === 2) name = name.replace(/ Identifier$/, ' ' + titleCase(snd) + ' Identifier'); }
+    else if (/\bwhat song\b/.test(lower)) name = 'Song Identifier';
+  }
   if (secondary) must.push('Integration point with your ' + lbl(secondary.label) + ' component');
   const loot = new Set();
   for (const f of FLAVOR) if (f.kw.some(k => hasWord(lower, k) || (k.length > 4 && lower.includes(k)))) f.loot.forEach(l => loot.add(l));
