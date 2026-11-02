@@ -402,3 +402,4 @@
 61. "a stream deck plugin that shows my twitch viewer count" plans as a Twitch Bot; it is an Elgato Stream Deck SDK plugin.
 62. "a metronome app for drummers" is a generic web app; it needs a Web Audio scheduling (sample-accurate click) must-have.
 63. "an android app that translates street signs from the camera" (no "ai" word) is a plain offline-first mobile app with no vision/OCR + translation line.
+- Committed 2c2141f and pushed; Render deployed in about 30s (live llms.txt has the Whisper voice notes example and FAQ, live page has the FAQ, live API plans "a guitar tuner app for my phone" as a Mobile App "Guitar Tuner" with the react-native-audio-api + pitchy line and "an app that transcribes my voice notes with whisper" as "Voice Notes Transcriber" with the speech-to-text line, /q/zzz 404). FEEDBACK.md (uncommitted X watch edits) left for its own run; newsletter/ stays ignored.
