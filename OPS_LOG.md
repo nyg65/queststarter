@@ -370,3 +370,35 @@
 49. "an app that transcribes my voice notes with whisper" is a plain Web App with no speech-to-text (Whisper API) line.
 50. "a twitch clips compilation maker" plans as a Bot from the Twitch keyword; it is a video tool (Twitch API clips + ffmpeg).
 - Committed be6759b and pushed; Render deployed in about 30s (live llms.txt has the bird song example and FAQ, live API plans it as a Mobile App named "Bird Song Identifier" with the BirdNET line, "a website for my clinic" is now a plain Web App, /q/zzz 404). FEEDBACK.md (uncommitted X watch edits) left for its own run; newsletter/ stays ignored.
+- 2026-11-01 9 AM CT X feedback watch: 0 QuestStarter mentions, site healthy, backlog 58 added, drafts 63-65 queued.
+- 2026-11-01 5 PM CT X feedback watch: 0 QuestStarter mentions, site healthy, no new backlog (asks map to 56 and 58), drafts 66-68 queued.
+
+## 2026-11-02 (daily run, ~8:03-8:20 AM CT)
+- Health: Render (https://queststarter.onrender.com) /health 200 after a ~12s cold start. Local :4173 up (restarted on new code). Locally /, /health, /robots.txt, /sitemap.xml, /llms.txt, /og.png 200; /q/zzz and unknown paths 404; bad JSON 400; FAQPage JSON-LD parses (20 Qs); all 22 sitemap /q/ links 200.
+- Output test: 20 new varied ideas (restaurant-booking agent, Ollama local chatbot, drummer metronome, Discord League of Legends ranked tracker, Chrome AI coupon finder, unused npm deps CLI, Android street-sign translator, Twitch chat poll overlay, Godot frog platformer, Spotify MCP server, Claude YouTube summarizer, Telegram Wordle hints bot, meteor dodge browser game, GitHub issue triage agent, Firefox YouTube comment hider, pomodoro CLI, Stream Deck Twitch viewer count, Whisper voice memo summarizer, ukulele tuner, Game Boy style RPG) plus backlog 47-50 ideas, 108 quoted ideas from OPS_LOG/FEEDBACK, 111 older test ideas and 18 transcription/tuner/whisper probes (whisper chat, ghost whisper game, car tuner game, transcripts RAG, pitch deck generator), diffed against the previous generator (2 changed in the regression set, 0 in the older set, 4 in the new set, 10 in the probe set, all intended).
+- Fixed in generator.js:
+  - Backlog 49 done: an idea that transcribes audio (transcribe, transcription, speech-to-text, dictation, "with/uses Whisper", "Whisper API") gets a speech-to-text stack line (OpenAI Whisper / gpt-4o-transcribe, or Deepgram; "called from one server function" for web/mobile apps, env-var key for bots and CLIs). For a web, AI web or mobile app the generic core flow becomes "record a voice note (MediaRecorder / expo-audio) or upload an audio file, send it to your server function, show the transcript (plus a short summary if asked) with a copy button" plus "handle a denied microphone, a silent clip and a file over the size limit", with a transcription quality and cost boss. A bare "whisper" (chat app, horror game) does not trigger it.
+  - Backlog 47 done: an instrument tuner ("guitar/bass/violin/chromatic tuner", "tunes my ukulele", pitch detection) on web or mobile gets a live mic + pitch detection plan: Web Audio API (getUserMedia + AnalyserNode) + pitchy on the web, react-native-audio-api + pitchy on phones, with "Expo Go" swapped for an Expo development build (the native audio module is not in Expo Go). Must-haves are the nearest note and cents sharp/flat updating live, plus denied mic / noisy room; the boss is pitch accuracy, low strings and needle smoothing. "a car tuner game" is unchanged.
+  - Names: transcribe/transcribes are naming verbs ("Transcribes Voice Notes" -> "Voice Notes Transcriber", "Transcribe Lectures AI" -> "AI Lecture Transcriber", "Discord Bot" -> "Voice Chat Transcriber"); a verb whose object is only another verb ("to transcribe and summarize") falls back to the normal name ("Voice Memo"); tuners name after the instrument ("Tunes Ukulele" -> "Ukulele Tuner").
+- SEO: "An app that transcribes my voice notes with Whisper" example quest added to sitemap.xml (23 URLs) and llms.txt.
+- LLM discoverability: new FAQ "Can it plan a voice note transcriber or a guitar tuner app?" on the page, FAQPage JSON-LD (20 Qs) and llms.txt.
+
+### Backlog
+10. Render free tier cold-starts (~12-85s), one ~8-minute stall on 10-28; consider a paid instance or keep-alive ping when traffic starts.
+24. Consider moving FEEDBACK.md/OPS_LOG.md out of the public repo (or making it private).
+26. Weak names: "Invoices Sender", "Current Song Viewer", "Chrome Extension" (dark overlay on YouTube), "OBS Plugin", "AI Agent" ("files bugs from my notes app"), "Cozy Sim" (cafe), "MCP Server" (linear tickets; postgres), "Slack Bot" (hr questions), "Tickets Creator", "Names D D AI", "D D Character", "D D NPC", "Tag Photos AI", "Them Sender", "Discord Bot" (plays music; plays lofi music in voice chat), "AI Workout Plan", "AI Todo", "Farming Game Stardew", "Voice Memos Converter", "Learning Japanese Flashcard", "Emotes Viewer", "AI Value Pokemon Card Estimator", "Detects Dog Barking Mobile", "Valorant Crosshair Code" (drops "Generator"), "Text Speech" ("a speech to text app for my iphone"), "Writers Dictation", "Drummers Metronome", "Laptop Runner" (Ollama chatbot), "League Legends Ranked Tracker".
+27. "a personal finance dashboard from my bank CSV" still plans a fetch/diff/alert data tool.
+29. "a semantic search engine for my bookmarks" is still a plain Next.js web app.
+32. "a space sim" gets the generic player-and-enemy game plan.
+34. Bot + RAG support bots keep the bot boss ("data ingestion / API integration"); also the Telegram water reminder bot and "an ai dungeon master for discord".
+35. "an app that uses gpt to summarize my emails" stays an agent; a Gmail-read + one LLM call plan may fit better.
+36. "a discord bot that plays music" (and "plays lofi music in voice chat") gets the "data ingestion / rate limits" boss; voice/audio streaming is the real boss.
+40. "a landing page for my ai startup" and "a portfolio website with an ai chatbot" get an AI Agent component.
+45. Stream overlays get game loot from the Twitch/game keywords; overlay loot should be overlay-specific.
+48. "a podcast clip finder that uses ai", "a cli that renames my screenshots with ai" and "a chrome extension that finds coupon codes with ai" plan as AI Agents; find/rename are one-shot AI features (AI Web App / CLI / extension + one LLM call).
+50. "a twitch clips compilation maker" plans as a Bot from the Twitch keyword; it is a video tool (Twitch API clips + ffmpeg).
+59. "a meeting transcriber with whisper api" plans as a Data / API Tool (fetch, diff, alert); it is an upload-and-transcribe web app.
+60. "a local llm chatbot that runs on my laptop with ollama" plans as an AI Agent with a cloud API stack; it needs an Ollama (local model) chat plan.
+61. "a stream deck plugin that shows my twitch viewer count" plans as a Twitch Bot; it is an Elgato Stream Deck SDK plugin.
+62. "a metronome app for drummers" is a generic web app; it needs a Web Audio scheduling (sample-accurate click) must-have.
+63. "an android app that translates street signs from the camera" (no "ai" word) is a plain offline-first mobile app with no vision/OCR + translation line.

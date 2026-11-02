@@ -215,7 +215,7 @@ function article(w) { if (/^RAG\b/.test(w)) return 'a'; if (/^[A-Z]{2,}/.test(w)
 
 const FILLER = new Set('helps help lets let allows allow can will you your which who where when using use uses via from into just some every all also really like new built made so tells shows gives are was were has have get gets play plays playing style'.split(' '));
 const KIND = new Set('cli bot tool extension plugin agent website site webapp saas platform thing chrome browser discord telegram slack mobile ios android iphone web'.split(' '));
-const VERB = { track: 'Tracker', tracks: 'Tracker', summarize: 'Summarizer', summarizes: 'Summarizer', review: 'Reviewer', reviews: 'Reviewer', pick: 'Picker', picks: 'Picker', find: 'Finder', finds: 'Finder', recommend: 'Recommender', recommends: 'Recommender', suggest: 'Suggester', suggests: 'Suggester', plan: 'Planner', plans: 'Planner', generate: 'Generator', generates: 'Generator', monitor: 'Monitor', monitors: 'Monitor', alert: 'Alerts', alerts: 'Alerts', organize: 'Organizer', organizes: 'Organizer', schedule: 'Scheduler', schedules: 'Scheduler', compare: 'Comparer', compares: 'Comparer', translate: 'Translator', translates: 'Translator', scrape: 'Scraper', scrapes: 'Scraper', log: 'Logger', logs: 'Logger', remind: 'Reminder', reminds: 'Reminder', count: 'Counter', counts: 'Counter', rate: 'Rater', rates: 'Rater', write: 'Writer', writes: 'Writer', build: 'Builder', builds: 'Builder', create: 'Creator', creates: 'Creator', explain: 'Explainer', explains: 'Explainer', analyze: 'Analyzer', analyzes: 'Analyzer', post: 'Poster', posts: 'Poster', send: 'Sender', sends: 'Sender', watch: 'Watcher', watches: 'Watcher', run: 'Runner', runs: 'Runner', show: 'Viewer', shows: 'Viewer', turn: 'Converter', turns: 'Converter', block: 'Blocker', blocks: 'Blocker', book: 'Booker', books: 'Booker', teach: 'Tutor', teaches: 'Tutor', convert: 'Converter', converts: 'Converter', rename: 'Renamer', renames: 'Renamer', hide: 'Hider', hides: 'Hider', triage: 'Triager', triages: 'Triager', scaffold: 'Scaffolder', scaffolds: 'Scaffolder', check: 'Checker', checks: 'Checker', identify: 'Identifier', identifies: 'Identifier', recognize: 'Identifier', recognizes: 'Identifier', scan: 'Scanner', scans: 'Scanner', roast: 'Roaster', roasts: 'Roaster', grade: 'Grader', grades: 'Grader', rank: 'Ranker', ranks: 'Ranker', estimate: 'Estimator', estimates: 'Estimator', calculate: 'Calculator', calculates: 'Calculator' };
+const VERB = { track: 'Tracker', tracks: 'Tracker', summarize: 'Summarizer', summarizes: 'Summarizer', review: 'Reviewer', reviews: 'Reviewer', pick: 'Picker', picks: 'Picker', find: 'Finder', finds: 'Finder', recommend: 'Recommender', recommends: 'Recommender', suggest: 'Suggester', suggests: 'Suggester', plan: 'Planner', plans: 'Planner', generate: 'Generator', generates: 'Generator', monitor: 'Monitor', monitors: 'Monitor', alert: 'Alerts', alerts: 'Alerts', organize: 'Organizer', organizes: 'Organizer', schedule: 'Scheduler', schedules: 'Scheduler', compare: 'Comparer', compares: 'Comparer', translate: 'Translator', translates: 'Translator', scrape: 'Scraper', scrapes: 'Scraper', log: 'Logger', logs: 'Logger', remind: 'Reminder', reminds: 'Reminder', count: 'Counter', counts: 'Counter', rate: 'Rater', rates: 'Rater', write: 'Writer', writes: 'Writer', build: 'Builder', builds: 'Builder', create: 'Creator', creates: 'Creator', explain: 'Explainer', explains: 'Explainer', analyze: 'Analyzer', analyzes: 'Analyzer', post: 'Poster', posts: 'Poster', send: 'Sender', sends: 'Sender', watch: 'Watcher', watches: 'Watcher', run: 'Runner', runs: 'Runner', show: 'Viewer', shows: 'Viewer', turn: 'Converter', turns: 'Converter', block: 'Blocker', blocks: 'Blocker', book: 'Booker', books: 'Booker', teach: 'Tutor', teaches: 'Tutor', convert: 'Converter', converts: 'Converter', rename: 'Renamer', renames: 'Renamer', hide: 'Hider', hides: 'Hider', triage: 'Triager', triages: 'Triager', scaffold: 'Scaffolder', scaffolds: 'Scaffolder', check: 'Checker', checks: 'Checker', identify: 'Identifier', identifies: 'Identifier', recognize: 'Identifier', recognizes: 'Identifier', scan: 'Scanner', scans: 'Scanner', roast: 'Roaster', roasts: 'Roaster', grade: 'Grader', grades: 'Grader', rank: 'Ranker', ranks: 'Ranker', estimate: 'Estimator', estimates: 'Estimator', calculate: 'Calculator', calculates: 'Calculator', transcribe: 'Transcriber', transcribes: 'Transcriber' };
 const BREAK = /^(to|for|with|on|in|at|by|and|or|when|so|from|using|via|while|before|after|based|over|where|as|that|which|who|if|like|into|about|across|between|during|without|per|than)$/;
 
 // "a discord bot that tracks my friends game wins" -> "Friends Game Wins Tracker" (falls back to the first 3 meaningful words)
@@ -249,6 +249,8 @@ function projectName(idea) {
       obj.push(w);
       if (obj.length === 3) break;
     }
+    // "uses whisper to transcribe and summarize": the object is another verb, not a thing to name the project after
+    if (obj.every(w => VERB[w])) obj.length = 0;
     if (obj.length && aiFeat) { const last = obj.length - 1; if (!/(ss|us|is)$/.test(obj[last])) obj[last] = obj[last].replace(/(calor|zomb|cook|mov|self|smooth|goal|pix|brown)ies$/, '$1ie').replace(/ies$/, 'y').replace(/([^s])s$/, '$1'); return 'AI ' + titleCase(obj.join(' ')) + ' ' + VERB[all[vi]]; }
     if (obj.length) return titleCase(obj.join(' ')) + ' ' + VERB[all[vi]];
   }
@@ -362,6 +364,33 @@ function generate(idea) {
     const snd = (lower.match(/\bfrom (?:their|its|the|a|my)?\s*(song|call|sound|chirp)s?\b/) || [])[1];
     if (/ Identifier$/.test(name)) { name = name.replace(/(\w+?)s Identifier$/, '$1 Identifier'); if (snd && name.split(' ').length === 2) name = name.replace(/ Identifier$/, ' ' + titleCase(snd) + ' Identifier'); }
     else if (/\bwhat song\b/.test(lower)) name = 'Song Identifier';
+  }
+  // "an app that transcribes my voice notes with whisper": the core step is audio -> speech-to-text API -> transcript, not a generic form or an offline-first local feature
+  const stt = keys[0] !== 'game' && /\b(transcrib\w*|transcriptions?|speech[- ]to[- ]text|dictation)\b|\b(with|using|uses?|via|and) (openai'?s? )?whisper\b|\bwhisper (api|model)\b/.test(lower) && !audioID;
+  if (stt) {
+    const srv = /^(mobile|web|aiapp)$/.test(keys[0]);
+    const st = { tech: 'A speech-to-text API (OpenAI Whisper / gpt-4o-transcribe, or Deepgram)' + (srv ? ' called from one server function' : ''), why: 'Send the recording, get the transcript text back; keep the API key ' + (srv ? 'on the server' : 'in an env var') + ', and note the 25 MB per-file upload limit on OpenAI.' };
+    const li = stack.findIndex(x => /^A vision-capable model/.test(x.tech));
+    if (li >= 0) stack.splice(li, 1, st); else stack.push(st);
+    const core = { mobile: 'Core action that works offline-first with local state', web: 'The one core flow, end to end', aiapp: 'One input form for what the user gives you (text, a few options, or an upload)' }[keys[0]];
+    const i = core && !secondary ? must.indexOf(core) : -1;
+    if (i >= 0) {
+      must.splice(i, 1, 'Record a voice note' + (keys[0] === 'mobile' ? ' with the microphone (expo-audio)' : ' in the browser (MediaRecorder)') + ' or upload an audio file, send it to your server function, and show the transcript' + (/\bsummar\w*/.test(lower) ? ' plus a short summary' : '') + ' with a copy button', 'Handle a denied microphone, a silent clip, and a file over the size limit (split long recordings into chunks) with a clear message');
+      boss = 'Transcription quality and cost on real recordings: background noise, names and jargon (pass a vocabulary prompt), long files split into chunks, and the per-minute API bill';
+    }
+  }
+  // "a guitar tuner app for my phone": the core step is live mic audio -> pitch detection -> note and cents, not an offline-first form
+  const tuner = /^(mobile|web)$/.test(keys[0]) && !secondary && /\b((guitar|ukulele|uke|bass|violin|cello|banjo|mandolin|instrument|chromatic) tuner|tunes? (my |a |your )?(guitar|ukulele|uke|bass|violin|cello|banjo|mandolin|instrument)s?|pitch detect\w*)\b/.test(lower);
+  if (tuner) {
+    const mob = keys[0] === 'mobile';
+    stack.push({ tech: mob ? 'react-native-audio-api (live mic PCM) + pitchy (pitch detection), in an Expo development build' : 'Web Audio API (getUserMedia + AnalyserNode) + pitchy (pitch detection)', why: (mob ? 'Streams raw microphone samples on the phone (a native module, so it needs a dev build, not Expo Go); ' : 'Reads the microphone in the browser with no server; ') + 'pitchy finds the note frequency in each frame.' });
+    const core = mob ? 'Core action that works offline-first with local state' : 'The one core flow, end to end';
+    const i = must.indexOf(core);
+    if (i >= 0) must.splice(i, 1, 'Listen through the microphone and show the nearest note and how many cents sharp or flat it is, updating live like a needle', 'Handle a denied microphone permission and a quiet or noisy room (show "play a string" instead of a jumping needle)');
+    if (mob) { const j = must.indexOf('Run on a real device via Expo Go'); if (j >= 0) must[j] = 'Run on a real device with an Expo development build (live microphone audio needs a native module, so Expo Go is not enough)'; }
+    boss = 'Pitch accuracy in a real room: low notes (the low E string on a guitar is about 82 Hz, so each frame needs enough samples), background noise, and smoothing so the needle does not jitter';
+    const inst = (lower.match(/\b(guitar|ukulele|uke|bass|violin|cello|banjo|mandolin)\b/) || [])[1];
+    if (!/ Tuner$/.test(name) && inst) name = titleCase(inst === 'uke' ? 'ukulele' : inst) + ' Tuner';
   }
   if (secondary) must.push('Integration point with your ' + lbl(secondary.label) + ' component');
   const loot = new Set();
