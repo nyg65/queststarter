@@ -150,6 +150,8 @@ const AUDIO_ID = /\b(identif\w*|recogni[sz]\w*|detects?|detecting|tells? me what
 const BIZ = /\b(store|shop|business|saas|website|site|app|product|restaurant|server|company|startup|customers?|etsy|shopify|woocommerce|clinic|salon|gym|course)\b/;
 const STORE = /\b(store|shop|etsy|shopify|woocommerce|ecommerce|e-commerce|orders?)\b/;
 const PERSONA = /\b(role ?plays?|roleplaying|persona|companion|pretends? to be|in character|(talks?|speaks?|acts?|chats?) (like|as) (a|an|my|the)\b)/;
+// transcribing speech ("transcribes my voice notes", "a meeting transcriber with whisper api"); a bare "whisper" (chat app, horror game) does not count
+const STT = /\b(transcrib\w*|transcriptions?|speech[- ]to[- ]text|dictation)\b|\b(with|using|uses?|via|and) (openai'?s? )?whisper\b|\bwhisper (api|model)\b/;
 const STOP = new Set('a an the to for of and or that i my me with on in it is be build make create want app project idea simple'.split(' '));
 
 function detectTypes(text) {
@@ -183,6 +185,8 @@ function detectTypes(text) {
   else if (keys.includes('overlay')) keys.splice(keys.indexOf('overlay'), 1);
   // a personal tracker ("a habit tracker app", "a workout log") is an app the user fills in, not a data fetcher
   if (keys[0] === 'data' && PERSONAL.test(t) && !/\b(scrap\w*|alerts?|api|monitor\w*|prices?|deals?|patch\w*|news|digest|feed|spend\w*|costs?)\b/.test(t)) { keys.shift(); const m = /\b(mobile|ios|android|iphone|phone)\b/.test(t) ? 'mobile' : 'web'; if (!keys.includes(m)) keys.unshift(m); else { keys.splice(keys.indexOf(m), 1); keys.unshift(m); } }
+  // "a meeting transcriber with whisper api": "api" names the speech-to-text service, not a data fetcher; a transcriber is a record/upload app
+  if (keys.includes('data') && STT.test(t) && !/\b(trackers?|dashboards?|scrap\w*|analytics|stats|monitor\w*|alerts?|digests?|news|deals?|patch\w*)\b/.test(t)) { keys.splice(keys.indexOf('data'), 1); if (!keys.length) keys.push(/\b(mobile|ios|android|iphone|phone)\b/.test(t) ? 'mobile' : 'web'); }
   // chat or Q&A over the user's own documents is retrieval (ingest, retrieve, cite), not a tool-calling agent loop
   if (keys.includes('agent') && RAG.test(t) && /\b(rag|retrieval|chat\w*|ask\w*|answer\w*|questions?|q&a|search\w*|tutor|quiz\w*|talk to|trained on|knowledge)\b/.test(t)) keys[keys.indexOf('agent')] = 'rag';
   // a support / FAQ chatbot for a store or product answers from that business's FAQ and policies: retrieval, not an agent loop
@@ -349,6 +353,23 @@ function generate(idea) {
   // "a mobile app that uses ai to identify plants": the core action is photo -> model -> result, not an offline-first local feature
   const visionAI = stack.some(x => /^A vision-capable model/.test(x.tech));
   if (keys[0] === 'mobile' && visionAI && !secondary) { const i = must.indexOf('Core action that works offline-first with local state'); if (i >= 0) must.splice(i, 1, 'Take or pick a photo (expo-image-picker), send it to your server function, and show the model\'s answer as a clear result card', 'Handle the camera permission being denied and a blurry or unrelated photo with a friendly retry message'); }
+  // "a mobile app that uses ai to count calories from a photo of my food": the hard part is the answer being right on real photos, not store submission
+  const photoAI = keys[0] === 'mobile' && visionAI && !secondary;
+  if (photoAI) boss = /\b(calor\w*|food|meals?|nutrition|macros?|dish\w*)\b/.test(lower) ? 'Estimate accuracy on real meal photos: portion sizes, mixed dishes and hidden oil or sauce, so show an editable estimate with a range instead of one confident number' : 'Result accuracy on real photos: bad light, odd angles and look-alikes, plus a confidence threshold so it says "not sure" instead of guessing';
+  // "an android app that translates street signs from the camera": camera -> read the text -> translate, even without the word "ai"
+  const camTranslate = keys[0] === 'mobile' && !secondary && /\btranslat\w*/.test(lower) && /\b(camera|photos?|pictures?|images?|signs?|menus?|labels?|scan\w*|snap\w*)\b/.test(lower);
+  if (camTranslate) {
+    const tr = { tech: 'A vision-capable model API (GPT-4o, Claude or Gemini) called from one server function', why: 'Reads the text in the photo and translates it in one call; keep the API key on the server. (Offline option: ML Kit text recognition + ML Kit translation.)' };
+    const vi = stack.findIndex(x => /^A vision-capable model/.test(x.tech) || /^An LLM API behind/.test(x.tech));
+    if (vi >= 0) stack.splice(vi, 1, tr); else stack.push(tr);
+    const flow = ['Point the camera at the text (expo-camera) or pick a photo, send it to your server function, and show the original text next to its translation', 'Handle a denied camera, blurry or angled text, and a photo with no text in it with a friendly retry message'];
+    const i = must.indexOf('Core action that works offline-first with local state');
+    if (i >= 0) must.splice(i, 1, ...flow);
+    else { const j = must.findIndex(m => /^Take or pick a photo/.test(m)); if (j >= 0) must.splice(j, 2, ...flow); }
+    const what = (lower.match(/\b(signs?|menus?|labels?)\b/) || [])[1];
+    boss = 'Reading and translating ' + (what ? 'real ' + what.replace(/s?$/, 's') : 'text in real photos') + ': glare, angles, stylized fonts and mixed languages; show the detected text so users can spot a misread';
+    name = name.replace(/\b(\w+)s Translator$/, (m, w) => /^(new|statu|bu|gla|ga|thi)$|(s|u|i)s$/i.test(w) ? m : w + ' Translator');
+  }
   // "an iphone app that identifies birds from their songs": the core action is mic clip -> audio-ID model/API -> result, not a photo or an offline-first local feature
   const audioID = keys[0] === 'mobile' && !secondary && AUDIO_ID.test(lower) && !/\b(spam|phone|robo)\s*calls?\b/.test(lower);
   if (audioID) {
@@ -366,7 +387,7 @@ function generate(idea) {
     else if (/\bwhat song\b/.test(lower)) name = 'Song Identifier';
   }
   // "an app that transcribes my voice notes with whisper": the core step is audio -> speech-to-text API -> transcript, not a generic form or an offline-first local feature
-  const stt = keys[0] !== 'game' && /\b(transcrib\w*|transcriptions?|speech[- ]to[- ]text|dictation)\b|\b(with|using|uses?|via|and) (openai'?s? )?whisper\b|\bwhisper (api|model)\b/.test(lower) && !audioID;
+  const stt = keys[0] !== 'game' && STT.test(lower) && !audioID;
   if (stt) {
     const srv = /^(mobile|web|aiapp)$/.test(keys[0]);
     const st = { tech: 'A speech-to-text API (OpenAI Whisper / gpt-4o-transcribe, or Deepgram)' + (srv ? ' called from one server function' : ''), why: 'Send the recording, get the transcript text back; keep the API key ' + (srv ? 'on the server' : 'in an env var') + ', and note the 25 MB per-file upload limit on OpenAI.' };
@@ -395,6 +416,8 @@ function generate(idea) {
   if (secondary) must.push('Integration point with your ' + lbl(secondary.label) + ' component');
   const loot = new Set();
   for (const f of FLAVOR) if (f.kw.some(k => hasWord(lower, k) || (k.length > 4 && lower.includes(k)))) f.loot.forEach(l => loot.add(l));
+  // photo apps get photo-app loot instead of chatbot loot (no model picker or conversation memory)
+  if (photoAI || camTranslate) { loot.delete('Model picker'); loot.delete('Conversation memory'); loot.delete('Eval set to test quality'); ['History of past scans on the device', 'Eval set of 20 real photos'].forEach(l => loot.add(l)); }
   ['Polish pass and onboarding', 'Share / invite flow', 'Basic analytics'].forEach(l => loot.add(l));
 
   const stackLine = stack.slice(0, 3).map(s => s.tech).join(', ');
