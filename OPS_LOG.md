@@ -457,3 +457,4 @@
 ### Backlog (new)
 69. "a habit tracker for my android phone" plans as Mobile App + Data / API Tool from the word "tracker"; a personal habit tracker is a plain local-first mobile app (PERSONAL words should drop the data-tool type).
 70. "a beat maker web app" gets the generic auth/data-model boss; it needs a Web Audio step sequencer plan (sample playback, lookahead scheduling like the metronome).
+- Committed 4fa442c and pushed; Render deployed within about 30s (live llms.txt has the metronome and Steam Deck speedrun examples and timing FAQ, live API plans "a speedrun timer for my steam deck" with localStorage and the timing boss; /q/zzz 404). FEEDBACK.md (uncommitted X watch edits) left for its own run; newsletter/ stays ignored.
