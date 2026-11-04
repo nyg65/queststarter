@@ -413,11 +413,39 @@ function generate(idea) {
     const inst = (lower.match(/\b(guitar|ukulele|uke|bass|violin|cello|banjo|mandolin)\b/) || [])[1];
     if (!/ Tuner$/.test(name) && inst) name = titleCase(inst === 'uke' ? 'ukulele' : inst) + ' Tuner';
   }
+  // "a metronome app for drummers": clicks scheduled ahead on the audio clock, not setInterval
+  const metronome = !tuner && /^(mobile|web)$/.test(keys[0]) && !secondary && /\b(metronome|click track|bpm counter)\b/.test(lower);
+  if (metronome) {
+    const mob = keys[0] === 'mobile';
+    stack.push({ tech: mob ? 'react-native-audio-api (Web Audio API for React Native), in an Expo development build' : 'Web Audio API (AudioContext + a lookahead scheduler)', why: 'Schedules each click on the audio clock a little ahead of time, so the beat stays sample-accurate instead of drifting like setInterval.' });
+    const core = mob ? 'Core action that works offline-first with local state' : 'The one core flow, end to end';
+    const i = must.indexOf(core);
+    if (i >= 0) must.splice(i, 1, 'Play a click at the chosen BPM (40-240) scheduled on the audio clock (AudioContext.currentTime) with a short lookahead, never with setInterval or setTimeout alone', 'Tap tempo, an accented first beat, and a time signature picker (4/4, 3/4, 6/8)');
+    if (mob) { const j = must.indexOf('Run on a real device via Expo Go'); if (j >= 0) must[j] = 'Run on a real device with an Expo development build (audio-clock scheduling needs a native module, so Expo Go is not enough)'; }
+    boss = 'Timing accuracy: clicks that drift or stutter when ' + (mob ? 'the app goes to the background, the screen locks' : 'the tab is in the background') + ' or the CPU is busy, so schedule on the audio clock and check it against a reference metronome for 5 minutes';
+    if (/\bdrum\w*\b/.test(lower)) name = 'Drum Metronome';
+    { const si = stack.findIndex(x => /Supabase/.test(x.tech)); if (si >= 0) stack.splice(si, 1); const pi = must.findIndex(m => /^Persist data/.test(m)); if (pi >= 0) must[pi] = 'Remember the last BPM and time signature in localStorage'; }
+  }
+  // "a speedrun timer for my steam deck": a local-first stopwatch with splits, no accounts or database
+  const runTimer = /^(web|mobile)$/.test(keys[0]) && !secondary && /\b(speed ?run\w* timer|split timer|livesplit)\b/.test(lower);
+  if (runTimer) {
+    const si = stack.findIndex(x => /Supabase/.test(x.tech));
+    const local = { tech: 'localStorage (IndexedDB if runs get large)', why: 'A timer needs no account or server; runs, splits and personal bests stay on the device.' };
+    if (si >= 0) stack.splice(si, 1, local); else stack.push(local);
+    const core = keys[0] === 'mobile' ? 'Core action that works offline-first with local state' : 'The one core flow, end to end';
+    const i = must.indexOf(core);
+    if (i >= 0) must.splice(i, 1, 'Start, split and reset with one key each, plus big on-screen buttons' + (/\bsteam ?deck\b/.test(lower) ? ' for the Steam Deck touchscreen' : ' for a touchscreen'), 'Time from performance.now() differences, never by adding up setInterval ticks, and show each split against your personal best with a green or red delta');
+    const pi = must.findIndex(m => /^Persist data/.test(m));
+    if (pi >= 0) must[pi] = 'Save runs, splits and personal bests in localStorage so they survive a restart';
+    if (/livesplit/i.test(name)) name = 'Split Timer';
+    boss = 'Timing you can trust: no drift over a 1-hour run, and hotkeys that still work while the game has focus (a browser tab only hears keys when it is focused, so global hotkeys need a desktop wrapper like Tauri or Electron)';
+  }
   if (secondary) must.push('Integration point with your ' + lbl(secondary.label) + ' component');
   const loot = new Set();
   for (const f of FLAVOR) if (f.kw.some(k => hasWord(lower, k) || (k.length > 4 && lower.includes(k)))) f.loot.forEach(l => loot.add(l));
   // photo apps get photo-app loot instead of chatbot loot (no model picker or conversation memory)
   if (photoAI || camTranslate) { loot.delete('Model picker'); loot.delete('Conversation memory'); loot.delete('Eval set to test quality'); ['History of past scans on the device', 'Eval set of 20 real photos'].forEach(l => loot.add(l)); }
+  if (runTimer) { loot.delete('Leaderboards'); ['Import and export LiveSplit (.lss) splits', 'Sum of best and best possible time'].forEach(l => loot.add(l)); }
   ['Polish pass and onboarding', 'Share / invite flow', 'Basic analytics'].forEach(l => loot.add(l));
 
   const stackLine = stack.slice(0, 3).map(s => s.tech).join(', ');
