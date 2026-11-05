@@ -184,6 +184,8 @@ function detectTypes(text) {
   if (keys.includes('overlay') && /\b(overlay|browser source)\b/.test(t) && /\b(obs|stream|streaming|streamer|streams|twitch|kick|streamlabs|browser source|youtube live|livestream\w*|speedrun\w*|splits)\b/.test(t)) { keys.length = 0; keys.push('overlay'); }
   else if (keys.includes('overlay')) keys.splice(keys.indexOf('overlay'), 1);
   // a personal tracker ("a habit tracker app", "a workout log") is an app the user fills in, not a data fetcher
+  // and "a habit tracker for my android phone" is a mobile app, so the word "tracker" shouldn't add a data / API tool component either
+  if (keys.length > 1 && keys[0] !== 'data' && keys.includes('data') && PERSONAL.test(t) && !/\b(scrap\w*|alerts?|api|monitor\w*|prices?|deals?|patch\w*|news|digest|feed|spend\w*|costs?|dashboards?|stats|analytics|fitbit|strava|garmin|goodreads|sync\w*|imports?)\b/.test(t)) keys.splice(keys.indexOf('data'), 1);
   if (keys[0] === 'data' && PERSONAL.test(t) && !/\b(scrap\w*|alerts?|api|monitor\w*|prices?|deals?|patch\w*|news|digest|feed|spend\w*|costs?)\b/.test(t)) { keys.shift(); const m = /\b(mobile|ios|android|iphone|phone)\b/.test(t) ? 'mobile' : 'web'; if (!keys.includes(m)) keys.unshift(m); else { keys.splice(keys.indexOf(m), 1); keys.unshift(m); } }
   // "a meeting transcriber with whisper api": "api" names the speech-to-text service, not a data fetcher; a transcriber is a record/upload app
   if (keys.includes('data') && STT.test(t) && !/\b(trackers?|dashboards?|scrap\w*|analytics|stats|monitor\w*|alerts?|digests?|news|deals?|patch\w*)\b/.test(t)) { keys.splice(keys.indexOf('data'), 1); if (!keys.length) keys.push(/\b(mobile|ios|android|iphone|phone)\b/.test(t) ? 'mobile' : 'web'); }
@@ -440,11 +442,27 @@ function generate(idea) {
     if (/livesplit/i.test(name)) name = 'Split Timer';
     boss = 'Timing you can trust: no drift over a 1-hour run, and hotkeys that still work while the game has focus (a browser tab only hears keys when it is focused, so global hotkeys need a desktop wrapper like Tauri or Electron)';
   }
+  // "a habit tracker for my android phone": check off today's habits and keep a streak, all on the device, no accounts
+  const habit = !metronome && !runTimer && /^(mobile|web)$/.test(keys[0]) && !secondary && /\b(habits?|streaks?)\b/.test(lower) && /\b(track\w*|app|streaks?|log|checklist|builder)\b/.test(lower) && !/\b(ai|gpt|claude|llm|gemini|openai|friends?|leaderboards?|social|group|team|share\w*|accountability|multiplayer)\b/.test(lower);
+  if (habit) {
+    const mob = keys[0] === 'mobile';
+    const si = stack.findIndex(x => /Supabase/.test(x.tech));
+    const local = mob ? { tech: 'expo-sqlite (on-device database)', why: 'Habits and daily check-ins stay on the phone, so it works offline with no account or server.' } : { tech: 'localStorage (IndexedDB if history grows)', why: 'Habits and daily check-ins stay in the browser, so there is no account or server to build.' };
+    if (si >= 0) stack.splice(si, 1, local); else stack.push(local);
+    const core = mob ? 'Core action that works offline-first with local state' : 'The one core flow, end to end';
+    const i = must.indexOf(core);
+    if (i >= 0) must.splice(i, 1, 'Add a habit, then check it off for today with one tap and see the current streak', mob ? 'A daily reminder at a time you pick, as a local notification (expo-notifications), with no server' : 'A 30-day grid per habit so missed days are visible at a glance');
+    const pi = must.findIndex(m => /^Persist data/.test(m));
+    if (pi >= 0) must[pi] = 'Save habits and check-ins in localStorage so they survive a refresh';
+    boss = 'Streak logic: store each check-in as a local date (YYYY-MM-DD), not a timestamp, so a late-night check-off, a missed day, daylight saving and travel across time zones never break or double-count a streak';
+    if (/^Habits? (Tracker|App)$/.test(name) || name === 'Habit') name = 'Habit Tracker';
+  }
   if (secondary) must.push('Integration point with your ' + lbl(secondary.label) + ' component');
   const loot = new Set();
   for (const f of FLAVOR) if (f.kw.some(k => hasWord(lower, k) || (k.length > 4 && lower.includes(k)))) f.loot.forEach(l => loot.add(l));
   // photo apps get photo-app loot instead of chatbot loot (no model picker or conversation memory)
   if (photoAI || camTranslate) { loot.delete('Model picker'); loot.delete('Conversation memory'); loot.delete('Eval set to test quality'); ['History of past scans on the device', 'Eval set of 20 real photos'].forEach(l => loot.add(l)); }
+  if (habit) [keys[0] === 'mobile' ? 'Home screen widget for today\'s habits' : 'Installable as a PWA that works offline', 'Export check-ins as CSV'].forEach(l => loot.add(l));
   if (runTimer) { loot.delete('Leaderboards'); ['Import and export LiveSplit (.lss) splits', 'Sum of best and best possible time'].forEach(l => loot.add(l)); }
   ['Polish pass and onboarding', 'Share / invite flow', 'Basic analytics'].forEach(l => loot.add(l));
 
