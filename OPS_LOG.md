@@ -505,3 +505,4 @@
 
 ### Backlog (new)
 73. "a pomodoro chrome extension" stays a generic browser extension (popup + content script) with no timer must-haves; a pomodoro extension wants a service-worker countdown and badge timer, not only the web local-first plan.
+- Committed 23b70f4 and pushed; Render deployed within about 30s (live llms.txt has the pomodoro example and FAQ, live API plans "a pomodoro timer web app" with the background-tab countdown boss and no Supabase, "a todo app" as Todo List with localStorage, "a cli that cleans up my downloads folder" as Downloads Cleaner CLI; /q/zzz 404). FEEDBACK.md (uncommitted X watch edits) left for its own run; newsletter/ stays ignored.
