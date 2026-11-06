@@ -221,7 +221,7 @@ function article(w) { if (/^RAG\b/.test(w)) return 'a'; if (/^[A-Z]{2,}/.test(w)
 
 const FILLER = new Set('helps help lets let allows allow can will you your which who where when using use uses via from into just some every all also really like new built made so tells shows gives are was were has have get gets play plays playing style'.split(' '));
 const KIND = new Set('cli bot tool extension plugin agent website site webapp saas platform thing chrome browser discord telegram slack mobile ios android iphone web'.split(' '));
-const VERB = { track: 'Tracker', tracks: 'Tracker', summarize: 'Summarizer', summarizes: 'Summarizer', review: 'Reviewer', reviews: 'Reviewer', pick: 'Picker', picks: 'Picker', find: 'Finder', finds: 'Finder', recommend: 'Recommender', recommends: 'Recommender', suggest: 'Suggester', suggests: 'Suggester', plan: 'Planner', plans: 'Planner', generate: 'Generator', generates: 'Generator', monitor: 'Monitor', monitors: 'Monitor', alert: 'Alerts', alerts: 'Alerts', organize: 'Organizer', organizes: 'Organizer', schedule: 'Scheduler', schedules: 'Scheduler', compare: 'Comparer', compares: 'Comparer', translate: 'Translator', translates: 'Translator', scrape: 'Scraper', scrapes: 'Scraper', log: 'Logger', logs: 'Logger', remind: 'Reminder', reminds: 'Reminder', count: 'Counter', counts: 'Counter', rate: 'Rater', rates: 'Rater', write: 'Writer', writes: 'Writer', build: 'Builder', builds: 'Builder', create: 'Creator', creates: 'Creator', explain: 'Explainer', explains: 'Explainer', analyze: 'Analyzer', analyzes: 'Analyzer', post: 'Poster', posts: 'Poster', send: 'Sender', sends: 'Sender', watch: 'Watcher', watches: 'Watcher', run: 'Runner', runs: 'Runner', show: 'Viewer', shows: 'Viewer', turn: 'Converter', turns: 'Converter', block: 'Blocker', blocks: 'Blocker', book: 'Booker', books: 'Booker', teach: 'Tutor', teaches: 'Tutor', convert: 'Converter', converts: 'Converter', rename: 'Renamer', renames: 'Renamer', hide: 'Hider', hides: 'Hider', triage: 'Triager', triages: 'Triager', scaffold: 'Scaffolder', scaffolds: 'Scaffolder', check: 'Checker', checks: 'Checker', identify: 'Identifier', identifies: 'Identifier', recognize: 'Identifier', recognizes: 'Identifier', scan: 'Scanner', scans: 'Scanner', roast: 'Roaster', roasts: 'Roaster', grade: 'Grader', grades: 'Grader', rank: 'Ranker', ranks: 'Ranker', estimate: 'Estimator', estimates: 'Estimator', calculate: 'Calculator', calculates: 'Calculator', transcribe: 'Transcriber', transcribes: 'Transcriber' };
+const VERB = { track: 'Tracker', tracks: 'Tracker', summarize: 'Summarizer', summarizes: 'Summarizer', review: 'Reviewer', reviews: 'Reviewer', pick: 'Picker', picks: 'Picker', find: 'Finder', finds: 'Finder', recommend: 'Recommender', recommends: 'Recommender', suggest: 'Suggester', suggests: 'Suggester', plan: 'Planner', plans: 'Planner', generate: 'Generator', generates: 'Generator', monitor: 'Monitor', monitors: 'Monitor', alert: 'Alerts', alerts: 'Alerts', organize: 'Organizer', organizes: 'Organizer', schedule: 'Scheduler', schedules: 'Scheduler', compare: 'Comparer', compares: 'Comparer', translate: 'Translator', translates: 'Translator', scrape: 'Scraper', scrapes: 'Scraper', log: 'Logger', logs: 'Logger', remind: 'Reminder', reminds: 'Reminder', count: 'Counter', counts: 'Counter', rate: 'Rater', rates: 'Rater', write: 'Writer', writes: 'Writer', build: 'Builder', builds: 'Builder', create: 'Creator', creates: 'Creator', explain: 'Explainer', explains: 'Explainer', analyze: 'Analyzer', analyzes: 'Analyzer', post: 'Poster', posts: 'Poster', send: 'Sender', sends: 'Sender', watch: 'Watcher', watches: 'Watcher', run: 'Runner', runs: 'Runner', show: 'Viewer', shows: 'Viewer', turn: 'Converter', turns: 'Converter', block: 'Blocker', blocks: 'Blocker', book: 'Booker', books: 'Booker', teach: 'Tutor', teaches: 'Tutor', convert: 'Converter', converts: 'Converter', rename: 'Renamer', renames: 'Renamer', hide: 'Hider', hides: 'Hider', triage: 'Triager', triages: 'Triager', scaffold: 'Scaffolder', scaffolds: 'Scaffolder', check: 'Checker', checks: 'Checker', identify: 'Identifier', identifies: 'Identifier', recognize: 'Identifier', recognizes: 'Identifier', scan: 'Scanner', scans: 'Scanner', roast: 'Roaster', roasts: 'Roaster', grade: 'Grader', grades: 'Grader', rank: 'Ranker', ranks: 'Ranker', estimate: 'Estimator', estimates: 'Estimator', calculate: 'Calculator', calculates: 'Calculator', transcribe: 'Transcriber', transcribes: 'Transcriber', clean: 'Cleaner', cleans: 'Cleaner', cleanup: 'Cleaner', delete: 'Deleter', deletes: 'Deleter', remove: 'Remover', removes: 'Remover' };
 const BREAK = /^(to|for|with|on|in|at|by|and|or|when|so|from|using|via|while|before|after|based|over|where|as|that|which|who|if|like|into|about|across|between|during|without|per|than)$/;
 
 // "a discord bot that tracks my friends game wins" -> "Friends Game Wins Tracker" (falls back to the first 3 meaningful words)
@@ -249,7 +249,9 @@ function projectName(idea) {
       if (tgt.length) return titleCase(tgt.join(' ')) + (noun ? ' ' + noun : '') + ' ' + VERB[all[vi]];
     }
     const obj = [];
-    for (const w of all.slice(vi + 1)) {
+    let oi = vi + 1;
+    while (/^(up|out|off|away|down)$/.test(all[oi] || '')) oi++; // "cleans up my downloads" -> skip "up"
+    for (const w of all.slice(oi)) {
       if (BREAK.test(w)) { if (obj.length) break; else continue; }
       if (STOP.has(w) || FILLER.has(w) || KIND.has(w)) continue;
       obj.push(w);
@@ -455,7 +457,67 @@ function generate(idea) {
     const pi = must.findIndex(m => /^Persist data/.test(m));
     if (pi >= 0) must[pi] = 'Save habits and check-ins in localStorage so they survive a refresh';
     boss = 'Streak logic: store each check-in as a local date (YYYY-MM-DD), not a timestamp, so a late-night check-off, a missed day, daylight saving and travel across time zones never break or double-count a streak';
-    if (/^Habits? (Tracker|App)$/.test(name) || name === 'Habit') name = 'Habit Tracker';
+    // "a streak app for learning japanese every day" -> "Japanese Learning Streak"
+    const learn = lower.match(/\b(?:learning|studying|practicing)\s+([a-z]+(?:\s+[a-z]+)?)/);
+    if (learn) {
+      const subj = learn[1].split(/\s+/).filter(w => !/^(every|each|day|daily|week|weekly|month|a|an|the|my|our)$/.test(w));
+      if (subj.length) name = titleCase(subj.join(' ')) + ' Learning Streak';
+    } else if (/^Habits? (Tracker|App)$/.test(name) || name === 'Habit') name = 'Habit Tracker';
+  }
+  // "a pomodoro timer web app": focus/break countdown on the device, no accounts or database
+  const pomo = !metronome && !runTimer && !habit && /^(web|mobile)$/.test(keys[0]) && !secondary && /\b(pomodoro|focus timer|tomato timer)\b/.test(lower);
+  if (pomo) {
+    const mob = keys[0] === 'mobile';
+    const si = stack.findIndex(x => /Supabase/.test(x.tech));
+    const local = mob ? { tech: 'expo-sqlite or AsyncStorage (on-device)', why: 'Timer settings and completed sessions stay on the phone, so there is no account or server.' } : { tech: 'localStorage', why: 'Timer settings and completed sessions stay in the browser; a pomodoro needs no account or database.' };
+    if (si >= 0) stack.splice(si, 1, local); else stack.push(local);
+    const core = mob ? 'Core action that works offline-first with local state' : 'The one core flow, end to end';
+    const i = must.indexOf(core);
+    if (i >= 0) must.splice(i, 1, 'Start, pause and reset a focus countdown (default 25 minutes) that switches into a short break, with editable focus and break lengths', 'Play a short sound or ' + (mob ? 'local notification' : 'browser notification') + ' when a focus or break ends (with permission handled)');
+    const pi = must.findIndex(m => /^Persist data/.test(m));
+    if (pi >= 0) must[pi] = 'Remember focus/break lengths and today\'s completed session count in ' + (mob ? 'on-device storage' : 'localStorage');
+    boss = 'A countdown you can trust when ' + (mob ? 'the app is backgrounded or the screen locks' : 'the tab is in the background') + ': store the end timestamp and derive remaining time from Date.now(), never by counting setInterval ticks alone';
+    if (/\bpomodoro\b/.test(lower)) name = 'Pomodoro Timer';
+    else if (/\bfocus timer\b/.test(lower)) name = 'Focus Timer';
+    else if (/\btomato timer\b/.test(lower)) name = 'Tomato Timer';
+  }
+  // "a todo app" / "a simple todo list": add/complete tasks on the device, no Auth/Supabase
+  const todo = !metronome && !runTimer && !habit && !pomo && /^(web|mobile)$/.test(keys[0]) && !secondary && /\b(to-?dos?|todo lists?|task lists?|checklist)\b/.test(lower) && !/\b(ai|gpt|claude|llm|gemini|openai|prioriti[sz]\w*|agents?|assistants?)\b/.test(lower);
+  if (todo) {
+    const mob = keys[0] === 'mobile';
+    const si = stack.findIndex(x => /Supabase/.test(x.tech));
+    const local = mob ? { tech: 'expo-sqlite or AsyncStorage (on-device)', why: 'Tasks stay on the phone, so the list works offline with no account or server.' } : { tech: 'localStorage (IndexedDB if the list grows)', why: 'Tasks stay in the browser; a personal todo list needs no account or database.' };
+    if (si >= 0) stack.splice(si, 1, local); else stack.push(local);
+    const core = mob ? 'Core action that works offline-first with local state' : 'The one core flow, end to end';
+    const i = must.indexOf(core);
+    if (i >= 0) must.splice(i, 1, 'Add a task, mark it done with one tap, and delete or clear completed tasks', 'Filter or show Active / Completed / All');
+    const pi = must.findIndex(m => /^Persist data/.test(m));
+    if (pi >= 0) must[pi] = 'Save tasks in ' + (mob ? 'on-device storage' : 'localStorage') + ' so they survive a restart';
+    boss = 'Local data you can trust: tasks never silently disappear on refresh, and an export (JSON or CSV) lets you leave without lock-in';
+    if (/^Todos?$/.test(name) || name === 'Todo List App') name = 'Todo List';
+  }
+  // "a workout tracker for my iphone" / "a sleep tracker app for my phone": personal logs stay on-device
+  const personalLog = !habit && !pomo && !todo && /^(mobile|web)$/.test(keys[0]) && !secondary && /\b(workouts?|gym sessions?|exercises?|sleep|mood|water intake|weight|meditation)\b/.test(lower) && /\b(track\w*|log|logger|journal)\b/.test(lower) && !/\b(ai|gpt|claude|llm|gemini|openai|friends?|leaderboards?|social|group|team|share\w*|fitbit|strava|garmin|apple health|healthkit|google fit|vr|ar|game)\b/.test(lower);
+  if (personalLog) {
+    const mob = keys[0] === 'mobile';
+    const kind = /\bsleep\b/.test(lower) ? 'sleep' : /\b(workouts?|gym|exercises?)\b/.test(lower) ? 'workout' : 'log';
+    const si = stack.findIndex(x => /Supabase/.test(x.tech));
+    const local = mob ? { tech: 'expo-sqlite (on-device database)', why: 'Personal ' + kind + ' entries stay on the phone, so it works offline with no account or server.' } : { tech: 'localStorage (IndexedDB if history grows)', why: 'Personal ' + kind + ' entries stay in the browser; no account or server to build.' };
+    if (si >= 0) stack.splice(si, 1, local); else stack.push(local);
+    const core = mob ? 'Core action that works offline-first with local state' : 'The one core flow, end to end';
+    const i = must.indexOf(core);
+    if (kind === 'workout' && i >= 0) must.splice(i, 1, 'Log a workout with date, exercise or type, and a duration or set count, then see a history list', mob ? 'A quick-add button on the home screen so logging takes under 15 seconds' : 'A simple weekly summary of sessions logged');
+    else if (kind === 'sleep' && i >= 0) must.splice(i, 1, 'Log bedtime and wake time (or total hours) for a night and see a recent history', mob ? 'A local morning reminder to log last night (expo-notifications), with no server' : 'A 7-day bar chart of hours slept');
+    else if (i >= 0) must.splice(i, 1, 'Add a dated entry with the one field that matters, then browse recent history');
+    const pi = must.findIndex(m => /^Persist data/.test(m));
+    if (pi >= 0) must[pi] = 'Save entries in ' + (mob ? 'expo-sqlite' : 'localStorage') + ' so they survive a restart';
+    boss = kind === 'sleep' ? 'Honest sleep math: store local dates and minutes, handle naps vs night sleep, and never trust a single timestamp across midnight or DST' : kind === 'workout' ? 'Logging that sticks: a session saved in under 15 seconds, edits that do not duplicate entries, and history that stays correct across time zones' : 'Local data you can trust across days, edits and time zone changes, with an export so nothing is locked in';
+    if (mob) boss = boss.replace(/\.$/, '') + '; skip App Store / Play submission until the log loop works on a real device';
+  }
+  // "Cleans Up Downloads CLI" -> "Downloads Cleaner CLI"
+  if (/\bCleaner$/.test(name)) {
+    name = name.replace(/\b(Folder|Directory|Dir) Cleaner$/, 'Cleaner');
+    if (keys[0] === 'cli' && !/\bCLI$/.test(name)) name += ' CLI';
   }
   if (secondary) must.push('Integration point with your ' + lbl(secondary.label) + ' component');
   const loot = new Set();
@@ -463,6 +525,9 @@ function generate(idea) {
   // photo apps get photo-app loot instead of chatbot loot (no model picker or conversation memory)
   if (photoAI || camTranslate) { loot.delete('Model picker'); loot.delete('Conversation memory'); loot.delete('Eval set to test quality'); ['History of past scans on the device', 'Eval set of 20 real photos'].forEach(l => loot.add(l)); }
   if (habit) [keys[0] === 'mobile' ? 'Home screen widget for today\'s habits' : 'Installable as a PWA that works offline', 'Export check-ins as CSV'].forEach(l => loot.add(l));
+  if (pomo) [keys[0] === 'mobile' ? 'Home screen widget or live activity for the running timer' : 'Installable as a PWA with an optional ambient tick sound', 'A simple daily/weekly session count chart'].forEach(l => loot.add(l));
+  if (todo) ['Export tasks as JSON or CSV', keys[0] === 'mobile' ? 'Home screen quick-add widget' : 'Installable as a PWA that works offline'].forEach(l => loot.add(l));
+  if (personalLog) ['Export entries as CSV', keys[0] === 'mobile' ? 'Home screen widget for today\'s summary' : 'Installable as a PWA that works offline'].forEach(l => loot.add(l));
   if (runTimer) { loot.delete('Leaderboards'); ['Import and export LiveSplit (.lss) splits', 'Sum of best and best possible time'].forEach(l => loot.add(l)); }
   ['Polish pass and onboarding', 'Share / invite flow', 'Basic analytics'].forEach(l => loot.add(l));
 

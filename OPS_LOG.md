@@ -472,3 +472,36 @@
 71. "a pomodoro timer web app" (and "a todo app") get the generic "Auth and data model" boss and Supabase; simple timers/todo lists are local-first (localStorage), like the speedrun timer and habit tracker. "a workout tracker for my iphone" and "a sleep tracker app for my phone" still get the generic offline-first mobile plan with the store-submission boss.
 72. Weak name: "Cleans Up Downloads CLI" ("a cli that cleans up my downloads folder") should be "Downloads Cleaner CLI"; "Learning Japanese Day Streak" for "a streak app for learning japanese every day".
 - Committed 411e708 and pushed; Render deployed within about 60s (live llms.txt has the habit tracker example and FAQ, live API plans "a habit tracker for my android phone" with the streak-logic boss; /q/zzz 404). FEEDBACK.md (uncommitted X watch edits) left for its own run; newsletter/ stays ignored.
+
+## 2026-11-06 (daily run, ~8:15-8:35 AM CT)
+- Health: Render (https://queststarter.onrender.com) /health 200 after a ~12s cold start. Local :4173 up (restarted on new code). Locally /, /health, /robots.txt, /sitemap.xml, /llms.txt, /og.png 200; /q/zzz and unknown paths 404; bad JSON to /api/generate 400; FAQPage JSON-LD parses (24 Qs); all 27 sitemap /q/ links 200; GoatCounter script still in public/index.html.
+- Output test: 20 varied new ideas (Twitch chat poll overlay, restaurant booking agent, Godot cat wizard roguelike, Shorts blocker extension, Valorant rank Discord bot, Postgres MCP server, Reddit sentiment dashboard, regex VS Code extension, Android habit tracker, pomodoro Chrome extension, meal-prep agent, Steam Deck speedrun timer, iPhone drummer metronome, beat maker, local-first todo, pomodoro with lofi, sleep log, workout log, downloads-cleanup CLI, Japanese learning streak) all produce full 6-level plans; 351 ideas quoted in OPS_LOG/FEEDBACK plus probes diffed against the previous generator: 13 changed, all intended (pomodoro/todo/focus timers, workout/sleep trackers and logs, downloads cleaner name, Japanese learning streak name).
+- Fixed in generator.js:
+  - Backlog 71 done: "a pomodoro timer web app" (and focus/tomato timers) are local-first — Supabase dropped for localStorage, must-haves for start/pause/reset with editable focus/break lengths plus an end notification, boss is a background-tab-safe countdown from an end timestamp (not setInterval ticks). "a todo app" / "a simple todo list" get add/complete/filter must-haves, localStorage persistence, and a local-data boss (was Auth and data model + Supabase). "a workout tracker for my iphone" and "a sleep tracker app for my phone" (and workout/sleep logs) get on-device expo-sqlite plans with logging must-haves instead of the generic store-submission boss.
+  - Backlog 72 done: "a cli that cleans up my downloads folder" is named "Downloads Cleaner CLI" (was "Cleans Up Downloads CLI"); clean/delete/remove verbs plus skipping the "up" particle; "a streak app for learning japanese every day" is "Japanese Learning Streak" (was "Learning Japanese Day Streak").
+- SEO: "A pomodoro timer web app" example quest added to sitemap.xml (now 27 quest URLs) and llms.txt.
+- LLM discoverability: new FAQ "Can it plan a pomodoro timer or a todo list without accounts?" on the page, FAQPage JSON-LD (24 Qs) and llms.txt.
+
+### Backlog
+10. Render free tier cold-starts (~12-85s), one ~8-minute stall on 10-28; consider a paid instance or keep-alive ping when traffic starts.
+24. Consider moving FEEDBACK.md/OPS_LOG.md out of the public repo (or making it private).
+26. Weak names: "Invoices Sender", "Current Song Viewer", "Chrome Extension" (dark overlay on YouTube), "OBS Plugin", "AI Agent" ("files bugs from my notes app"), "Cozy Sim" (cafe), "MCP Server" (linear tickets; postgres), "Slack Bot" (hr questions), "Tickets Creator", "Names D D AI", "D D Character", "D D NPC", "Tag Photos AI", "Them Sender", "Discord Bot" (plays music; plays lofi music in voice chat), "AI Workout Plan", "AI Todo", "Farming Game Stardew", "Voice Memos Converter", "Learning Japanese Flashcard", "Emotes Viewer", "AI Value Pokemon Card Estimator", "Detects Dog Barking Mobile", "Valorant Crosshair Code" (drops "Generator"), "Text Speech" ("a speech to text app for my iphone"), "Writers Dictation", "Laptop Runner" (Ollama chatbot), "League Legends Ranked Tracker", "Steam Library Converter" ("turns my steam library into a tier list"), "Current Elden Ring Viewer" (Twitch overlay death count), "Lecture Transcription" (should be "Lecture Transcriber"), "MCP Server" (lets cursor query my supabase database), "Old Screenshots Deleter" ("a cli that deletes old screenshots"; fine-ish), "Local First Todo" (keeps the adjective).
+27. "a personal finance dashboard from my bank CSV" still plans a fetch/diff/alert data tool.
+29. "a semantic search engine for my bookmarks" is still a plain Next.js web app.
+32. "a space sim" gets the generic player-and-enemy game plan.
+34. Bot + RAG support bots keep the bot boss ("data ingestion / API integration"); also the Telegram water reminder bot and "an ai dungeon master for discord".
+35. "an app that uses gpt to summarize my emails" stays an agent; a Gmail-read + one LLM call plan may fit better.
+36. "a discord bot that plays music" (and "plays lofi music in voice chat") gets the "data ingestion / rate limits" boss; voice/audio streaming is the real boss.
+40. "a landing page for my ai startup" and "a portfolio website with an ai chatbot" get an AI Agent component.
+45. Stream overlays get game loot from the Twitch/game keywords; overlay loot should be overlay-specific.
+48. "a podcast clip finder that uses ai", "a cli that renames my screenshots with ai" and "a chrome extension that finds coupon codes with ai" plan as AI Agents; find/rename are one-shot AI features (AI Web App / CLI / extension + one LLM call).
+50. "a twitch clips compilation maker" plans as a Bot from the Twitch keyword; it is a video tool (Twitch API clips + ffmpeg).
+60. "a local llm chatbot that runs on my laptop with ollama" plans as an AI Agent with a cloud API stack; it needs an Ollama (local model) chat plan.
+61. "a stream deck plugin that shows my twitch viewer count" plans as a Twitch Bot; it is an Elgato Stream Deck SDK plugin.
+65. The /stats usage counter is in-memory and resets on every deploy (daily), so it never holds more than about a day of data; persist daily totals.
+66. "a discord bot that clips the last 30 seconds of voice chat" is named "Discord Bot" and gets the generic slash-command plan; it needs voice receive (@discordjs/voice) + a rolling audio buffer + ffmpeg (related to 36).
+67. "a mobile app that scans receipts and splits the bill with friends" (no "ai" word) is a plain offline-first mobile app with the store-submission boss; it needs a camera + receipt OCR line (vision model or ML Kit) and a split-the-bill flow.
+70. "a beat maker web app" gets the generic auth/data-model boss; it needs a Web Audio step sequencer plan (sample playback, lookahead scheduling like the metronome).
+
+### Backlog (new)
+73. "a pomodoro chrome extension" stays a generic browser extension (popup + content script) with no timer must-haves; a pomodoro extension wants a service-worker countdown and badge timer, not only the web local-first plan.
