@@ -430,6 +430,21 @@ function generate(idea) {
     if (/\bdrum\w*\b/.test(lower)) name = 'Drum Metronome';
     { const si = stack.findIndex(x => /Supabase/.test(x.tech)); if (si >= 0) stack.splice(si, 1); const pi = must.findIndex(m => /^Persist data/.test(m)); if (pi >= 0) must[pi] = 'Remember the last BPM and time signature in localStorage'; }
   }
+  // "a beat maker web app": Web Audio step sequencer (sample playback + lookahead), not Auth/Supabase
+  const beatMaker = !metronome && !tuner && /^(web|mobile)$/.test(keys[0]) && !secondary && /\b(beat makers?|drum machines?|step sequencers?)\b/.test(lower);
+  if (beatMaker) {
+    const mob = keys[0] === 'mobile';
+    stack.push({ tech: mob ? 'react-native-audio-api (Web Audio API for React Native), in an Expo development build' : 'Web Audio API (AudioContext + AudioBufferSourceNode + a lookahead scheduler)', why: 'Plays one-shot drum samples on the audio clock a little ahead of time, so the grid stays tight instead of drifting like setInterval.' });
+    const core = mob ? 'Core action that works offline-first with local state' : 'The one core flow, end to end';
+    const i = must.indexOf(core);
+    if (i >= 0) must.splice(i, 1, 'A 16-step (or 8/16 toggle) grid for at least 4 drum pads (kick, snare, hat, clap) that plays on a loop at a chosen BPM', 'Schedule each hit on the audio clock (AudioContext.currentTime) with a short lookahead, never with setInterval alone, and let the user load or swap a sample per pad');
+    if (mob) { const j = must.indexOf('Run on a real device via Expo Go'); if (j >= 0) must[j] = 'Run on a real device with an Expo development build (sample playback needs a native module, so Expo Go is not enough)'; }
+    { const si = stack.findIndex(x => /Supabase/.test(x.tech)); if (si >= 0) stack.splice(si, 1); const pi = must.findIndex(m => /^Persist data/.test(m)); if (pi >= 0) must[pi] = 'Save the pattern, BPM and pad-to-sample map in localStorage so a refresh keeps the beat'; }
+    boss = 'Tight timing under load: samples that fire late or double when the ' + (mob ? 'app is backgrounded or the CPU is busy' : 'tab is in the background or the main thread is busy') + ', so schedule on the audio clock and check a 16-step loop against a reference metronome for 2 minutes';
+    if (/\bdrum machines?\b/.test(lower)) name = 'Drum Machine';
+    else if (/\bstep sequencers?\b/.test(lower)) name = 'Step Sequencer';
+    else name = 'Beat Maker';
+  }
   // "a speedrun timer for my steam deck": a local-first stopwatch with splits, no accounts or database
   const runTimer = /^(web|mobile)$/.test(keys[0]) && !secondary && /\b(speed ?run\w* timer|split timer|livesplit)\b/.test(lower);
   if (runTimer) {
@@ -481,6 +496,20 @@ function generate(idea) {
     else if (/\bfocus timer\b/.test(lower)) name = 'Focus Timer';
     else if (/\btomato timer\b/.test(lower)) name = 'Tomato Timer';
   }
+  // "a pomodoro chrome extension": service-worker countdown + badge timer, not a generic content-script extension
+  const pomoExt = !pomo && keys[0] === 'extension' && !vscode && !secondary && /\b(pomodoro|focus timer|tomato timer)\b/.test(lower);
+  if (pomoExt) {
+    const i = must.indexOf('Manifest + popup that opens');
+    if (i >= 0) must.splice(i, 1, 'Manifest V3 with a popup that shows start/pause/reset and the remaining time', 'A service worker that runs the countdown from an end timestamp (chrome.alarms + Date.now()), updates chrome.action.setBadgeText while a session is running, and fires a notification when a focus or break ends');
+    const j = must.indexOf('Content script that does one thing on one site');
+    if (j >= 0) must.splice(j, 1, 'Editable focus and break lengths; no content script required for the MVP');
+    const k = must.indexOf('Settings saved in chrome.storage');
+    if (k >= 0) must[k] = 'Remember focus/break lengths and today\'s completed session count in chrome.storage.local';
+    boss = 'An accurate timer across MV3 service worker sleeps: store the end timestamp, use chrome.alarms so the worker wakes for the session end, and keep the badge time correct when Chrome throttles the worker';
+    if (/\bpomodoro\b/.test(lower)) name = 'Pomodoro Timer';
+    else if (/\bfocus timer\b/.test(lower)) name = 'Focus Timer';
+    else if (/\btomato timer\b/.test(lower)) name = 'Tomato Timer';
+  }
   // "a todo app" / "a simple todo list": add/complete tasks on the device, no Auth/Supabase
   const todo = !metronome && !runTimer && !habit && !pomo && /^(web|mobile)$/.test(keys[0]) && !secondary && /\b(to-?dos?|todo lists?|task lists?|checklist)\b/.test(lower) && !/\b(ai|gpt|claude|llm|gemini|openai|prioriti[sz]\w*|agents?|assistants?)\b/.test(lower);
   if (todo) {
@@ -526,6 +555,8 @@ function generate(idea) {
   if (photoAI || camTranslate) { loot.delete('Model picker'); loot.delete('Conversation memory'); loot.delete('Eval set to test quality'); ['History of past scans on the device', 'Eval set of 20 real photos'].forEach(l => loot.add(l)); }
   if (habit) [keys[0] === 'mobile' ? 'Home screen widget for today\'s habits' : 'Installable as a PWA that works offline', 'Export check-ins as CSV'].forEach(l => loot.add(l));
   if (pomo) [keys[0] === 'mobile' ? 'Home screen widget or live activity for the running timer' : 'Installable as a PWA with an optional ambient tick sound', 'A simple daily/weekly session count chart'].forEach(l => loot.add(l));
+  if (beatMaker) ['Export and import patterns as JSON', 'Swing / humanize amount and a master volume'].forEach(l => loot.add(l));
+  if (pomoExt) ['Optional site blocker list while a focus session is running', 'A simple daily/weekly session count in the popup'].forEach(l => loot.add(l));
   if (todo) ['Export tasks as JSON or CSV', keys[0] === 'mobile' ? 'Home screen quick-add widget' : 'Installable as a PWA that works offline'].forEach(l => loot.add(l));
   if (personalLog) ['Export entries as CSV', keys[0] === 'mobile' ? 'Home screen widget for today\'s summary' : 'Installable as a PWA that works offline'].forEach(l => loot.add(l));
   if (runTimer) { loot.delete('Leaderboards'); ['Import and export LiveSplit (.lss) splits', 'Sum of best and best possible time'].forEach(l => loot.add(l)); }
