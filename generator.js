@@ -152,6 +152,8 @@ const STORE = /\b(store|shop|etsy|shopify|woocommerce|ecommerce|e-commerce|order
 const PERSONA = /\b(role ?plays?|roleplaying|persona|companion|pretends? to be|in character|(talks?|speaks?|acts?|chats?) (like|as) (a|an|my|the)\b)/;
 // transcribing speech ("transcribes my voice notes", "a meeting transcriber with whisper api"); a bare "whisper" (chat app, horror game) does not count
 const STT = /\b(transcrib\w*|transcriptions?|speech[- ]to[- ]text|dictation)\b|\b(with|using|uses?|via|and) (openai'?s? )?whisper\b|\bwhisper (api|model)\b/;
+// chat with a model running on your machine (Ollama, LM Studio); a usage monitor stays a data tool
+const LOCAL_LLM = /\b(ollama|lm studio|lmstudio|lm-studio|localai|local-ai|llama\.?cpp|gpt4all)\b|\blocal (llms?|models?)\b/;
 const STOP = new Set('a an the to for of and or that i my me with on in it is be build make create want app project idea simple'.split(' '));
 
 function detectTypes(text) {
@@ -198,6 +200,20 @@ function detectTypes(text) {
   }
   // a character or roleplay chatbot just talks: a persona prompt, chat history and a streaming UI, no tools or agent loop
   if (keys[0] === 'agent' && PERSONA.test(t) && !/\b(files?|sends?|books?|posts?|reads? my|emails?|schedules?|orders?|buys?|deploys?|creates? (issues|tickets|bugs))\b/.test(t)) keys[0] = 'persona';
+  // "a local llm chatbot that runs on my laptop with ollama": chat with a local model, not a cloud tool-calling agent
+  if (LOCAL_LLM.test(t) && /\b(chat\w*|assistant|conversation|talks?)\b/.test(t) && !/\b(monitor\w*|dashboards?|usage|trackers?|costs?|spend\w*|alerts?)\b/.test(t)) {
+    if (keys.includes('agent')) keys[keys.indexOf('agent')] = 'persona';
+    else if (keys[0] === 'web' && !keys.includes('persona')) keys[0] = 'persona';
+    else if (!keys.includes('persona') && !keys.includes('rag')) keys.unshift('persona');
+  }
+  // "a landing page for my ai startup" is a marketing site, not an agent; a portfolio with a chatbot is a site plus a chat widget
+  if (keys.includes('agent') && /\b(landing pages?|portfolios?)\b/.test(t) && !/\b(chatbots?|agents?|assistants?|copilots?)\b/.test(t)) {
+    keys.splice(keys.indexOf('agent'), 1);
+    if (!keys.includes('web')) keys.unshift('web');
+    else { keys.splice(keys.indexOf('web'), 1); keys.unshift('web'); }
+  } else if (keys.includes('agent') && /\b(landing pages?|portfolios?)\b/.test(t) && /\bchatbots?\b/.test(t) && !/\b(files?|sends?|books?|posts?|reads? my|emails?|schedules?|orders?|buys?|deploys?|creates? (issues|tickets|bugs))\b/.test(t)) {
+    keys[keys.indexOf('agent')] = 'persona';
+  }
   // "a meal planner that uses ai to suggest recipes" is one LLM call behind a form, not a tool-calling agent loop
   // "a workout tracker that uses ai to plan my week" / "a recipe site that uses claude to write recipes": a web app whose core is that one AI call is an AI Web App too
   const ai1 = keys.indexOf('agent');
@@ -205,7 +221,7 @@ function detectTypes(text) {
   const TEXTGEN = /\b(captions?|bios?|slogans?|taglines?|tweets?|hashtags?|(?<!file |domain )names?|titles?|headlines?|poems?|lyrics|jokes?|excuses?|cover letters?|descriptions?|pick ?up lines?|stor(y|ies)|prompts?|ideas?|puns?|essays?|quotes?|rhymes?|raps?|limericks?|haikus?) (generator|writer|maker)s?\b/;
   if (!keys.length && TEXTGEN.test(t)) keys.push('web');
   const aiUse = ai1 >= 0 || (keys[0] === 'web' && (/\b(ai|gpt|chatgpt|claude|llm|openai|gemini|grok)\b/.test(t) || TEXTGEN.test(t)));
-  if (aiUse && !/\b(agents?|agentic|autonomous\w*|assistants?|copilots?|chatbots?|chat|bots?|rag|files?|sends?|books?|(?<!blog |social media |each |every |per |the |a |my |your |our )posts?|reads? my|emails?|inbox|schedules?|orders?|buys?|deploys?|browses?|controls?|automat\w*|monitors?|smart home|creates? (issues|tickets|bugs)|opens? (prs?|pull requests))\b/.test(t) && /\b(suggest\w*|generat\w*|writ(e|es|er|ers|ing)|summar\w*|review\w*|maker|makes|names?|tags?|explain\w*|rewrit\w*|translat\w*|plans?|planner|captions?|descriptions?|turns?|converts?|grades?|scores?|critiques?|roasts?|feedback|ideas|prioriti[sz]\w*|rate|rates|rating|rank|ranks|sort|sorts|categori[sz]\w*|classif\w*|identif\w*|recogni[sz]\w*|detects?|transcrib\w*|extracts?|scans?|counts?|estimat\w*|analy[sz]\w*|calculat\w*)\b/.test(t)) {
+  if (aiUse && !/\b(agents?|agentic|autonomous\w*|assistants?|copilots?|chatbots?|chat|bots?|rag|files?|sends?|books?|(?<!blog |social media |each |every |per |the |a |my |your |our )posts?|reads? my|emails?|inbox|schedules?|orders?|buys?|deploys?|browses?|controls?|automat\w*|monitors?|smart home|creates? (issues|tickets|bugs)|opens? (prs?|pull requests))\b/.test(t) && /\b(suggest\w*|generat\w*|writ(e|es|er|ers|ing)|summar\w*|review\w*|maker|makes|names?|tags?|explain\w*|rewrit\w*|translat\w*|plans?|planner|captions?|descriptions?|turns?|converts?|grades?|scores?|critiques?|roasts?|feedback|ideas|prioriti[sz]\w*|rate|rates|rating|rank|ranks|sort|sorts|categori[sz]\w*|classif\w*|identif\w*|recogni[sz]\w*|detects?|transcrib\w*|extracts?|scans?|counts?|estimat\w*|analy[sz]\w*|calculat\w*|finds?|finder|finding|renam\w*)\b/.test(t)) {
     // a phone app, extension, bot, CLI or game with one AI feature stays that kind of project; the AI call is a feature, not an agent
     if (ai1 >= 0 && keys.some(k => /^(mobile|extension|bot|cli|game|mcmod|overlay)$/.test(k))) keys.splice(ai1, 1);
     else if (ai1 === 0 || keys[0] === 'web') { if (ai1 > 0) keys.splice(ai1, 1); keys[0] = 'aiapp'; const w = keys.indexOf('web'); if (w > 0) keys.splice(w, 1); } else keys.splice(ai1, 1);
@@ -213,7 +229,7 @@ function detectTypes(text) {
   return keys.length ? keys.slice(0, 2) : ['web'];
 }
 
-const ACRO = { ai: 'AI', rag: 'RAG', mcp: 'MCP', cli: 'CLI', pdfs: 'PDFs', obsidian: 'Obsidian', saas: 'SaaS', claude: 'Claude', cursor: 'Cursor', vscode: 'VS Code', turnbased: 'Turn-Based', api: 'API', llm: 'LLM', gpt: 'GPT', ios: 'iOS', iphone: 'iPhone', mvp: 'MVP', rpg: 'RPG', ui: 'UI', '2d': '2D', '3d': '3D', npc: 'NPC', mmo: 'MMO', fps: 'FPS', pc: 'PC', vr: 'VR', ar: 'AR', youtube: 'YouTube', github: 'GitHub', tiktok: 'TikTok', gpu: 'GPU', cpu: 'CPU', pdf: 'PDF', seo: 'SEO', sql: 'SQL', npcs: 'NPCs', unity: 'Unity', godot: 'Godot', unreal: 'Unreal', ue5: 'UE5', obby: 'Obby', threejs: 'Three.js', webgl: 'WebGL', discord: 'Discord', telegram: 'Telegram', slack: 'Slack', twitter: 'Twitter', reddit: 'Reddit', steam: 'Steam', chrome: 'Chrome', android: 'Android', notion: 'Notion', spotify: 'Spotify', twitch: 'Twitch', minecraft: 'Minecraft', roblox: 'Roblox', xbox: 'Xbox', playstation: 'PlayStation', openai: 'OpenAI', chatgpt: 'ChatGPT', nextjs: 'Next.js', obs: 'OBS', csv: 'CSV', json: 'JSON', npx: 'npx', woocommerce: 'WooCommerce' };
+const ACRO = { ai: 'AI', rag: 'RAG', mcp: 'MCP', cli: 'CLI', pdfs: 'PDFs', obsidian: 'Obsidian', saas: 'SaaS', claude: 'Claude', cursor: 'Cursor', vscode: 'VS Code', turnbased: 'Turn-Based', api: 'API', llm: 'LLM', gpt: 'GPT', ios: 'iOS', iphone: 'iPhone', mvp: 'MVP', rpg: 'RPG', ui: 'UI', '2d': '2D', '3d': '3D', npc: 'NPC', mmo: 'MMO', fps: 'FPS', pc: 'PC', vr: 'VR', ar: 'AR', youtube: 'YouTube', github: 'GitHub', tiktok: 'TikTok', gpu: 'GPU', cpu: 'CPU', pdf: 'PDF', seo: 'SEO', sql: 'SQL', npcs: 'NPCs', unity: 'Unity', godot: 'Godot', unreal: 'Unreal', ue5: 'UE5', obby: 'Obby', threejs: 'Three.js', webgl: 'WebGL', discord: 'Discord', telegram: 'Telegram', slack: 'Slack', twitter: 'Twitter', reddit: 'Reddit', steam: 'Steam', chrome: 'Chrome', android: 'Android', notion: 'Notion', spotify: 'Spotify', twitch: 'Twitch', minecraft: 'Minecraft', roblox: 'Roblox', xbox: 'Xbox', playstation: 'PlayStation', openai: 'OpenAI', chatgpt: 'ChatGPT', nextjs: 'Next.js', obs: 'OBS', csv: 'CSV', json: 'JSON', npx: 'npx', woocommerce: 'WooCommerce', ollama: 'Ollama' };
 function titleCase(s) { return s.split(' ').map(w => ACRO[w] || w.replace(/\b\w/g, c => c.toUpperCase())).join(' '); }
 function hasWord(text, k) { return new RegExp('(^|[^a-z0-9])' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '($|[^a-z0-9])').test(text); }
 function lbl(l) { return l.toLowerCase().replace(/\bai\b/g, 'AI').replace(/\bapi\b/g, 'API').replace(/\bmcp\b/g, 'MCP').replace(/\bvs code\b/g, 'VS Code').replace(/\bminecraft\b/g, 'Minecraft').replace(/\bcli\b/g, 'CLI').replace(/\brag\b/g, 'RAG'); }
@@ -472,12 +488,14 @@ function generate(idea) {
     const pi = must.findIndex(m => /^Persist data/.test(m));
     if (pi >= 0) must[pi] = 'Save habits and check-ins in localStorage so they survive a refresh';
     boss = 'Streak logic: store each check-in as a local date (YYYY-MM-DD), not a timestamp, so a late-night check-off, a missed day, daylight saving and travel across time zones never break or double-count a streak';
-    // "a streak app for learning japanese every day" -> "Japanese Learning Streak"
-    const learn = lower.match(/\b(?:learning|studying|practicing)\s+([a-z]+(?:\s+[a-z]+)?)/);
-    if (learn) {
-      const subj = learn[1].split(/\s+/).filter(w => !/^(every|each|day|daily|week|weekly|month|a|an|the|my|our)$/.test(w));
-      if (subj.length) name = titleCase(subj.join(' ')) + ' Learning Streak';
-    } else if (/^Habits? (Tracker|App)$/.test(name) || name === 'Habit') name = 'Habit Tracker';
+    // "a streak app for learning japanese every day" / "a japanese learning streak app" -> "Japanese Learning Streak"
+    const learnJunk = /^(every|each|day|daily|week|weekly|month|a|an|the|my|our|apps?|streaks?|habits?|for|of|about|by|while|when|after|before|with|from|on|in|to)$/;
+    const learnWords = raw => (raw || '').split(/\s+/).filter(w => w && !learnJunk.test(w));
+    const learnAfter = learnWords((lower.match(/\b(?:learning|studying|practicing)\s+([a-z]+(?:\s+[a-z]+)?)/) || [])[1]);
+    const learnBefore = learnWords((lower.match(/\b([a-z]+)\s+(?:learning|studying|practicing)\b/) || [])[1]);
+    const subj = learnAfter.length ? learnAfter : learnBefore;
+    if (subj.length) name = titleCase(subj.join(' ')) + ' Learning Streak';
+    else if (/^Habits? (Tracker|App)$/.test(name) || name === 'Habit') name = 'Habit Tracker';
   }
   // "a pomodoro timer web app": focus/break countdown on the device, no accounts or database
   const pomo = !metronome && !runTimer && !habit && /^(web|mobile)$/.test(keys[0]) && !secondary && /\b(pomodoro|focus timer|tomato timer)\b/.test(lower);
@@ -548,6 +566,34 @@ function generate(idea) {
     name = name.replace(/\b(Folder|Directory|Dir) Cleaner$/, 'Cleaner');
     if (keys[0] === 'cli' && !/\bCLI$/.test(name)) name += ' CLI';
   }
+  // "a local llm chatbot that runs on my laptop with ollama": talk to a model on your machine, no cloud API key
+  const localLlm = LOCAL_LLM.test(lower) && /^(persona|aiapp|web)$/.test(keys[0]) && !secondary && /\b(chat\w*|assistant|conversation|talks?)\b/.test(lower) && !/\b(monitor\w*|dashboards?|usage|trackers?|costs?|spend\w*|alerts?)\b/.test(lower);
+  if (localLlm) {
+    const runner = /\blm[- ]?studio\b/.test(lower) && !/\bollama\b/.test(lower)
+      ? { tech: "LM Studio's local OpenAI-compatible server (localhost)", why: 'Serves whatever model you loaded in LM Studio on your machine, so chats never leave your laptop.' }
+      : { tech: 'Ollama running locally (HTTP API at localhost:11434)' + (/\blm[- ]?studio\b/.test(lower) ? ", or LM Studio's local OpenAI-compatible server" : ''), why: 'Serves the model on your machine so chats never leave your laptop. Pull a model with `ollama pull` (try llama3.2) before you start.' };
+    const oai = stack.findIndex(x => /OpenAI \/ Anthropic/.test(x.tech) || /^An LLM API behind/.test(x.tech));
+    if (oai >= 0) stack.splice(oai, 1, runner); else stack.push(runner);
+    const vai = stack.findIndex(x => /Vercel AI SDK/.test(x.tech));
+    if (vai >= 0) stack[vai] = { tech: 'Next.js + TypeScript + the Vercel AI SDK (ollama-ai-provider)', why: 'Streams tokens from your local Ollama (or LM Studio) server into a chat UI; the same SDK works later if you add a cloud model.' };
+    const si = stack.findIndex(x => /Supabase/.test(x.tech));
+    if (si >= 0) stack.splice(si, 1);
+    const ve = stack.findIndex(x => x.tech === 'Vercel');
+    if (ve >= 0) stack.splice(ve, 1);
+    const coreIdx = must.findIndex(m => /^A system prompt that defines|^A chat UI that streams|^One input form for what the user|^The one core flow/.test(m));
+    const localMust = [
+      'A chat UI that streams tokens from Ollama at http://localhost:11434' + (/\blm[- ]?studio\b/.test(lower) ? " (or LM Studio's local OpenAI-compatible endpoint)" : ''),
+      "A model picker filled from the local server's model list (Ollama GET /api/tags)",
+      "Conversation history sent with each message, trimmed to the model's context window, plus a reset button",
+      'A clear empty state when Ollama is not running or no model is pulled, with the exact command to start it and pull a model'
+    ];
+    if (coreIdx >= 0) must.splice(coreIdx, Math.min(4, must.length - coreIdx), ...localMust);
+    else must.unshift(...localMust);
+    boss = 'Staying fully local and usable: first-token latency on your hardware, context-window limits on smaller models, and a clear error when Ollama is not running or no model is pulled — never silently fall back to a cloud API';
+    if (/\bollama\b/.test(lower)) name = 'Ollama Chat';
+    else if (/\blm[- ]?studio\b/.test(lower)) name = 'LM Studio Chat';
+    else name = 'Local LLM Chat';
+  }
   if (secondary) must.push('Integration point with your ' + lbl(secondary.label) + ' component');
   const loot = new Set();
   for (const f of FLAVOR) if (f.kw.some(k => hasWord(lower, k) || (k.length > 4 && lower.includes(k)))) f.loot.forEach(l => loot.add(l));
@@ -559,6 +605,7 @@ function generate(idea) {
   if (pomoExt) ['Optional site blocker list while a focus session is running', 'A simple daily/weekly session count in the popup'].forEach(l => loot.add(l));
   if (todo) ['Export tasks as JSON or CSV', keys[0] === 'mobile' ? 'Home screen quick-add widget' : 'Installable as a PWA that works offline'].forEach(l => loot.add(l));
   if (personalLog) ['Export entries as CSV', keys[0] === 'mobile' ? 'Home screen widget for today\'s summary' : 'Installable as a PWA that works offline'].forEach(l => loot.add(l));
+  if (localLlm) { loot.delete('Cost / token meter'); loot.add('Optional system prompt editor'); }
   if (runTimer) { loot.delete('Leaderboards'); ['Import and export LiveSplit (.lss) splits', 'Sum of best and best possible time'].forEach(l => loot.add(l)); }
   ['Polish pass and onboarding', 'Share / invite flow', 'Basic analytics'].forEach(l => loot.add(l));
 
