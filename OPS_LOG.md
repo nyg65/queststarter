@@ -568,3 +568,4 @@
 ### Backlog (new)
 74. "an iphone app that logs my espresso shots" (and similar personal logs that do not say tracker/workout/sleep) still get the generic store-submission boss and Supabase; they should stay on-device like the workout and sleep log plans.
 75. "a godot game where you cook ramen for hungry yokai" gets the generic player-and-enemy combat plan; a cooking or serving game wants a cozy core-loop + progression MVP.
+- Committed 3791469 and pushed; Render deployed within about 30s (live llms.txt has the Ollama chatbot example and FAQ, live API plans "a local llm chatbot that runs on my laptop with ollama" as Ollama Chat with the localhost:11434 stack and no cloud fallback, "a podcast clip finder that uses ai" as an AI Web App, "a pomodoro chrome extension" still a Pomodoro Timer; /q/zzz 404). FEEDBACK.md (uncommitted X watch edits) left for its own run; newsletter/ stays ignored.
