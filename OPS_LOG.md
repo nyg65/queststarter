@@ -581,3 +581,4 @@
 ### Backlog (new)
 76. "a raycast extension for my notion tasks" is typed as a Browser Extension (name "Raycast Extension", MV3/DOM boss); it needs a Raycast API (React + @raycast/api) plan with the Notion API.
 77. "an android app that reminds me to stretch" keeps the generic "Auth, permissions, and store submission" boss and Supabase; simple reminder apps should be local notifications + on-device settings. Name "Backs Up Dotfiles CLI" is weak (should be "Dotfiles Backup CLI"; add to 26).
+- Committed da94459 and pushed; Render deployed within about 40s (live llms.txt has the espresso example and FAQ, live API plans "an iphone app that logs my espresso shots" as Espresso Shots Logger with expo-sqlite and no Supabase; /q/zzz 404). FEEDBACK.md (uncommitted X watch edits) left for its own run; newsletter/ stays ignored.
