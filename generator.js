@@ -543,8 +543,10 @@ function generate(idea) {
     boss = 'Local data you can trust: tasks never silently disappear on refresh, and an export (JSON or CSV) lets you leave without lock-in';
     if (/^Todos?$/.test(name) || name === 'Todo List App') name = 'Todo List';
   }
+  // "an iphone app that logs my espresso shots" / "a plant watering log app": any personal log of my own stuff
+  const PERSONAL_LOG = /\b(logs?|logging|logger|journal)\s+(of\s+)?my\b|\b(log|journal)\s+(app|for)\b|\b(log|journal)$/;
   // "a workout tracker for my iphone" / "a sleep tracker app for my phone": personal logs stay on-device
-  const personalLog = !habit && !pomo && !todo && /^(mobile|web)$/.test(keys[0]) && !secondary && /\b(workouts?|gym sessions?|exercises?|sleep|mood|water intake|weight|meditation)\b/.test(lower) && /\b(track\w*|log|logger|journal)\b/.test(lower) && !/\b(ai|gpt|claude|llm|gemini|openai|friends?|leaderboards?|social|group|team|share\w*|fitbit|strava|garmin|apple health|healthkit|google fit|vr|ar|game)\b/.test(lower);
+  const personalLog = !habit && !pomo && !todo && /^(mobile|web)$/.test(keys[0]) && !secondary && ((/\b(workouts?|gym sessions?|exercises?|sleep|mood|water intake|weight|meditation)\b/.test(lower) && /\b(track\w*|log|logger|journal)\b/.test(lower)) || PERSONAL_LOG.test(lower)) && !/\b(server|error|api|console|crash|access|system|files?|parse\w*|viewer|analy\w+|webhooks?|requests?|deploy\w*|chat|discord|slack|twitch)\b/.test(lower) && !/\b(ai|gpt|claude|llm|gemini|openai|friends?|leaderboards?|social|group|team|share\w*|fitbit|strava|garmin|apple health|healthkit|google fit|vr|ar|game)\b/.test(lower);
   if (personalLog) {
     const mob = keys[0] === 'mobile';
     const kind = /\bsleep\b/.test(lower) ? 'sleep' : /\b(workouts?|gym|exercises?)\b/.test(lower) ? 'workout' : 'log';
@@ -555,6 +557,7 @@ function generate(idea) {
     const i = must.indexOf(core);
     if (kind === 'workout' && i >= 0) must.splice(i, 1, 'Log a workout with date, exercise or type, and a duration or set count, then see a history list', mob ? 'A quick-add button on the home screen so logging takes under 15 seconds' : 'A simple weekly summary of sessions logged');
     else if (kind === 'sleep' && i >= 0) must.splice(i, 1, 'Log bedtime and wake time (or total hours) for a night and see a recent history', mob ? 'A local morning reminder to log last night (expo-notifications), with no server' : 'A 7-day bar chart of hours slept');
+    else if (/\b(espresso|coffee|brews?|pour ?overs?|lattes?)\b/.test(lower) && i >= 0) must.splice(i, 1, 'Log a ' + (/\bespresso\b/.test(lower) ? 'shot' : 'brew') + ' with date, beans, dose (g), yield (g), time (s) and a 1-5 taste rating, then see recent entries', 'Prefill the next entry from the last one so dialing in only changes one variable');
     else if (i >= 0) must.splice(i, 1, 'Add a dated entry with the one field that matters, then browse recent history');
     const pi = must.findIndex(m => /^Persist data/.test(m));
     if (pi >= 0) must[pi] = 'Save entries in ' + (mob ? 'expo-sqlite' : 'localStorage') + ' so they survive a restart';
