@@ -130,6 +130,11 @@ const VSCODE = /\b(vs ?code|vscode|visual studio code|cursor extension)\b/;
 const VSCODE_STACK = [['VS Code Extension API + TypeScript (yo code)', 'Official scaffold; the same extension also runs in Cursor and Windsurf.'], ['esbuild', 'Fast bundling that the official template supports.'], ['VS Code Marketplace + Open VSX', 'Publish to both so Cursor and other VS Code forks can install it.']];
 const VSCODE_MUST = ['One command in the Command Palette that runs the core action', 'Show the result in the editor (hover, panel, or inline decoration)', 'Settings via contributes.configuration', 'Test it in the Extension Development Host (F5)'];
 const VSCODE_BOSS = 'Extension host lifecycle and keeping the editor fast (activation events, async work)';
+// Raycast (macOS launcher) extensions are React + TypeScript commands built on @raycast/api, not Chrome MV3
+const RAYCAST = /\braycast\b/;
+const RAYCAST_STACK = [['Raycast API (@raycast/api) + React + TypeScript (npm create raycast-extension)', 'The official template; each command is a React component (List, Detail or Form) and `npm run dev` hot-reloads it inside Raycast.'], ['@raycast/utils (useFetch, usePromise, useCachedPromise, OAuth helpers)', 'Loading states, caching and OAuth in a few lines, so results show instantly the second time.'], ['Extension preferences (password type for API tokens)', 'Raycast stores secrets in the macOS keychain; never hardcode a token.'], ['Raycast Store (npm run publish)', 'Opens a pull request to raycast/extensions; reviewers check it before anyone can install it.']];
+const RAYCAST_MUST = ['One command in package.json that opens a List view from the Raycast root search', 'Load the data with useCachedPromise or useFetch, with a loading state, an empty view and a clear error toast', 'An ActionPanel on each item (open in browser, copy, and the one action that matters)', 'API token read from a password preference, never hardcoded'];
+const RAYCAST_BOSS = 'Feeling instant inside Raycast: cached results, API rate limits and auth (OAuth PKCE via @raycast/utils or a token preference), plus passing the Raycast Store review';
 // Turn-based, card, board, puzzle and text games have no moving character or collision
 const TURN = /\b(turn[- ]based|card game|deckbuilder|deck builder|board game|chess|checkers|tic tac toe|strategy game|tactics|trivia|quiz game|word game|wordle|text adventure|interactive fiction|visual novel|sudoku)\b/;
 const TURN_MUST = ['Game state model (board, hand, or story position) that the UI reads from', 'One full turn: player acts, game resolves, opponent or game responds', 'Win / lose condition and restart', 'Clear feedback on what just happened each turn'];
@@ -226,10 +231,12 @@ function detectTypes(text) {
     if (ai1 >= 0 && keys.some(k => /^(mobile|extension|bot|cli|game|mcmod|overlay)$/.test(k))) keys.splice(ai1, 1);
     else if (ai1 === 0 || keys[0] === 'web') { if (ai1 > 0) keys.splice(ai1, 1); keys[0] = 'aiapp'; const w = keys.indexOf('web'); if (w > 0) keys.splice(w, 1); } else keys.splice(ai1, 1);
   }
+  // "a raycast extension for my notion tasks" is a Raycast (macOS launcher) extension, not a browser extension or a web app
+  if (/\braycast (extensions?|plugins?|commands?|scripts?)\b|\bextensions? for raycast\b|\bfor raycast\b/.test(t)) { for (const k of ['extension', 'web', 'mobile', 'cli', 'data']) { const i = keys.indexOf(k); if (i >= 0) keys.splice(i, 1); } keys.unshift('extension'); }
   return keys.length ? keys.slice(0, 2) : ['web'];
 }
 
-const ACRO = { ai: 'AI', rag: 'RAG', mcp: 'MCP', cli: 'CLI', pdfs: 'PDFs', obsidian: 'Obsidian', saas: 'SaaS', claude: 'Claude', cursor: 'Cursor', vscode: 'VS Code', turnbased: 'Turn-Based', api: 'API', llm: 'LLM', gpt: 'GPT', ios: 'iOS', iphone: 'iPhone', mvp: 'MVP', rpg: 'RPG', ui: 'UI', '2d': '2D', '3d': '3D', npc: 'NPC', mmo: 'MMO', fps: 'FPS', pc: 'PC', vr: 'VR', ar: 'AR', youtube: 'YouTube', github: 'GitHub', tiktok: 'TikTok', gpu: 'GPU', cpu: 'CPU', pdf: 'PDF', seo: 'SEO', sql: 'SQL', npcs: 'NPCs', unity: 'Unity', godot: 'Godot', unreal: 'Unreal', ue5: 'UE5', obby: 'Obby', threejs: 'Three.js', webgl: 'WebGL', discord: 'Discord', telegram: 'Telegram', slack: 'Slack', twitter: 'Twitter', reddit: 'Reddit', steam: 'Steam', chrome: 'Chrome', android: 'Android', notion: 'Notion', spotify: 'Spotify', twitch: 'Twitch', minecraft: 'Minecraft', roblox: 'Roblox', xbox: 'Xbox', playstation: 'PlayStation', openai: 'OpenAI', chatgpt: 'ChatGPT', nextjs: 'Next.js', obs: 'OBS', csv: 'CSV', json: 'JSON', npx: 'npx', woocommerce: 'WooCommerce', ollama: 'Ollama' };
+const ACRO = { ai: 'AI', rag: 'RAG', mcp: 'MCP', cli: 'CLI', pdfs: 'PDFs', obsidian: 'Obsidian', saas: 'SaaS', claude: 'Claude', cursor: 'Cursor', vscode: 'VS Code', turnbased: 'Turn-Based', api: 'API', llm: 'LLM', gpt: 'GPT', ios: 'iOS', iphone: 'iPhone', mvp: 'MVP', rpg: 'RPG', ui: 'UI', '2d': '2D', '3d': '3D', npc: 'NPC', mmo: 'MMO', fps: 'FPS', pc: 'PC', vr: 'VR', ar: 'AR', youtube: 'YouTube', github: 'GitHub', tiktok: 'TikTok', gpu: 'GPU', cpu: 'CPU', pdf: 'PDF', seo: 'SEO', sql: 'SQL', npcs: 'NPCs', unity: 'Unity', godot: 'Godot', unreal: 'Unreal', ue5: 'UE5', obby: 'Obby', threejs: 'Three.js', webgl: 'WebGL', discord: 'Discord', telegram: 'Telegram', slack: 'Slack', twitter: 'Twitter', reddit: 'Reddit', steam: 'Steam', chrome: 'Chrome', android: 'Android', notion: 'Notion', spotify: 'Spotify', twitch: 'Twitch', minecraft: 'Minecraft', roblox: 'Roblox', xbox: 'Xbox', playstation: 'PlayStation', openai: 'OpenAI', chatgpt: 'ChatGPT', nextjs: 'Next.js', obs: 'OBS', csv: 'CSV', json: 'JSON', npx: 'npx', woocommerce: 'WooCommerce', ollama: 'Ollama', todoist: 'Todoist', raycast: 'Raycast' };
 function titleCase(s) { return s.split(' ').map(w => ACRO[w] || w.replace(/\b\w/g, c => c.toUpperCase())).join(' '); }
 function hasWord(text, k) { return new RegExp('(^|[^a-z0-9])' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '($|[^a-z0-9])').test(text); }
 function lbl(l) { return l.toLowerCase().replace(/\bai\b/g, 'AI').replace(/\bapi\b/g, 'API').replace(/\bmcp\b/g, 'MCP').replace(/\bvs code\b/g, 'VS Code').replace(/\bminecraft\b/g, 'Minecraft').replace(/\bcli\b/g, 'CLI').replace(/\brag\b/g, 'RAG'); }
@@ -237,7 +244,7 @@ function article(w) { if (/^RAG\b/.test(w)) return 'a'; if (/^[A-Z]{2,}/.test(w)
 
 const FILLER = new Set('helps help lets let allows allow can will you your which who where when using use uses via from into just some every all also really like new built made so tells shows gives are was were has have get gets play plays playing style'.split(' '));
 const KIND = new Set('cli bot tool extension plugin agent website site webapp saas platform thing chrome browser discord telegram slack mobile ios android iphone web'.split(' '));
-const VERB = { track: 'Tracker', tracks: 'Tracker', summarize: 'Summarizer', summarizes: 'Summarizer', review: 'Reviewer', reviews: 'Reviewer', pick: 'Picker', picks: 'Picker', find: 'Finder', finds: 'Finder', recommend: 'Recommender', recommends: 'Recommender', suggest: 'Suggester', suggests: 'Suggester', plan: 'Planner', plans: 'Planner', generate: 'Generator', generates: 'Generator', monitor: 'Monitor', monitors: 'Monitor', alert: 'Alerts', alerts: 'Alerts', organize: 'Organizer', organizes: 'Organizer', schedule: 'Scheduler', schedules: 'Scheduler', compare: 'Comparer', compares: 'Comparer', translate: 'Translator', translates: 'Translator', scrape: 'Scraper', scrapes: 'Scraper', log: 'Logger', logs: 'Logger', remind: 'Reminder', reminds: 'Reminder', count: 'Counter', counts: 'Counter', rate: 'Rater', rates: 'Rater', write: 'Writer', writes: 'Writer', build: 'Builder', builds: 'Builder', create: 'Creator', creates: 'Creator', explain: 'Explainer', explains: 'Explainer', analyze: 'Analyzer', analyzes: 'Analyzer', post: 'Poster', posts: 'Poster', send: 'Sender', sends: 'Sender', watch: 'Watcher', watches: 'Watcher', run: 'Runner', runs: 'Runner', show: 'Viewer', shows: 'Viewer', turn: 'Converter', turns: 'Converter', block: 'Blocker', blocks: 'Blocker', book: 'Booker', books: 'Booker', teach: 'Tutor', teaches: 'Tutor', convert: 'Converter', converts: 'Converter', rename: 'Renamer', renames: 'Renamer', hide: 'Hider', hides: 'Hider', triage: 'Triager', triages: 'Triager', scaffold: 'Scaffolder', scaffolds: 'Scaffolder', check: 'Checker', checks: 'Checker', identify: 'Identifier', identifies: 'Identifier', recognize: 'Identifier', recognizes: 'Identifier', scan: 'Scanner', scans: 'Scanner', roast: 'Roaster', roasts: 'Roaster', grade: 'Grader', grades: 'Grader', rank: 'Ranker', ranks: 'Ranker', estimate: 'Estimator', estimates: 'Estimator', calculate: 'Calculator', calculates: 'Calculator', transcribe: 'Transcriber', transcribes: 'Transcriber', clean: 'Cleaner', cleans: 'Cleaner', cleanup: 'Cleaner', delete: 'Deleter', deletes: 'Deleter', remove: 'Remover', removes: 'Remover' };
+const VERB = { track: 'Tracker', tracks: 'Tracker', summarize: 'Summarizer', summarizes: 'Summarizer', review: 'Reviewer', reviews: 'Reviewer', pick: 'Picker', picks: 'Picker', find: 'Finder', finds: 'Finder', recommend: 'Recommender', recommends: 'Recommender', suggest: 'Suggester', suggests: 'Suggester', plan: 'Planner', plans: 'Planner', generate: 'Generator', generates: 'Generator', monitor: 'Monitor', monitors: 'Monitor', alert: 'Alerts', alerts: 'Alerts', organize: 'Organizer', organizes: 'Organizer', schedule: 'Scheduler', schedules: 'Scheduler', compare: 'Comparer', compares: 'Comparer', translate: 'Translator', translates: 'Translator', scrape: 'Scraper', scrapes: 'Scraper', log: 'Logger', logs: 'Logger', remind: 'Reminder', reminds: 'Reminder', count: 'Counter', counts: 'Counter', rate: 'Rater', rates: 'Rater', write: 'Writer', writes: 'Writer', build: 'Builder', builds: 'Builder', create: 'Creator', creates: 'Creator', explain: 'Explainer', explains: 'Explainer', analyze: 'Analyzer', analyzes: 'Analyzer', post: 'Poster', posts: 'Poster', send: 'Sender', sends: 'Sender', watch: 'Watcher', watches: 'Watcher', run: 'Runner', runs: 'Runner', show: 'Viewer', shows: 'Viewer', turn: 'Converter', turns: 'Converter', block: 'Blocker', blocks: 'Blocker', book: 'Booker', books: 'Booker', teach: 'Tutor', teaches: 'Tutor', convert: 'Converter', converts: 'Converter', rename: 'Renamer', renames: 'Renamer', hide: 'Hider', hides: 'Hider', triage: 'Triager', triages: 'Triager', scaffold: 'Scaffolder', scaffolds: 'Scaffolder', check: 'Checker', checks: 'Checker', identify: 'Identifier', identifies: 'Identifier', recognize: 'Identifier', recognizes: 'Identifier', scan: 'Scanner', scans: 'Scanner', roast: 'Roaster', roasts: 'Roaster', grade: 'Grader', grades: 'Grader', rank: 'Ranker', ranks: 'Ranker', estimate: 'Estimator', estimates: 'Estimator', calculate: 'Calculator', calculates: 'Calculator', transcribe: 'Transcriber', transcribes: 'Transcriber', clean: 'Cleaner', cleans: 'Cleaner', cleanup: 'Cleaner', delete: 'Deleter', deletes: 'Deleter', remove: 'Remover', removes: 'Remover', backs: 'Backup', mutes: 'Muter' };
 const BREAK = /^(to|for|with|on|in|at|by|and|or|when|so|from|using|via|while|before|after|based|over|where|as|that|which|who|if|like|into|about|across|between|during|without|per|than)$/;
 
 // "a discord bot that tracks my friends game wins" -> "Friends Game Wins Tracker" (falls back to the first 3 meaningful words)
@@ -313,7 +320,7 @@ function generate(idea) {
   idea = String(idea || '').trim().slice(0, 600);
   if (idea.length < 4 || !/[a-z0-9]{2,}/i.test(idea)) throw new Error('Tell me a bit more about your idea (at least a few words).');
   const keys = detectTypes(idea);
-  let primary = keys[0] === 'extension' && VSCODE.test(idea.toLowerCase()) ? { ...TYPES.extension, label: 'VS Code Extension' } : TYPES[keys[0]];
+  let primary = keys[0] === 'extension' && VSCODE.test(idea.toLowerCase()) ? { ...TYPES.extension, label: 'VS Code Extension' } : keys[0] === 'extension' && RAYCAST.test(idea.toLowerCase()) ? { ...TYPES.extension, label: 'Raycast Extension' } : TYPES[keys[0]];
   const secondary = keys[1] ? TYPES[keys[1]] : null;
   const lower = idea.toLowerCase();
   let name = projectName(idea);
@@ -339,9 +346,10 @@ function generate(idea) {
 
   const engine = keys[0] === 'game' ? gameEngine(lower) : null;
   const vscode = keys[0] === 'extension' && VSCODE.test(lower);
+  const raycast = keys[0] === 'extension' && !vscode && RAYCAST.test(lower);
   const fabric = keys[0] === 'mcmod' && /\b(mod|fabric|forge|neoforge|modpack)\b/.test(lower) && !/\b(plugin|paper|spigot|bukkit|server)\b/.test(lower);
   if (fabric) primary = { ...primary, label: 'Minecraft Mod' };
-  const stack = (engine ? GAME_ENGINES[engine] : vscode ? VSCODE_STACK : fabric ? MCMOD_FABRIC : primary.stack).map(([tech, why]) => ({ tech, why }));
+  const stack = (engine ? GAME_ENGINES[engine] : vscode ? VSCODE_STACK : raycast ? RAYCAST_STACK : fabric ? MCMOD_FABRIC : primary.stack).map(([tech, why]) => ({ tech, why }));
   if (engine && engine !== 'roblox' && (engine === 'unreal' || /\b(3d|three dimensional|vr|virtual reality)\b|\bthree\.?js\b/.test(lower))) stack.push({ tech: 'Blender + Blender MCP (optional)', why: 'Lets Claude Code or Cursor model and export simple 3D assets for you, so you are not stuck on art.' });
   const botSdk = () => {
     const sdk = /\btelegram\b/.test(lower) ? ['Node.js + grammY (Telegram)', 'Modern, well-documented Telegram bot framework; easy for AI tools to write.']
@@ -366,8 +374,8 @@ function generate(idea) {
   const turn = keys[0] === 'game' && !cozy && !tower && TURN.test(lower);
   const roblox = engine === 'roblox' && !cozy && !turn && !tower;
   const vehicle = keys[0] === 'game' && !cozy && !turn && !roblox && !tower && VEHICLE.test(lower);
-  const must = cozy ? [...COZY_MUST] : tower ? [...TOWER_MUST] : turn ? [...TURN_MUST] : roblox ? [...ROBLOX_MUST] : vehicle ? [...VEHICLE_MUST] : fabric ? [...MCMOD_FABRIC_MUST] : vscode ? [...VSCODE_MUST] : [...primary.must];
-  let boss = cozy ? COZY_BOSS : tower ? TOWER_BOSS : turn ? TURN_BOSS : roblox ? ROBLOX_BOSS : vehicle ? VEHICLE_BOSS : fabric ? FABRIC_BOSS : vscode ? VSCODE_BOSS : primary.boss;
+  const must = cozy ? [...COZY_MUST] : tower ? [...TOWER_MUST] : turn ? [...TURN_MUST] : roblox ? [...ROBLOX_MUST] : vehicle ? [...VEHICLE_MUST] : fabric ? [...MCMOD_FABRIC_MUST] : vscode ? [...VSCODE_MUST] : raycast ? [...RAYCAST_MUST] : [...primary.must];
+  let boss = cozy ? COZY_BOSS : tower ? TOWER_BOSS : turn ? TURN_BOSS : roblox ? ROBLOX_BOSS : vehicle ? VEHICLE_BOSS : fabric ? FABRIC_BOSS : vscode ? VSCODE_BOSS : raycast ? RAYCAST_BOSS : primary.boss;
   if (tower && engine === 'roblox') must.push('Waves and money run on the server, saved with DataStoreService');
   if (keys.includes('rag') && SUPPORT.test(lower)) { must.push('Hand off to a human (email or ticket link) when the bot cannot answer or the customer asks for one'); if (STORE.test(lower)) must.push('One read-only order-status lookup by order number + email' + (/\bshopify\b/.test(lower) ? ' (Shopify Admin API)' : /\bwoocommerce\b/.test(lower) ? ' (WooCommerce REST API)' : '') + ', never refunds or edits'); }
   // "a mobile app that uses ai to identify plants": the core action is photo -> model -> result, not an offline-first local feature
@@ -515,7 +523,7 @@ function generate(idea) {
     else if (/\btomato timer\b/.test(lower)) name = 'Tomato Timer';
   }
   // "a pomodoro chrome extension": service-worker countdown + badge timer, not a generic content-script extension
-  const pomoExt = !pomo && keys[0] === 'extension' && !vscode && !secondary && /\b(pomodoro|focus timer|tomato timer)\b/.test(lower);
+  const pomoExt = !pomo && keys[0] === 'extension' && !vscode && !raycast && !secondary && /\b(pomodoro|focus timer|tomato timer)\b/.test(lower);
   if (pomoExt) {
     const i = must.indexOf('Manifest + popup that opens');
     if (i >= 0) must.splice(i, 1, 'Manifest V3 with a popup that shows start/pause/reset and the remaining time', 'A service worker that runs the countdown from an end timestamp (chrome.alarms + Date.now()), updates chrome.action.setBadgeText while a session is running, and fires a notification when a focus or break ends');
@@ -564,8 +572,63 @@ function generate(idea) {
     boss = kind === 'sleep' ? 'Honest sleep math: store local dates and minutes, handle naps vs night sleep, and never trust a single timestamp across midnight or DST' : kind === 'workout' ? 'Logging that sticks: a session saved in under 15 seconds, edits that do not duplicate entries, and history that stays correct across time zones' : 'Local data you can trust across days, edits and time zone changes, with an export so nothing is locked in';
     if (mob) boss = boss.replace(/\.$/, '') + '; skip App Store / Play submission until the log loop works on a real device';
   }
-  // "Cleans Up Downloads CLI" -> "Downloads Cleaner CLI"
-  if (/\bCleaner$/.test(name)) {
+  // "a raycast extension for my notion tasks": name it after what it shows, and add the service's API client
+  if (raycast) {
+    const svc = [[/\bnotion\b/, '@notionhq/client (Notion API)', 'Query your Notion database (filter by status) and update a page property to mark a task done; share the database with your integration, or use Notion OAuth via @raycast/utils.'],
+      [/\bgithub\b/, '@octokit/rest (GitHub API)', 'Lists repos, issues or PRs with a personal access token from a password preference (or GitHub OAuth via @raycast/utils).'],
+      [/\blinear\b/, '@linear/sdk (Linear API)', 'Typed client for issues and projects; use a personal API key preference or Linear OAuth.'],
+      [/\btodoist\b/, 'Todoist REST API (@doist/todoist-api-typescript)', 'Read and complete tasks with an API token preference.'],
+      [/\bspotify\b/, 'Spotify Web API (OAuth PKCE via @raycast/utils)', 'Control playback and search; Spotify requires a user login, so use the PKCE helper.']].find(([re]) => re.test(lower));
+    if (svc) {
+      stack.splice(2, 0, { tech: svc[1], why: svc[2] });
+      if (/\bnotion\b/.test(lower) && /\b(tasks?|to-?dos?)\b/.test(lower)) must.splice(1, 1, 'List tasks from one Notion database (not done first, with status and due date), loaded with useCachedPromise so the list is instant on reopen');
+    }
+    const rm = lower.match(/raycast (?:extensions?|plugins?|commands?|scripts?)\s+(?:(?:that|which|to)\s+(?:uses?\s+(?:ai|gpt|chatgpt|claude|an llm|llms?|openai)\s+to\s+)?([a-z]+)\s+|for\s+)?(.*)$/);
+    const nw = [];
+    for (const w of (rm ? rm[2] : '').replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean)) { if (BREAK.test(w)) { if (nw.length) break; else continue; } if (STOP.has(w) || FILLER.has(w) || KIND.has(w) || w === 'raycast') continue; nw.push(w); if (nw.length === 3) break; }
+    const rv = rm && rm[1] && VERB[rm[1]] && VERB[rm[1]] !== 'Viewer' ? ' ' + VERB[rm[1]] : '';
+    name = nw.length ? (/\b(ai|gpt|chatgpt|claude|llm|openai)\b/.test(lower) ? 'AI ' : '') + titleCase(nw.join(' ')) + rv + ' for Raycast' : /^Raycast/.test(name) || !name ? 'Raycast Extension' : name;
+  }
+  // "an android app that reminds me to stretch": schedule local notifications from on-device settings, no accounts or store-submission boss
+  const reminder = !habit && !pomo && !pomoExt && !todo && !personalLog && !metronome && !runTimer && !beatMaker && !tuner && !secondary && !vscode && !raycast && /^(mobile|web|extension|bot)$/.test(keys[0])
+    && /\b(remind\w*|nudges? me)\b/.test(lower)
+    && !/\b(ai|gpt|claude|llm|gemini|openai|calendar|emails?|inbox|meetings?|bills?|invoices?|friends?|team|group|share\w*|social|prices?|deals?|scrap\w*|api|stocks?|restocks?|releases?|drops?|news)\b/.test(lower);
+  if (reminder) {
+    const k = keys[0];
+    if (k === 'mobile') {
+      const si = stack.findIndex(x => /Supabase/.test(x.tech));
+      const tech = [{ tech: 'expo-notifications (local scheduled notifications)', why: 'Schedules repeating reminders on the phone itself, so there is no server, push token or account.' }, { tech: 'AsyncStorage (on-device settings)', why: 'Remembers what to remind you about, the interval and quiet hours.' }];
+      if (si >= 0) stack.splice(si, 1, ...tech); else stack.push(...tech);
+      const i = must.indexOf('Core action that works offline-first with local state');
+      if (i >= 0) must.splice(i, 1, 'Pick the reminder and a schedule (every N minutes between set hours, or daily at a time), saved on the device', 'Schedule repeating local notifications with expo-notifications (no server or push tokens), with snooze, an on/off switch and a test-notification button');
+      boss = 'Reminders that actually fire: the notification permission being denied (Android 13+ asks at runtime), Android battery savers and exact-alarm limits, iOS keeping only 64 pending notifications, and rescheduling after a time zone or daylight saving change; skip App Store / Play submission until it has reminded you reliably for a few days on a real device';
+    } else if (k === 'web') {
+      const si = stack.findIndex(x => /Supabase/.test(x.tech));
+      const tech = { tech: 'localStorage + the Notification API', why: 'Reminder settings stay in the browser, and notifications need no server while the page is open.' };
+      if (si >= 0) stack.splice(si, 1, tech); else stack.push(tech);
+      const i = must.indexOf('The one core flow, end to end');
+      if (i >= 0) must.splice(i, 1, 'Set what to be reminded about and when (every N minutes or at a time of day)', 'Show a browser notification when it is due, asking for permission from a button click, with an in-page fallback if it is denied');
+      const pi = must.findIndex(m => /^Persist data/.test(m));
+      if (pi >= 0) must[pi] = 'Save reminders in localStorage and compute the next due time from stored timestamps, not setInterval ticks';
+      boss = 'Reminding you when the tab is closed or asleep: a web page can only notify while it is open, so start as an installed PWA or pinned tab that recomputes due times on wake, and add Web Push later only if you need it';
+    } else if (k === 'extension') {
+      const i = must.indexOf('Content script that does one thing on one site');
+      if (i >= 0) must.splice(i, 1, 'A service worker that schedules the reminder with chrome.alarms and shows it with chrome.notifications (no content script needed)');
+      const pi = must.indexOf('Manifest + popup that opens');
+      if (pi >= 0) must[pi] = 'Manifest V3 with a popup to set the interval and turn reminders on or off';
+      boss = 'Reminders across MV3 service worker sleeps: schedule with chrome.alarms (not setTimeout), keep state in chrome.storage, and use chrome.idle so it does not nag while you are away from the computer';
+    } else if (k === 'bot') {
+      const i = must.indexOf('One useful command that delivers the core value');
+      if (i >= 0) must.splice(i, 1, 'A /remind command to set what and when (interval or time of day, in the user\'s time zone), plus /list and /stop');
+      const j = must.indexOf('Store per-user data in SQLite');
+      if (j >= 0) must[j] = 'Store each reminder and the user\'s time zone in SQLite, with the next due time';
+      stack.splice(2, 0, { tech: 'A scheduler loop (node-cron or a 1-minute setInterval) that reads due reminders from SQLite', why: 'Reminders live in the database, so a restart or redeploy never loses them.' });
+      boss = 'Reminders that fire on time for every user: per-user time zones and daylight saving, no lost or doubled reminders across restarts, and users who block the bot or leave the chat';
+    }
+    name = name.replace(/^Take (\w+?)s? Reminder$/, '$1 Reminder').replace(/^Drink Water Reminder$/, 'Water Reminder').replace(/^([A-Z][a-z]+[^su])s Reminder$/, '$1 Reminder');
+  }
+  // "Cleans Up Downloads CLI" -> "Downloads Cleaner CLI"; "backs up my dotfiles" -> "Dotfiles Backup CLI"
+  if (/\b(Cleaner|Backup)$/.test(name)) {
     name = name.replace(/\b(Folder|Directory|Dir) Cleaner$/, 'Cleaner');
     if (keys[0] === 'cli' && !/\bCLI$/.test(name)) name += ' CLI';
   }
@@ -607,10 +670,13 @@ function generate(idea) {
   if (beatMaker) ['Export and import patterns as JSON', 'Swing / humanize amount and a master volume'].forEach(l => loot.add(l));
   if (pomoExt) ['Optional site blocker list while a focus session is running', 'A simple daily/weekly session count in the popup'].forEach(l => loot.add(l));
   if (todo) ['Export tasks as JSON or CSV', keys[0] === 'mobile' ? 'Home screen quick-add widget' : 'Installable as a PWA that works offline'].forEach(l => loot.add(l));
+  if (reminder && keys[0] === 'mobile') ['Quiet hours and a weekdays-only schedule', 'Home screen widget showing the next reminder'].forEach(l => loot.add(l));
+  if (raycast) { ['A menu bar command (MenuBarExtra) with a count', 'Keyboard shortcuts on the most-used actions'].forEach(l => loot.add(l)); }
   if (personalLog) ['Export entries as CSV', keys[0] === 'mobile' ? 'Home screen widget for today\'s summary' : 'Installable as a PWA that works offline'].forEach(l => loot.add(l));
   if (localLlm) { loot.delete('Cost / token meter'); loot.add('Optional system prompt editor'); }
   if (runTimer) { loot.delete('Leaderboards'); ['Import and export LiveSplit (.lss) splits', 'Sum of best and best possible time'].forEach(l => loot.add(l)); }
   ['Polish pass and onboarding', 'Share / invite flow', 'Basic analytics'].forEach(l => loot.add(l));
+  if (raycast) loot.delete('Share / invite flow');
 
   const stackLine = stack.slice(0, 3).map(s => s.tech).join(', ');
   const mvp = {
