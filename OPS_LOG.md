@@ -616,3 +616,4 @@
 ### Backlog (new)
 82. "a cozy bookshop sim where you recommend books to travelers" is a Web App: "sim" alone is not a game keyword and "recommend" triggers the about-games demotion; needs a "<noun> sim" game rule that skips sim racing/sim card.
 83. Weak game names: "Cook Ramen Game" (could be "Ramen for Hungry Yokai"), "Serve Coffee Game", "Deliver Pizzas Game", "Pico 8 Game" ("a pico-8 game about a cat that collects fish"), "Moth Collects Lamplight Game"; also "MCP Server" ("an mcp server for my home assistant lights"), "Weather Morning Sender".
+- Committed 729aded and pushed; Render deployed within about 45s (live llms.txt has the combat FAQ, live API plans "a godot game where you cook ramen for hungry yokai" with the take-order/cook/serve/tips loop; /, /health, /sitemap.xml 200 in <0.1s, GoatCounter script present; /q/zzz 404). FEEDBACK.md (uncommitted X watch edits) left for its own run; newsletter/ stays ignored.
