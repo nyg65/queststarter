@@ -102,6 +102,16 @@ const GAME_ENGINES = {
 const MCMOD_FABRIC = [['Fabric API (Java 21) + Fabric Loom (Gradle)', 'The lightweight, fast-updating mod loader; AI tools know its registries and mixins. Use NeoForge if your modpack needs it.'], ['Loom runClient dev setup', 'Launches a test Minecraft client with your mod in one command.'], ['A JSON config + data generators', 'Players expect a config file; datagen writes recipes and models so you do not hand-edit JSON.'], ['Modrinth / CurseForge', 'Where players already search for mods.']];
 const MCMOD_FABRIC_MUST = ['One new thing registered (an item, block, or command) that works in a test world', 'The core mechanic driven by one event or mixin', 'A config file with sensible defaults', 'Runs in a clean Fabric install with only Fabric API alongside'];
 const COZY = /\b(cozy|cosy|farming|farm|sim|simulator|sandbox|life sim|idle|incremental|tycoon|management|builder|city builder|crafting|walking sim|relaxing)\b/;
+// Gentle themes (cooking, serving, collecting, delivering, gardening) are cozy loops too, unless the idea names combat or another game genre.
+const GENTLE = /\b(cook|cooks|cooking|bake|bakes|baking|serve|serves|serving|restaurant|cafe|bakery|ramen|tea shop|coffee shop|garden|gardening|collect|collects|collecting|gather|gathers|gathering|deliver|delivers|delivering|delivery|mail|decorate|decorates|decorating|fishing)\b/;
+const NOT_GENTLE = /\b(shoot|shoots|shooter|fight|fights|fighting|enemy|enemies|zombie|zombies|kill|kills|boss|bosses|battle|combat|gun|guns|sword|swords|war|survive|survival|dungeon|roguelike|roguelite|platformer|tower defen[cs]e|racing|race|puzzle|match-3|card game|deckbuilder|chess|trivia|word game|escape room|multiplayer|turn-based|turn based|strategy|rpg|obby|horror)\b/;
+function cozyLoop(lower) {
+  if (/\b(cook|cooks|cooking|bake|bakes|baking|serve|serves|serving|restaurant|cafe|bakery|ramen|tea shop|coffee shop)\b/.test(lower)) return 'A core loop the player repeats (take an order, cook or prepare it, serve it, earn tips)';
+  if (/\b(deliver|delivers|delivering|delivery|mail)\b/.test(lower)) return 'A core loop the player repeats (pick up, travel, deliver, get paid or thanked)';
+  if (/\b(collect|collects|collecting|gather|gathers|gathering)\b/.test(lower)) return 'A core loop the player repeats (explore, collect, bring it back, unlock a new area)';
+  if (/\b(fishing)\b/.test(lower)) return 'A core loop the player repeats (cast, wait, reel in, sell or log the catch)';
+  return null;
+}
 const COZY_MUST = ['A core loop the player repeats (e.g. plant, wait, harvest, sell)', 'One progression system (unlocks, upgrades, or money)', 'Save and load so progress survives a restart', 'A clear on-screen goal for the first 5 minutes'];
 const ROBLOX_MUST = ['Spawn point, checkpoints and respawn when a player falls or dies', 'Progress checked on the server, never trusted from the client', 'Progress saved with DataStoreService so it survives rejoining', 'A leaderstats display (stage, coins or wins)'];
 const ROBLOX_BOSS = 'Server/client split and DataStore reliability: exploit-proof progress that saves without data loss';
@@ -360,7 +370,7 @@ function generate(idea) {
     const i = stack.findIndex(s => s.tech.startsWith(TYPES.bot.stack[0][0]));
     if (sdk && i >= 0) stack[i] = { tech: sdk[0], why: sdk[1] + (i > 0 ? ' (for the bot side)' : '') };
   };
-  const cozy = keys[0] === 'game' && COZY.test(lower) && !/\b(flight|racing|driving|space|combat|battle|war|mech) (sim|simulator)\b/.test(lower);
+  const cozy = keys[0] === 'game' && ((COZY.test(lower) && !/\b(flight|racing|driving|space|combat|battle|war|mech) (sim|simulator)\b/.test(lower)) || (GENTLE.test(lower) && !NOT_GENTLE.test(lower)));
   if (secondary) for (const [tech, why] of secondary.stack.slice(0, 2)) if (!stack.find(s => s.tech === tech)) stack.push({ tech, why: why + ' (for the ' + lbl(secondary.label) + ' side)' });
   if (keys[1] === 'rag' && !stack.find(s => s.tech === TYPES.rag.stack[2][0])) stack.push({ tech: TYPES.rag.stack[2][0], why: TYPES.rag.stack[2][1] + ' (for the RAG chatbot side)' });
   botSdk();
@@ -374,7 +384,7 @@ function generate(idea) {
   const turn = keys[0] === 'game' && !cozy && !tower && TURN.test(lower);
   const roblox = engine === 'roblox' && !cozy && !turn && !tower;
   const vehicle = keys[0] === 'game' && !cozy && !turn && !roblox && !tower && VEHICLE.test(lower);
-  const must = cozy ? [...COZY_MUST] : tower ? [...TOWER_MUST] : turn ? [...TURN_MUST] : roblox ? [...ROBLOX_MUST] : vehicle ? [...VEHICLE_MUST] : fabric ? [...MCMOD_FABRIC_MUST] : vscode ? [...VSCODE_MUST] : raycast ? [...RAYCAST_MUST] : [...primary.must];
+  const must = cozy ? (cozyLoop(lower) ? [cozyLoop(lower), ...COZY_MUST.slice(1)] : [...COZY_MUST]) : tower ? [...TOWER_MUST] : turn ? [...TURN_MUST] : roblox ? [...ROBLOX_MUST] : vehicle ? [...VEHICLE_MUST] : fabric ? [...MCMOD_FABRIC_MUST] : vscode ? [...VSCODE_MUST] : raycast ? [...RAYCAST_MUST] : [...primary.must];
   let boss = cozy ? COZY_BOSS : tower ? TOWER_BOSS : turn ? TURN_BOSS : roblox ? ROBLOX_BOSS : vehicle ? VEHICLE_BOSS : fabric ? FABRIC_BOSS : vscode ? VSCODE_BOSS : raycast ? RAYCAST_BOSS : primary.boss;
   if (tower && engine === 'roblox') must.push('Waves and money run on the server, saved with DataStoreService');
   if (keys.includes('rag') && SUPPORT.test(lower)) { must.push('Hand off to a human (email or ticket link) when the bot cannot answer or the customer asks for one'); if (STORE.test(lower)) must.push('One read-only order-status lookup by order number + email' + (/\bshopify\b/.test(lower) ? ' (Shopify Admin API)' : /\bwoocommerce\b/.test(lower) ? ' (WooCommerce REST API)' : '') + ', never refunds or edits'); }
