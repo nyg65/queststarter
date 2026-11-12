@@ -9,7 +9,7 @@ const TYPES = {
     boss: 'Reliable data ingestion / API integration without hitting rate limits',
   },
   game: {
-    label: 'Game', kw: ['game', 'platformer', 'rpg', 'roguelike', 'shooter', 'puzzle', 'arcade', 'tower defense', 'tower defence', 'card game', 'multiplayer', 'unity', 'godot', 'flight sim', 'racing sim', 'city builder', 'colony sim', 'life sim', 'tycoon', 'escape room', 'vr game', 'sim game', 'farming sim', 'fishing sim', 'cozy sim', 'space sim', 'driving sim', 'simulator', 'roblox', 'obby', 'unreal', 'deckbuilder', 'board game', 'chess', 'tic tac toe', 'strategy game', 'turn-based', 'turn based', 'text adventure', 'trivia game', 'word game'],
+    label: 'Game', kw: ['game', 'platformer', 'rpg', 'roguelike', 'shooter', 'puzzle', 'arcade', 'tower defense', 'tower defence', 'card game', 'multiplayer', 'unity', 'godot', 'flight sim', 'racing sim', 'city builder', 'colony sim', 'life sim', 'tycoon', 'escape room', 'vr game', 'sim game', 'farming sim', 'fishing sim', 'cozy sim', 'space sim', 'driving sim', 'simulator', 'roblox', 'obby', 'unreal', 'deckbuilder', 'board game', 'chess', 'tic tac toe', 'strategy game', 'turn-based', 'turn based', 'text adventure', 'trivia game', 'word game', 'visual novel', 'dating sim'],
     stack: [['Phaser 3 + Vite', 'Fast 2D browser game framework; huge example base AI knows well.'], ['TypeScript', 'Catches bugs in game-state logic early.'], ['Itch.io / Netlify', 'Free, instant sharing of playable builds.'], ['Kenney.nl assets', 'Free CC0 art/sound so you can ship without an artist.']],
     must: ['Player character that moves and has a goal', 'One enemy or obstacle type', 'Win / lose condition and restart', 'Score or progress display'],
     boss: 'Game feel: collision, difficulty curve, and juice (sound, particles, screen shake)',
@@ -33,7 +33,7 @@ const TYPES = {
     boss: 'Version compatibility and server performance: no blocking work on the main thread, and test on the Minecraft version you target',
   },
   cli: {
-    label: 'CLI Tool', kw: ['cli', 'command line', 'command-line', 'terminal tool', 'terminal app', 'npx'],
+    label: 'CLI Tool', kw: ['cli', 'command line', 'command-line', 'terminal tool', 'terminal app', 'npx', 'python script', 'bash script', 'shell script', 'powershell script', 'node script'],
     stack: [['Node.js + TypeScript', 'Runs anywhere npm does; AI tools write solid Node CLIs.'], ['commander + @clack/prompts', 'Argument parsing and friendly interactive prompts without reinventing either.'], ['tsup', 'Bundles to one file with a shebang so it runs with npx.'], ['npm (publish as an npx command)', 'Anyone can try it with one command, no install step.']],
     must: ['One command that does the core job, with --help', 'Clear errors and non-zero exit codes when something fails', 'Read options from flags first, then a config file or env vars', 'Runnable with npx from a fresh folder'],
     boss: 'Working the same on macOS, Windows and Linux (paths, shells, line endings) with error messages people can act on',
@@ -182,6 +182,8 @@ function detectTypes(text) {
     for (const k of def.kw) if (k.length <= 3 ? (k === 'web' || k === 'app' || /[^a-z0-9]/.test(k) ? tt.includes(' ' + k) : new RegExp('[^a-z0-9]' + k + '(s|\\d+)?(?![a-z0-9])').test(tt)) : new RegExp('(^|[^a-z0-9])' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).test(tt)) s += k.length > 3 ? 2 : 1;
     if (s) scored.push([key, s]);
   }
+  // "a lighthouse keeper sim" / "a cozy bookshop sim where ...": "<noun> sim" names a game, but not sim racing, a SIM card, an eSIM or a stock market simulator web app
+  if (!scored.find(x => x[0] === 'game') && /\b(?!(?:a|an|the|my|our|your|for|of|esim)\b)[a-z]+ (sim|simulator)s?\b(?! (card|cards|racing|racer|rig|rigs|league|wheel|swap|data|only|tray))/.test(t) && !/\b(stock|trading|market|investing|investment|portfolio|budget|retirement|loan|mortgage|monte carlo|physics|circuit|network|esim)\b/.test(t)) scored.push(['game', 2]);
   scored.sort((a, b) => b[1] - a[1]);
   const keys = scored.map(x => x[0]);
   // generic "app/web/tool" shouldn't beat specific types
@@ -189,7 +191,7 @@ function detectTypes(text) {
   // "app"/"tool" alone is just a noun, not a web-app signal when a specific type was found
   if (keys.length > 1 && keys[0] !== 'web' && !/\b(web|website|site|saas|platform|landing|portfolio)\b/.test(t)) { const i = keys.indexOf('web'); if (i > 0) keys.splice(i, 1); }
   // an app that picks/tracks/recommends games is a web/data tool about games, not a game to build
-  const gameGenre = /\bgame (where|about|in which|set)\b|\b(platformer|rpg|roguelike|shooter|puzzle|arcade|tower defense|card game|deckbuilder|multiplayer|level|player|enemy|enemies|npc|npcs|dungeon|escape room)\b/.test(t);
+  const gameGenre = /\b(game|sim|simulator|visual novel) (where|about|in which|set)\b|\bvisual novel\b|\b(platformer|rpg|roguelike|shooter|puzzle|arcade|tower defense|card game|deckbuilder|multiplayer|level|player|enemy|enemies|npc|npcs|dungeon|escape room)\b/.test(t);
   // a game with AI features ("an rpg where the npcs are llm agents") is a game first, with an AI component
   if (keys[0] === 'agent' && keys.includes('game') && gameGenre) { keys.splice(keys.indexOf('game'), 1); keys.unshift('game'); }
   if (keys[0] === 'game' && !gameGenre && /\b(pick|picks|recommend\w*|suggest\w*|choose|finder|track\w*|backlog|library|wishlist|review\w*|deals?|rat(e|es|ing|ings)|timer|stats|compar\w*|performance|benchmarks?|generator|sprites?|assets?|overlay|splits|wiki|guides?|launcher)\b/.test(t)) { keys.shift(); if (!keys.includes('web') && !keys.includes('data')) keys.unshift('web'); }
@@ -386,6 +388,13 @@ function generate(idea) {
   const vehicle = keys[0] === 'game' && !cozy && !turn && !roblox && !tower && VEHICLE.test(lower);
   const must = cozy ? (cozyLoop(lower) ? [cozyLoop(lower), ...COZY_MUST.slice(1)] : [...COZY_MUST]) : tower ? [...TOWER_MUST] : turn ? [...TURN_MUST] : roblox ? [...ROBLOX_MUST] : vehicle ? [...VEHICLE_MUST] : fabric ? [...MCMOD_FABRIC_MUST] : vscode ? [...VSCODE_MUST] : raycast ? [...RAYCAST_MUST] : [...primary.must];
   let boss = cozy ? COZY_BOSS : tower ? TOWER_BOSS : turn ? TURN_BOSS : roblox ? ROBLOX_BOSS : vehicle ? VEHICLE_BOSS : fabric ? FABRIC_BOSS : vscode ? VSCODE_BOSS : raycast ? RAYCAST_BOSS : primary.boss;
+  // "a python script that renames my photos by date": a Python CLI (Typer + uv), not a Node/npx package
+  if (keys[0] === 'cli' && /\bpython\b/.test(lower)) {
+    const py = [['Python 3.12 + Typer', 'Type-hinted commands with --help for free; AI tools write clean Typer CLIs.'], ['Rich', 'Readable output, progress bars and friendly errors.'], ['uv', 'Creates the project, pins dependencies and runs it with one command.'], ['pipx / uvx (publish to PyPI when ready)', 'Anyone can install it as a command without touching their system Python.']];
+    for (let k = 0; k < 4; k++) if (stack[k] && TYPES.cli.stack.some(([tech]) => tech === stack[k].tech)) stack[k] = { tech: py[k][0], why: py[k][1] };
+    const ni = must.indexOf('Runnable with npx from a fresh folder');
+    if (ni >= 0) must[ni] = 'Runnable with uvx (or pipx) from a fresh folder, with a --dry-run flag before it changes any files';
+  }
   if (tower && engine === 'roblox') must.push('Waves and money run on the server, saved with DataStoreService');
   if (keys.includes('rag') && SUPPORT.test(lower)) { must.push('Hand off to a human (email or ticket link) when the bot cannot answer or the customer asks for one'); if (STORE.test(lower)) must.push('One read-only order-status lookup by order number + email' + (/\bshopify\b/.test(lower) ? ' (Shopify Admin API)' : /\bwoocommerce\b/.test(lower) ? ' (WooCommerce REST API)' : '') + ', never refunds or edits'); }
   // "a mobile app that uses ai to identify plants": the core action is photo -> model -> result, not an offline-first local feature
