@@ -33,7 +33,7 @@ const TYPES = {
     boss: 'Version compatibility and server performance: no blocking work on the main thread, and test on the Minecraft version you target',
   },
   cli: {
-    label: 'CLI Tool', kw: ['cli', 'command line', 'command-line', 'terminal tool', 'terminal app', 'npx', 'python script', 'bash script', 'shell script', 'powershell script', 'node script'],
+    label: 'CLI Tool', kw: ['cli', 'command line', 'command-line', 'terminal tool', 'terminal app', 'npx', 'python script', 'bash script', 'shell script', 'zsh script', 'powershell script', 'node script'],
     stack: [['Node.js + TypeScript', 'Runs anywhere npm does; AI tools write solid Node CLIs.'], ['commander + @clack/prompts', 'Argument parsing and friendly interactive prompts without reinventing either.'], ['tsup', 'Bundles to one file with a shebang so it runs with npx.'], ['npm (publish as an npx command)', 'Anyone can try it with one command, no install step.']],
     must: ['One command that does the core job, with --help', 'Clear errors and non-zero exit codes when something fails', 'Read options from flags first, then a config file or env vars', 'Runnable with npx from a fresh folder'],
     boss: 'Working the same on macOS, Windows and Linux (paths, shells, line endings) with error messages people can act on',
@@ -145,6 +145,11 @@ const RAYCAST = /\braycast\b/;
 const RAYCAST_STACK = [['Raycast API (@raycast/api) + React + TypeScript (npm create raycast-extension)', 'The official template; each command is a React component (List, Detail or Form) and `npm run dev` hot-reloads it inside Raycast.'], ['@raycast/utils (useFetch, usePromise, useCachedPromise, OAuth helpers)', 'Loading states, caching and OAuth in a few lines, so results show instantly the second time.'], ['Extension preferences (password type for API tokens)', 'Raycast stores secrets in the macOS keychain; never hardcode a token.'], ['Raycast Store (npm run publish)', 'Opens a pull request to raycast/extensions; reviewers check it before anyone can install it.']];
 const RAYCAST_MUST = ['One command in package.json that opens a List view from the Raycast root search', 'Load the data with useCachedPromise or useFetch, with a loading state, an empty view and a clear error toast', 'An ActionPanel on each item (open in browser, copy, and the one action that matters)', 'API token read from a password preference, never hardcoded'];
 const RAYCAST_BOSS = 'Feeling instant inside Raycast: cached results, API rate limits and auth (OAuth PKCE via @raycast/utils or a token preference), plus passing the Raycast Store review';
+// Figma plugins run in Figma's sandbox (Plugin API + manifest.json + a UI iframe), not a web app or Chrome extension
+const FIGMA = /\b(figma|figjam) plugins?\b|\bplugins? for (figma|figjam)\b/;
+const FIGMA_STACK = [['Figma Plugin API + TypeScript (@figma/plugin-typings, from the Figma desktop "New plugin" template or create-figma-plugin)', 'The official typings and template; the main code runs in Figma\'s sandbox with access to the open file.'], ['manifest.json (editorType, documentAccess: "dynamic-page", networkAccess)', 'Declares where it runs (Figma, FigJam, Dev Mode) and which domains it may call; Figma blocks requests to anything not listed.'], ['A UI iframe (figma.showUI with plain HTML or Preact) + postMessage', 'The UI has no access to the document and the main code has no DOM, so the two talk through figma.ui.postMessage and onmessage.'], ['Figma Community (publish from the desktop app)', 'Where designers find plugins; Figma reviews each submission before it is listed.']];
+const FIGMA_MUST = ['Runs from Plugins > Development in the Figma desktop app on the current selection, with a clear message when nothing is selected', 'The core action in the main code with the Plugin API (read or change nodes, styles or variables), using the async APIs that dynamic-page access requires', 'A small UI (figma.showUI) that sends options to the main code and shows the result, with copy to clipboard', 'Settings remembered with figma.clientStorage'];
+const FIGMA_BOSS = 'The two-world model and big files: main code vs UI iframe messaging, async node and style APIs, staying fast on files with thousands of layers, and network calls limited to the domains in manifest.json, plus passing Figma Community review';
 // Turn-based, card, board, puzzle and text games have no moving character or collision
 const TURN = /\b(turn[- ]based|card game|deckbuilder|deck builder|board game|chess|checkers|tic tac toe|strategy game|tactics|trivia|quiz game|word game|wordle|text adventure|interactive fiction|visual novel|sudoku)\b/;
 const TURN_MUST = ['Game state model (board, hand, or story position) that the UI reads from', 'One full turn: player acts, game resolves, opponent or game responds', 'Win / lose condition and restart', 'Clear feedback on what just happened each turn'];
@@ -245,18 +250,20 @@ function detectTypes(text) {
   }
   // "a raycast extension for my notion tasks" is a Raycast (macOS launcher) extension, not a browser extension or a web app
   if (/\braycast (extensions?|plugins?|commands?|scripts?)\b|\bextensions? for raycast\b|\bfor raycast\b/.test(t)) { for (const k of ['extension', 'web', 'mobile', 'cli', 'data']) { const i = keys.indexOf(k); if (i >= 0) keys.splice(i, 1); } keys.unshift('extension'); }
+  // "a figma plugin that exports colors as tailwind config" is a Figma plugin, not a web app or a browser extension
+  if (FIGMA.test(t)) { for (const k of ['extension', 'web', 'mobile', 'cli', 'data', 'aiapp', 'agent']) { const i = keys.indexOf(k); if (i >= 0) keys.splice(i, 1); } keys.unshift('extension'); }
   return keys.length ? keys.slice(0, 2) : ['web'];
 }
 
-const ACRO = { ai: 'AI', rag: 'RAG', mcp: 'MCP', cli: 'CLI', pdfs: 'PDFs', obsidian: 'Obsidian', saas: 'SaaS', claude: 'Claude', cursor: 'Cursor', vscode: 'VS Code', turnbased: 'Turn-Based', api: 'API', llm: 'LLM', gpt: 'GPT', ios: 'iOS', iphone: 'iPhone', mvp: 'MVP', rpg: 'RPG', ui: 'UI', '2d': '2D', '3d': '3D', npc: 'NPC', mmo: 'MMO', fps: 'FPS', pc: 'PC', vr: 'VR', ar: 'AR', youtube: 'YouTube', github: 'GitHub', tiktok: 'TikTok', gpu: 'GPU', cpu: 'CPU', pdf: 'PDF', seo: 'SEO', sql: 'SQL', npcs: 'NPCs', unity: 'Unity', godot: 'Godot', unreal: 'Unreal', ue5: 'UE5', obby: 'Obby', threejs: 'Three.js', webgl: 'WebGL', discord: 'Discord', telegram: 'Telegram', slack: 'Slack', twitter: 'Twitter', reddit: 'Reddit', steam: 'Steam', chrome: 'Chrome', android: 'Android', notion: 'Notion', spotify: 'Spotify', twitch: 'Twitch', minecraft: 'Minecraft', roblox: 'Roblox', xbox: 'Xbox', playstation: 'PlayStation', openai: 'OpenAI', chatgpt: 'ChatGPT', nextjs: 'Next.js', obs: 'OBS', csv: 'CSV', json: 'JSON', npx: 'npx', woocommerce: 'WooCommerce', ollama: 'Ollama', todoist: 'Todoist', raycast: 'Raycast' };
+const ACRO = { ai: 'AI', rag: 'RAG', mcp: 'MCP', cli: 'CLI', pdfs: 'PDFs', obsidian: 'Obsidian', saas: 'SaaS', claude: 'Claude', cursor: 'Cursor', vscode: 'VS Code', turnbased: 'Turn-Based', api: 'API', llm: 'LLM', gpt: 'GPT', ios: 'iOS', iphone: 'iPhone', mvp: 'MVP', rpg: 'RPG', ui: 'UI', '2d': '2D', '3d': '3D', npc: 'NPC', mmo: 'MMO', fps: 'FPS', pc: 'PC', vr: 'VR', ar: 'AR', youtube: 'YouTube', github: 'GitHub', tiktok: 'TikTok', gpu: 'GPU', cpu: 'CPU', pdf: 'PDF', seo: 'SEO', sql: 'SQL', npcs: 'NPCs', unity: 'Unity', godot: 'Godot', unreal: 'Unreal', ue5: 'UE5', obby: 'Obby', threejs: 'Three.js', webgl: 'WebGL', discord: 'Discord', telegram: 'Telegram', slack: 'Slack', twitter: 'Twitter', reddit: 'Reddit', steam: 'Steam', chrome: 'Chrome', android: 'Android', notion: 'Notion', spotify: 'Spotify', twitch: 'Twitch', minecraft: 'Minecraft', roblox: 'Roblox', xbox: 'Xbox', playstation: 'PlayStation', openai: 'OpenAI', chatgpt: 'ChatGPT', nextjs: 'Next.js', obs: 'OBS', csv: 'CSV', json: 'JSON', npx: 'npx', woocommerce: 'WooCommerce', ollama: 'Ollama', todoist: 'Todoist', raycast: 'Raycast', figma: 'Figma', figjam: 'FigJam', tailwind: 'Tailwind' };
 function titleCase(s) { return s.split(' ').map(w => ACRO[w] || w.replace(/\b\w/g, c => c.toUpperCase())).join(' '); }
 function hasWord(text, k) { return new RegExp('(^|[^a-z0-9])' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '($|[^a-z0-9])').test(text); }
-function lbl(l) { return l.toLowerCase().replace(/\bai\b/g, 'AI').replace(/\bapi\b/g, 'API').replace(/\bmcp\b/g, 'MCP').replace(/\bvs code\b/g, 'VS Code').replace(/\bminecraft\b/g, 'Minecraft').replace(/\bcli\b/g, 'CLI').replace(/\brag\b/g, 'RAG'); }
+function lbl(l) { return l.toLowerCase().replace(/\bai\b/g, 'AI').replace(/\bapi\b/g, 'API').replace(/\bmcp\b/g, 'MCP').replace(/\bvs code\b/g, 'VS Code').replace(/\bminecraft\b/g, 'Minecraft').replace(/\bcli\b/g, 'CLI').replace(/\brag\b/g, 'RAG').replace(/\bfigma\b/g, 'Figma'); }
 function article(w) { if (/^RAG\b/.test(w)) return 'a'; if (/^[A-Z]{2,}/.test(w)) return /^[AEFHILMNORSX]/.test(w) ? 'an' : 'a'; return /^[aeiou]/i.test(w) ? 'an' : 'a'; }
 
 const FILLER = new Set('helps help lets let allows allow can will you your which who where when using use uses via from into just some every all also really like new built made so tells shows gives are was were has have get gets play plays playing style'.split(' '));
 const KIND = new Set('cli bot tool extension plugin agent website site webapp saas platform thing chrome browser discord telegram slack mobile ios android iphone web'.split(' '));
-const VERB = { track: 'Tracker', tracks: 'Tracker', summarize: 'Summarizer', summarizes: 'Summarizer', review: 'Reviewer', reviews: 'Reviewer', pick: 'Picker', picks: 'Picker', find: 'Finder', finds: 'Finder', recommend: 'Recommender', recommends: 'Recommender', suggest: 'Suggester', suggests: 'Suggester', plan: 'Planner', plans: 'Planner', generate: 'Generator', generates: 'Generator', monitor: 'Monitor', monitors: 'Monitor', alert: 'Alerts', alerts: 'Alerts', organize: 'Organizer', organizes: 'Organizer', schedule: 'Scheduler', schedules: 'Scheduler', compare: 'Comparer', compares: 'Comparer', translate: 'Translator', translates: 'Translator', scrape: 'Scraper', scrapes: 'Scraper', log: 'Logger', logs: 'Logger', remind: 'Reminder', reminds: 'Reminder', count: 'Counter', counts: 'Counter', rate: 'Rater', rates: 'Rater', write: 'Writer', writes: 'Writer', build: 'Builder', builds: 'Builder', create: 'Creator', creates: 'Creator', explain: 'Explainer', explains: 'Explainer', analyze: 'Analyzer', analyzes: 'Analyzer', post: 'Poster', posts: 'Poster', send: 'Sender', sends: 'Sender', watch: 'Watcher', watches: 'Watcher', run: 'Runner', runs: 'Runner', show: 'Viewer', shows: 'Viewer', turn: 'Converter', turns: 'Converter', block: 'Blocker', blocks: 'Blocker', book: 'Booker', books: 'Booker', teach: 'Tutor', teaches: 'Tutor', convert: 'Converter', converts: 'Converter', rename: 'Renamer', renames: 'Renamer', hide: 'Hider', hides: 'Hider', triage: 'Triager', triages: 'Triager', scaffold: 'Scaffolder', scaffolds: 'Scaffolder', check: 'Checker', checks: 'Checker', identify: 'Identifier', identifies: 'Identifier', recognize: 'Identifier', recognizes: 'Identifier', scan: 'Scanner', scans: 'Scanner', roast: 'Roaster', roasts: 'Roaster', grade: 'Grader', grades: 'Grader', rank: 'Ranker', ranks: 'Ranker', estimate: 'Estimator', estimates: 'Estimator', calculate: 'Calculator', calculates: 'Calculator', transcribe: 'Transcriber', transcribes: 'Transcriber', clean: 'Cleaner', cleans: 'Cleaner', cleanup: 'Cleaner', delete: 'Deleter', deletes: 'Deleter', remove: 'Remover', removes: 'Remover', backs: 'Backup', mutes: 'Muter' };
+const VERB = { track: 'Tracker', tracks: 'Tracker', summarize: 'Summarizer', summarizes: 'Summarizer', review: 'Reviewer', reviews: 'Reviewer', pick: 'Picker', picks: 'Picker', find: 'Finder', finds: 'Finder', recommend: 'Recommender', recommends: 'Recommender', suggest: 'Suggester', suggests: 'Suggester', plan: 'Planner', plans: 'Planner', generate: 'Generator', generates: 'Generator', monitor: 'Monitor', monitors: 'Monitor', alert: 'Alerts', alerts: 'Alerts', organize: 'Organizer', organizes: 'Organizer', schedule: 'Scheduler', schedules: 'Scheduler', compare: 'Comparer', compares: 'Comparer', translate: 'Translator', translates: 'Translator', scrape: 'Scraper', scrapes: 'Scraper', log: 'Logger', logs: 'Logger', remind: 'Reminder', reminds: 'Reminder', count: 'Counter', counts: 'Counter', rate: 'Rater', rates: 'Rater', write: 'Writer', writes: 'Writer', build: 'Builder', builds: 'Builder', create: 'Creator', creates: 'Creator', explain: 'Explainer', explains: 'Explainer', analyze: 'Analyzer', analyzes: 'Analyzer', post: 'Poster', posts: 'Poster', send: 'Sender', sends: 'Sender', watch: 'Watcher', watches: 'Watcher', run: 'Runner', runs: 'Runner', show: 'Viewer', shows: 'Viewer', turn: 'Converter', turns: 'Converter', block: 'Blocker', blocks: 'Blocker', book: 'Booker', books: 'Booker', teach: 'Tutor', teaches: 'Tutor', convert: 'Converter', converts: 'Converter', rename: 'Renamer', renames: 'Renamer', hide: 'Hider', hides: 'Hider', triage: 'Triager', triages: 'Triager', scaffold: 'Scaffolder', scaffolds: 'Scaffolder', check: 'Checker', checks: 'Checker', identify: 'Identifier', identifies: 'Identifier', recognize: 'Identifier', recognizes: 'Identifier', scan: 'Scanner', scans: 'Scanner', roast: 'Roaster', roasts: 'Roaster', grade: 'Grader', grades: 'Grader', rank: 'Ranker', ranks: 'Ranker', estimate: 'Estimator', estimates: 'Estimator', calculate: 'Calculator', calculates: 'Calculator', transcribe: 'Transcriber', transcribes: 'Transcriber', clean: 'Cleaner', cleans: 'Cleaner', cleanup: 'Cleaner', delete: 'Deleter', deletes: 'Deleter', remove: 'Remover', removes: 'Remover', backs: 'Backup', mutes: 'Muter', downloads: 'Downloader', exports: 'Exporter', resizes: 'Resizer' };
 const BREAK = /^(to|for|with|on|in|at|by|and|or|when|so|from|using|via|while|before|after|based|over|where|as|that|which|who|if|like|into|about|across|between|during|without|per|than)$/;
 
 // "a discord bot that tracks my friends game wins" -> "Friends Game Wins Tracker" (falls back to the first 3 meaningful words)
@@ -295,6 +302,13 @@ function projectName(idea) {
     // "uses whisper to transcribe and summarize": the object is another verb, not a thing to name the project after
     if (obj.every(w => VERB[w])) obj.length = 0;
     if (obj.length && aiFeat) { const last = obj.length - 1; if (!/(ss|us|is)$/.test(obj[last])) obj[last] = obj[last].replace(/(calor|zomb|cook|mov|self|smooth|goal|pix|brown)ies$/, '$1ie').replace(/ies$/, 'y').replace(/([^s])s$/, '$1'); return 'AI ' + titleCase(obj.join(' ')) + ' ' + VERB[all[vi]]; }
+    // "renames my photos by date" -> "Photo Date Renamer", "downloads youtube transcripts" -> "YouTube Transcript Downloader"
+    if (obj.length && /^(Renamer|Downloader|Resizer)$/.test(VERB[all[vi]])) {
+      const last = obj.length - 1;
+      if (!/(ss|us|is)$/.test(obj[last])) obj[last] = obj[last].replace(/ies$/, 'y').replace(/([^s])s$/, '$1');
+      const bi = all.indexOf('by', vi);
+      if (VERB[all[vi]] === 'Renamer' && bi > vi && all[bi + 1] && /^(date|name|size|type|time|month|year|artist|album|title|camera|location)$/.test(all[bi + 1]) && obj.length < 3) obj.push(all[bi + 1]);
+    }
     if (obj.length) return titleCase(obj.join(' ')) + ' ' + VERB[all[vi]];
   }
   const words = [];
@@ -332,7 +346,7 @@ function generate(idea) {
   idea = String(idea || '').trim().slice(0, 600);
   if (idea.length < 4 || !/[a-z0-9]{2,}/i.test(idea)) throw new Error('Tell me a bit more about your idea (at least a few words).');
   const keys = detectTypes(idea);
-  let primary = keys[0] === 'extension' && VSCODE.test(idea.toLowerCase()) ? { ...TYPES.extension, label: 'VS Code Extension' } : keys[0] === 'extension' && RAYCAST.test(idea.toLowerCase()) ? { ...TYPES.extension, label: 'Raycast Extension' } : TYPES[keys[0]];
+  let primary = keys[0] === 'extension' && VSCODE.test(idea.toLowerCase()) ? { ...TYPES.extension, label: 'VS Code Extension' } : keys[0] === 'extension' && RAYCAST.test(idea.toLowerCase()) ? { ...TYPES.extension, label: 'Raycast Extension' } : keys[0] === 'extension' && FIGMA.test(idea.toLowerCase()) ? { ...TYPES.extension, label: 'Figma Plugin' } : TYPES[keys[0]];
   const secondary = keys[1] ? TYPES[keys[1]] : null;
   const lower = idea.toLowerCase();
   let name = projectName(idea);
@@ -359,9 +373,10 @@ function generate(idea) {
   const engine = keys[0] === 'game' ? gameEngine(lower) : null;
   const vscode = keys[0] === 'extension' && VSCODE.test(lower);
   const raycast = keys[0] === 'extension' && !vscode && RAYCAST.test(lower);
+  const figma = keys[0] === 'extension' && !vscode && !raycast && FIGMA.test(lower);
   const fabric = keys[0] === 'mcmod' && /\b(mod|fabric|forge|neoforge|modpack)\b/.test(lower) && !/\b(plugin|paper|spigot|bukkit|server)\b/.test(lower);
   if (fabric) primary = { ...primary, label: 'Minecraft Mod' };
-  const stack = (engine ? GAME_ENGINES[engine] : vscode ? VSCODE_STACK : raycast ? RAYCAST_STACK : fabric ? MCMOD_FABRIC : primary.stack).map(([tech, why]) => ({ tech, why }));
+  const stack = (engine ? GAME_ENGINES[engine] : vscode ? VSCODE_STACK : raycast ? RAYCAST_STACK : figma ? FIGMA_STACK : fabric ? MCMOD_FABRIC : primary.stack).map(([tech, why]) => ({ tech, why }));
   if (engine && engine !== 'roblox' && (engine === 'unreal' || /\b(3d|three dimensional|vr|virtual reality)\b|\bthree\.?js\b/.test(lower))) stack.push({ tech: 'Blender + Blender MCP (optional)', why: 'Lets Claude Code or Cursor model and export simple 3D assets for you, so you are not stuck on art.' });
   const botSdk = () => {
     const sdk = /\btelegram\b/.test(lower) ? ['Node.js + grammY (Telegram)', 'Modern, well-documented Telegram bot framework; easy for AI tools to write.']
@@ -386,14 +401,34 @@ function generate(idea) {
   const turn = keys[0] === 'game' && !cozy && !tower && TURN.test(lower);
   const roblox = engine === 'roblox' && !cozy && !turn && !tower;
   const vehicle = keys[0] === 'game' && !cozy && !turn && !roblox && !tower && VEHICLE.test(lower);
-  const must = cozy ? (cozyLoop(lower) ? [cozyLoop(lower), ...COZY_MUST.slice(1)] : [...COZY_MUST]) : tower ? [...TOWER_MUST] : turn ? [...TURN_MUST] : roblox ? [...ROBLOX_MUST] : vehicle ? [...VEHICLE_MUST] : fabric ? [...MCMOD_FABRIC_MUST] : vscode ? [...VSCODE_MUST] : raycast ? [...RAYCAST_MUST] : [...primary.must];
-  let boss = cozy ? COZY_BOSS : tower ? TOWER_BOSS : turn ? TURN_BOSS : roblox ? ROBLOX_BOSS : vehicle ? VEHICLE_BOSS : fabric ? FABRIC_BOSS : vscode ? VSCODE_BOSS : raycast ? RAYCAST_BOSS : primary.boss;
+  const must = cozy ? (cozyLoop(lower) ? [cozyLoop(lower), ...COZY_MUST.slice(1)] : [...COZY_MUST]) : tower ? [...TOWER_MUST] : turn ? [...TURN_MUST] : roblox ? [...ROBLOX_MUST] : vehicle ? [...VEHICLE_MUST] : fabric ? [...MCMOD_FABRIC_MUST] : vscode ? [...VSCODE_MUST] : raycast ? [...RAYCAST_MUST] : figma ? [...FIGMA_MUST] : [...primary.must];
+  let boss = cozy ? COZY_BOSS : tower ? TOWER_BOSS : turn ? TURN_BOSS : roblox ? ROBLOX_BOSS : vehicle ? VEHICLE_BOSS : fabric ? FABRIC_BOSS : vscode ? VSCODE_BOSS : raycast ? RAYCAST_BOSS : figma ? FIGMA_BOSS : primary.boss;
   // "a python script that renames my photos by date": a Python CLI (Typer + uv), not a Node/npx package
   if (keys[0] === 'cli' && /\bpython\b/.test(lower)) {
     const py = [['Python 3.12 + Typer', 'Type-hinted commands with --help for free; AI tools write clean Typer CLIs.'], ['Rich', 'Readable output, progress bars and friendly errors.'], ['uv', 'Creates the project, pins dependencies and runs it with one command.'], ['pipx / uvx (publish to PyPI when ready)', 'Anyone can install it as a command without touching their system Python.']];
     for (let k = 0; k < 4; k++) if (stack[k] && TYPES.cli.stack.some(([tech]) => tech === stack[k].tech)) stack[k] = { tech: py[k][0], why: py[k][1] };
     const ni = must.indexOf('Runnable with npx from a fresh folder');
     if (ni >= 0) must[ni] = 'Runnable with uvx (or pipx) from a fresh folder, with a --dry-run flag before it changes any files';
+  }
+  // "a bash script that backs up my server": one strict-mode Bash file checked by ShellCheck and tested with bats, not a Node/npx package
+  const bashCli = keys[0] === 'cli' && /\b(bash|shell|zsh|sh) scripts?\b/.test(lower) && !/\b(python|node|powershell|typescript|javascript|rust|go)\b/.test(lower);
+  if (bashCli) {
+    const sh = [['Bash (#!/usr/bin/env bash + set -euo pipefail)', 'One file with no runtime to install; strict mode stops on the first error instead of carrying on.'], ['ShellCheck + shfmt', 'Catches quoting bugs and unsafe patterns before they bite, and keeps the style consistent; AI tools fix ShellCheck warnings well.'], ['bats-core', 'Tests for the script: the happy path, a missing argument and a failing command.'], ['One file in a GitHub repo (copy to your PATH, Homebrew tap later)', 'People install it by copying one file and running chmod +x; no package manager needed.']];
+    for (let k = 0; k < 4; k++) if (stack[k] && TYPES.cli.stack.some(([tech]) => tech === stack[k].tech)) stack[k] = { tech: sh[k][0], why: sh[k][1] };
+    if (/\b(s3|aws)\b/.test(lower)) stack.push({ tech: 'AWS CLI v2 (aws s3 sync / aws s3 cp)', why: 'Does the upload, retries and credentials for you; the script just calls it with the right flags.' });
+    const oi = must.indexOf('Read options from flags first, then a config file or env vars');
+    if (oi >= 0) must[oi] = 'Read options from flags (getopts) first, then env vars, and check required tools with command -v before doing anything';
+    const ni = must.indexOf('Runnable with npx from a fresh folder');
+    if (ni >= 0) must[ni] = 'Runs as one executable file (chmod +x) on a fresh machine, with -h usage text and a --dry-run flag before it changes or deletes anything';
+    must.push('Passes shellcheck with no warnings and has bats tests for the happy path and one failure');
+    // "a shell script that sets up my new mac" -> "Mac Setup Script" instead of "Shell Script"
+    if (/^(Bash|Shell|Zsh|Sh) Script$/.test(name)) {
+      const m = lower.match(/\bscripts?\s+(?:that|which|to)\s+(.*)$/);
+      const ow = [];
+      for (const w of (m ? m[1] : '').replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean).slice(1)) { if (/^(up|out|off|down)$/.test(w) && !ow.length) continue; if (BREAK.test(w)) { if (ow.length) break; else continue; } if (STOP.has(w) || FILLER.has(w) || KIND.has(w)) continue; ow.push(w); if (ow.length === 3) break; }
+      if (ow.length) name = titleCase(ow.join(' ')) + (/\b(sets? up|setup|bootstraps?|installs?|configures?)\b/.test(lower) ? ' Setup Script' : ' Script');
+    }
+    boss = 'Portable, safe shell: quoting paths with spaces, macOS Bash 3.2 and BSD tools (sed -i, date, stat) vs GNU on Linux, cleanup with trap on errors, and never deleting the wrong thing when a variable is empty';
   }
   if (tower && engine === 'roblox') must.push('Waves and money run on the server, saved with DataStoreService');
   if (keys.includes('rag') && SUPPORT.test(lower)) { must.push('Hand off to a human (email or ticket link) when the bot cannot answer or the customer asks for one'); if (STORE.test(lower)) must.push('One read-only order-status lookup by order number + email' + (/\bshopify\b/.test(lower) ? ' (Shopify Admin API)' : /\bwoocommerce\b/.test(lower) ? ' (WooCommerce REST API)' : '') + ', never refunds or edits'); }
@@ -608,8 +643,19 @@ function generate(idea) {
     const rv = rm && rm[1] && VERB[rm[1]] && VERB[rm[1]] !== 'Viewer' ? ' ' + VERB[rm[1]] : '';
     name = nw.length ? (/\b(ai|gpt|chatgpt|claude|llm|openai)\b/.test(lower) ? 'AI ' : '') + titleCase(nw.join(' ')) + rv + ' for Raycast' : /^Raycast/.test(name) || !name ? 'Raycast Extension' : name;
   }
+  // "a figma plugin that exports colors as tailwind config" -> "Tailwind Colors Exporter for Figma"
+  if (figma) {
+    if (/\btailwind\b/.test(lower) && /\b(colou?rs?|styles?|variables?|tokens?|theme)\b/.test(lower)) must.splice(1, 1, 'Read the local color styles and variables (getLocalPaintStylesAsync, figma.variables.getLocalVariablesAsync) and turn them into a Tailwind theme.colors config (plus CSS variables for Tailwind v4)');
+    const ai = stack.findIndex(x => /^An LLM API behind/.test(x.tech));
+    if (ai >= 0) stack[ai] = { tech: 'An LLM API called through your own small server function', why: 'Plugin code ships to every user, so an API key in it is public; send only the layer names or text the model needs, and add the server domain to networkAccess.' };
+    let n = name.replace(/\s*\b(Figma )?(Plugins?|Widgets?)$/, '').replace(/^Figma$/, '');
+    if (n && /\btailwind\b/.test(lower) && !/Tailwind/.test(n)) n = 'Tailwind ' + n;
+    if (n && /\b(ai|gpt|chatgpt|claude|llm|openai)\b/.test(lower) && !/^AI\b/.test(n)) n = 'AI ' + n;
+    const app = /\bfigjam\b/.test(lower) ? 'FigJam' : 'Figma';
+    name = n ? (/Fig(ma|Jam)/.test(n) ? n : n + ' for ' + app) : app + ' Plugin';
+  }
   // "an android app that reminds me to stretch": schedule local notifications from on-device settings, no accounts or store-submission boss
-  const reminder = !habit && !pomo && !pomoExt && !todo && !personalLog && !metronome && !runTimer && !beatMaker && !tuner && !secondary && !vscode && !raycast && /^(mobile|web|extension|bot)$/.test(keys[0])
+  const reminder = !habit && !pomo && !pomoExt && !todo && !personalLog && !metronome && !runTimer && !beatMaker && !tuner && !secondary && !vscode && !raycast && !figma && /^(mobile|web|extension|bot)$/.test(keys[0])
     && /\b(remind\w*|nudges? me)\b/.test(lower)
     && !/\b(ai|gpt|claude|llm|gemini|openai|calendar|emails?|inbox|meetings?|bills?|invoices?|friends?|team|group|share\w*|social|prices?|deals?|scrap\w*|api|stocks?|restocks?|releases?|drops?|news)\b/.test(lower);
   if (reminder) {
@@ -696,6 +742,8 @@ function generate(idea) {
   if (runTimer) { loot.delete('Leaderboards'); ['Import and export LiveSplit (.lss) splits', 'Sum of best and best possible time'].forEach(l => loot.add(l)); }
   ['Polish pass and onboarding', 'Share / invite flow', 'Basic analytics'].forEach(l => loot.add(l));
   if (raycast) loot.delete('Share / invite flow');
+  if (bashCli) { loot.delete('Share / invite flow'); loot.delete('Basic analytics'); ['A cron (or launchd) example to run it on a schedule', 'Quiet (-q) and verbose (-v) output modes'].forEach(l => loot.add(l)); }
+  if (figma) { loot.delete('Share / invite flow'); loot.delete('Basic analytics'); loot.delete('Conversation memory'); ['Run on a whole page, not just the selection', 'A Dev Mode (codegen) version for developers'].forEach(l => loot.add(l)); }
 
   const stackLine = stack.slice(0, 3).map(s => s.tech).join(', ');
   const mvp = {
