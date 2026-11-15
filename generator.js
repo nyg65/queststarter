@@ -33,7 +33,7 @@ const TYPES = {
     boss: 'Version compatibility and server performance: no blocking work on the main thread, and test on the Minecraft version you target',
   },
   cli: {
-    label: 'CLI Tool', kw: ['cli', 'command line', 'command-line', 'terminal tool', 'terminal app', 'npx', 'python script', 'bash script', 'shell script', 'zsh script', 'powershell script', 'node script'],
+    label: 'CLI Tool', kw: ['cli', 'command line', 'command-line', 'terminal tool', 'terminal app', 'npx', 'python script', 'bash script', 'shell script', 'zsh script', 'powershell script', 'node script', 'tui', 'terminal ui'],
     stack: [['Node.js + TypeScript', 'Runs anywhere npm does; AI tools write solid Node CLIs.'], ['commander + @clack/prompts', 'Argument parsing and friendly interactive prompts without reinventing either.'], ['tsup', 'Bundles to one file with a shebang so it runs with npx.'], ['npm (publish as an npx command)', 'Anyone can try it with one command, no install step.']],
     must: ['One command that does the core job, with --help', 'Clear errors and non-zero exit codes when something fails', 'Read options from flags first, then a config file or env vars', 'Runnable with npx from a fresh folder'],
     boss: 'Working the same on macOS, Windows and Linux (paths, shells, line endings) with error messages people can act on',
@@ -45,7 +45,7 @@ const TYPES = {
     boss: 'Running all stream long: reconnecting when the data source drops, and staying light so OBS does not drop frames',
   },
   extension: {
-    label: 'Browser Extension', kw: ['extension', 'chrome', 'browser plugin', 'userscript'],
+    label: 'Browser Extension', kw: ['extension', 'chrome', 'browser plugin', 'userscript', 'firefox add'],
     stack: [['Chrome Extension MV3 + Vite (CRXJS)', 'Modern manifest with hot reload.'], ['TypeScript', 'Safer message passing between scripts.'], ['chrome.storage', 'Built-in persistence.']],
     must: ['Manifest + popup that opens', 'Content script that does one thing on one site', 'Settings saved in chrome.storage'],
     boss: 'Handling sites that change their DOM, and MV3 service worker lifecycle',
@@ -176,6 +176,7 @@ const PERSONA = /\b(role ?plays?|roleplaying|persona|companion|pretends? to be|i
 const STT = /\b(transcrib\w*|transcriptions?|speech[- ]to[- ]text|dictation)\b|\b(with|using|uses?|via|and) (openai'?s? )?whisper\b|\bwhisper (api|model)\b/;
 // chat with a model running on your machine (Ollama, LM Studio); a usage monitor stays a data tool
 const LOCAL_LLM = /\b(ollama|lm studio|lmstudio|lm-studio|localai|local-ai|llama\.?cpp|gpt4all)\b|\blocal (llms?|models?)\b/;
+const TABLETOP = /\b(ttrpgs?|d&d|dnd|dungeons (and|&) dragons|tabletop|pathfinder|initiative|character sheets?|dungeon master|game master)\b/;
 const STOP = new Set('a an the to for of and or that i my me with on in it is be build make create want app project idea simple'.split(' '));
 
 function detectTypes(text) {
@@ -201,7 +202,7 @@ function detectTypes(text) {
   const gameGenre = /\b(game|sim|simulator|visual novel) (where|about|in which|set)\b|\bvisual novel\b|\b(platformer|rpg|roguelike|shooter|puzzle|arcade|tower defense|card game|deckbuilder|multiplayer|level|player|enemy|enemies|npc|npcs|dungeon|escape room)\b/.test(t);
   // a game with AI features ("an rpg where the npcs are llm agents") is a game first, with an AI component
   if (keys[0] === 'agent' && keys.includes('game') && gameGenre) { keys.splice(keys.indexOf('game'), 1); keys.unshift('game'); }
-  if (keys[0] === 'game' && !gameGenre && /\b(pick|picks|recommend\w*|suggest\w*|choose|finder|track\w*|backlog|library|wishlist|review\w*|deals?|rat(e|es|ing|ings)|timer|stats|compar\w*|performance|benchmarks?|generator|sprites?|assets?|overlay|splits|wiki|guides?|launcher)\b/.test(t)) { keys.shift(); if (!keys.includes('web') && !keys.includes('data')) keys.unshift('web'); }
+  if (keys[0] === 'game' && !gameGenre && /\b(pick|picks|recommend\w*|suggest\w*|choose|finder|track\w*|backlog|library|wishlist|review\w*|deals?|rat(e|es|ing|ings)|timer|stats|compar\w*|performance|benchmarks?|generator|sprites?|assets?|overlay|splits|wiki|guides?|launcher)\b/.test(t) || (keys[0] === 'game' && !gameGenre && /\b(leaderboards?|standings|elo|rankings?|tournaments?|brackets?|schedul\w*)\b/.test(t) && /\b(website|site|web ?app|app|page|tracker|dashboard|for (my|our))\b/.test(t) && !/\bgames? (with|where|about|in which|that has)\b/.test(t))) { keys.shift(); if (!keys.includes('web') && !keys.includes('data')) keys.unshift('web'); }
   // a bot/tool that is merely about games ("tracks my friends' game wins") shouldn't also get a game engine
   if (keys[0] !== 'game' && keys.includes('game') && !gameGenre && !/\b(unity|godot|three\.?js)\b/.test(t)) keys.splice(keys.indexOf('game'), 1);
   // "an MCP server that lets my coding agent read X": the agent is the client, so plan only the MCP server
@@ -213,6 +214,8 @@ function detectTypes(text) {
   // and "a habit tracker for my android phone" is a mobile app, so the word "tracker" shouldn't add a data / API tool component either
   if (keys.length > 1 && keys[0] !== 'data' && keys.includes('data') && PERSONAL.test(t) && !/\b(scrap\w*|alerts?|api|monitor\w*|prices?|deals?|patch\w*|news|digest|feed|spend\w*|costs?|dashboards?|stats|analytics|fitbit|strava|garmin|goodreads|sync\w*|imports?)\b/.test(t)) keys.splice(keys.indexOf('data'), 1);
   if (keys[0] === 'data' && PERSONAL.test(t) && !/\b(scrap\w*|alerts?|api|monitor\w*|prices?|deals?|patch\w*|news|digest|feed|spend\w*|costs?)\b/.test(t)) { keys.shift(); const m = /\b(mobile|ios|android|iphone|phone)\b/.test(t) ? 'mobile' : 'web'; if (!keys.includes(m)) keys.unshift(m); else { keys.splice(keys.indexOf(m), 1); keys.unshift(m); } }
+  // "a ttrpg initiative tracker" / "a d&d character sheet tracker": a table-side tool the group fills in, not a data fetcher with cron and email alerts
+  if (keys[0] === 'data' && TABLETOP.test(t) && !/\b(scrap\w*|alerts?|api|monitor\w*|prices?|deals?|news|digest|feed|stock)\b/.test(t)) { keys.shift(); const w = keys.indexOf('web'); if (w >= 0) keys.splice(w, 1); keys.unshift('web'); }
   // "a meeting transcriber with whisper api": "api" names the speech-to-text service, not a data fetcher; a transcriber is a record/upload app
   if (keys.includes('data') && STT.test(t) && !/\b(trackers?|dashboards?|scrap\w*|analytics|stats|monitor\w*|alerts?|digests?|news|deals?|patch\w*)\b/.test(t)) { keys.splice(keys.indexOf('data'), 1); if (!keys.length) keys.push(/\b(mobile|ios|android|iphone|phone)\b/.test(t) ? 'mobile' : 'web'); }
   // chat or Q&A over the user's own documents is retrieval (ingest, retrieve, cite), not a tool-calling agent loop
@@ -257,7 +260,7 @@ function detectTypes(text) {
   return keys.length ? keys.slice(0, 2) : ['web'];
 }
 
-const ACRO = { ai: 'AI', rag: 'RAG', mcp: 'MCP', cli: 'CLI', pdfs: 'PDFs', obsidian: 'Obsidian', saas: 'SaaS', claude: 'Claude', cursor: 'Cursor', vscode: 'VS Code', turnbased: 'Turn-Based', api: 'API', llm: 'LLM', gpt: 'GPT', ios: 'iOS', iphone: 'iPhone', mvp: 'MVP', rpg: 'RPG', ui: 'UI', '2d': '2D', '3d': '3D', npc: 'NPC', mmo: 'MMO', fps: 'FPS', pc: 'PC', vr: 'VR', ar: 'AR', youtube: 'YouTube', github: 'GitHub', tiktok: 'TikTok', gpu: 'GPU', cpu: 'CPU', pdf: 'PDF', seo: 'SEO', sql: 'SQL', npcs: 'NPCs', unity: 'Unity', godot: 'Godot', unreal: 'Unreal', ue5: 'UE5', obby: 'Obby', threejs: 'Three.js', webgl: 'WebGL', discord: 'Discord', telegram: 'Telegram', slack: 'Slack', twitter: 'Twitter', reddit: 'Reddit', steam: 'Steam', chrome: 'Chrome', android: 'Android', notion: 'Notion', spotify: 'Spotify', twitch: 'Twitch', minecraft: 'Minecraft', roblox: 'Roblox', xbox: 'Xbox', playstation: 'PlayStation', openai: 'OpenAI', chatgpt: 'ChatGPT', nextjs: 'Next.js', obs: 'OBS', csv: 'CSV', json: 'JSON', npx: 'npx', woocommerce: 'WooCommerce', ollama: 'Ollama', todoist: 'Todoist', raycast: 'Raycast', figma: 'Figma', figjam: 'FigJam', tailwind: 'Tailwind', pico8: 'PICO-8', jira: 'Jira', heic: 'HEIC', jpg: 'JPG', png: 'PNG' };
+const ACRO = { html: 'HTML', gif: 'GIF', gifs: 'GIFs', dnd: 'D&D', ttrpg: 'TTRPG', ttrpgs: 'TTRPGs', tui: 'TUI', ai: 'AI', rag: 'RAG', mcp: 'MCP', cli: 'CLI', pdfs: 'PDFs', obsidian: 'Obsidian', saas: 'SaaS', claude: 'Claude', cursor: 'Cursor', vscode: 'VS Code', turnbased: 'Turn-Based', api: 'API', llm: 'LLM', gpt: 'GPT', ios: 'iOS', iphone: 'iPhone', mvp: 'MVP', rpg: 'RPG', ui: 'UI', '2d': '2D', '3d': '3D', npc: 'NPC', mmo: 'MMO', fps: 'FPS', pc: 'PC', vr: 'VR', ar: 'AR', youtube: 'YouTube', github: 'GitHub', tiktok: 'TikTok', gpu: 'GPU', cpu: 'CPU', pdf: 'PDF', seo: 'SEO', sql: 'SQL', npcs: 'NPCs', unity: 'Unity', godot: 'Godot', unreal: 'Unreal', ue5: 'UE5', obby: 'Obby', threejs: 'Three.js', webgl: 'WebGL', discord: 'Discord', telegram: 'Telegram', slack: 'Slack', twitter: 'Twitter', reddit: 'Reddit', steam: 'Steam', chrome: 'Chrome', android: 'Android', notion: 'Notion', spotify: 'Spotify', twitch: 'Twitch', minecraft: 'Minecraft', roblox: 'Roblox', xbox: 'Xbox', playstation: 'PlayStation', openai: 'OpenAI', chatgpt: 'ChatGPT', nextjs: 'Next.js', obs: 'OBS', csv: 'CSV', json: 'JSON', npx: 'npx', woocommerce: 'WooCommerce', ollama: 'Ollama', todoist: 'Todoist', raycast: 'Raycast', figma: 'Figma', figjam: 'FigJam', tailwind: 'Tailwind', pico8: 'PICO-8', jira: 'Jira', heic: 'HEIC', jpg: 'JPG', png: 'PNG' };
 function titleCase(s) { return s.split(' ').map(w => ACRO[w] || (/'s$/.test(w) && ACRO[w.slice(0, -2)] ? ACRO[w.slice(0, -2)] + "'s" : w.replace(/(^|[^a-z0-9'])([a-z0-9])/g, (m, a, c) => a + c.toUpperCase()))).join(' '); }
 function hasWord(text, k) { return new RegExp('(^|[^a-z0-9])' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '($|[^a-z0-9])').test(text); }
 function lbl(l) { return l.toLowerCase().replace(/\bai\b/g, 'AI').replace(/\bapi\b/g, 'API').replace(/\bmcp\b/g, 'MCP').replace(/\bvs code\b/g, 'VS Code').replace(/\bminecraft\b/g, 'Minecraft').replace(/\bcli\b/g, 'CLI').replace(/\brag\b/g, 'RAG').replace(/\bfigma\b/g, 'Figma'); }
@@ -265,7 +268,7 @@ function article(w) { if (/^RAG\b/.test(w)) return 'a'; if (/^[A-Z]{2,}/.test(w)
 
 const FILLER = new Set('helps help lets let allows allow can will you your which who where when using use uses via from into just some every all also really like new built made so tells shows gives are was were has have get gets play plays playing style'.split(' '));
 const KIND = new Set('cli bot tool extension plugin agent website site webapp saas platform thing chrome browser discord telegram slack mobile ios android iphone web'.split(' '));
-const VERB = { track: 'Tracker', tracks: 'Tracker', summarize: 'Summarizer', summarizes: 'Summarizer', review: 'Reviewer', reviews: 'Reviewer', pick: 'Picker', picks: 'Picker', find: 'Finder', finds: 'Finder', recommend: 'Recommender', recommends: 'Recommender', suggest: 'Suggester', suggests: 'Suggester', plan: 'Planner', plans: 'Planner', generate: 'Generator', generates: 'Generator', monitor: 'Monitor', monitors: 'Monitor', alert: 'Alerts', alerts: 'Alerts', organize: 'Organizer', organizes: 'Organizer', schedule: 'Scheduler', schedules: 'Scheduler', compare: 'Comparer', compares: 'Comparer', translate: 'Translator', translates: 'Translator', scrape: 'Scraper', scrapes: 'Scraper', log: 'Logger', logs: 'Logger', remind: 'Reminder', reminds: 'Reminder', count: 'Counter', counts: 'Counter', rate: 'Rater', rates: 'Rater', write: 'Writer', writes: 'Writer', build: 'Builder', builds: 'Builder', create: 'Creator', creates: 'Creator', explain: 'Explainer', explains: 'Explainer', analyze: 'Analyzer', analyzes: 'Analyzer', post: 'Poster', posts: 'Poster', send: 'Sender', sends: 'Sender', watch: 'Watcher', watches: 'Watcher', run: 'Runner', runs: 'Runner', show: 'Viewer', shows: 'Viewer', turn: 'Converter', turns: 'Converter', block: 'Blocker', blocks: 'Blocker', book: 'Booker', books: 'Booker', teach: 'Tutor', teaches: 'Tutor', convert: 'Converter', converts: 'Converter', rename: 'Renamer', renames: 'Renamer', hide: 'Hider', hides: 'Hider', triage: 'Triager', triages: 'Triager', scaffold: 'Scaffolder', scaffolds: 'Scaffolder', check: 'Checker', checks: 'Checker', identify: 'Identifier', identifies: 'Identifier', recognize: 'Identifier', recognizes: 'Identifier', scan: 'Scanner', scans: 'Scanner', roast: 'Roaster', roasts: 'Roaster', grade: 'Grader', grades: 'Grader', rank: 'Ranker', ranks: 'Ranker', estimate: 'Estimator', estimates: 'Estimator', calculate: 'Calculator', calculates: 'Calculator', transcribe: 'Transcriber', transcribes: 'Transcriber', clean: 'Cleaner', cleans: 'Cleaner', cleanup: 'Cleaner', delete: 'Deleter', deletes: 'Deleter', remove: 'Remover', removes: 'Remover', backs: 'Backup', mutes: 'Muter', downloads: 'Downloader', exports: 'Exporter', resizes: 'Resizer', pings: 'Pinger', rotates: 'Rotator', collects: 'Collector', splits: 'Splitter' };
+const VERB = { track: 'Tracker', tracks: 'Tracker', summarize: 'Summarizer', summarizes: 'Summarizer', review: 'Reviewer', reviews: 'Reviewer', pick: 'Picker', picks: 'Picker', find: 'Finder', finds: 'Finder', recommend: 'Recommender', recommends: 'Recommender', suggest: 'Suggester', suggests: 'Suggester', plan: 'Planner', plans: 'Planner', generate: 'Generator', generates: 'Generator', monitor: 'Monitor', monitors: 'Monitor', alert: 'Alerts', alerts: 'Alerts', organize: 'Organizer', organizes: 'Organizer', schedule: 'Scheduler', schedules: 'Scheduler', compare: 'Comparer', compares: 'Comparer', translate: 'Translator', translates: 'Translator', scrape: 'Scraper', scrapes: 'Scraper', log: 'Logger', logs: 'Logger', remind: 'Reminder', reminds: 'Reminder', count: 'Counter', counts: 'Counter', rate: 'Rater', rates: 'Rater', write: 'Writer', writes: 'Writer', build: 'Builder', builds: 'Builder', create: 'Creator', creates: 'Creator', explain: 'Explainer', explains: 'Explainer', analyze: 'Analyzer', analyzes: 'Analyzer', post: 'Poster', posts: 'Poster', send: 'Sender', sends: 'Sender', watch: 'Watcher', watches: 'Watcher', run: 'Runner', runs: 'Runner', show: 'Viewer', shows: 'Viewer', turn: 'Converter', turns: 'Converter', block: 'Blocker', blocks: 'Blocker', book: 'Booker', books: 'Booker', teach: 'Tutor', teaches: 'Tutor', convert: 'Converter', converts: 'Converter', rename: 'Renamer', renames: 'Renamer', hide: 'Hider', hides: 'Hider', triage: 'Triager', triages: 'Triager', scaffold: 'Scaffolder', scaffolds: 'Scaffolder', check: 'Checker', checks: 'Checker', identify: 'Identifier', identifies: 'Identifier', recognize: 'Identifier', recognizes: 'Identifier', scan: 'Scanner', scans: 'Scanner', roast: 'Roaster', roasts: 'Roaster', grade: 'Grader', grades: 'Grader', rank: 'Ranker', ranks: 'Ranker', estimate: 'Estimator', estimates: 'Estimator', calculate: 'Calculator', calculates: 'Calculator', transcribe: 'Transcriber', transcribes: 'Transcriber', clean: 'Cleaner', cleans: 'Cleaner', cleanup: 'Cleaner', delete: 'Deleter', deletes: 'Deleter', remove: 'Remover', removes: 'Remover', backs: 'Backup', mutes: 'Muter', downloads: 'Downloader', exports: 'Exporter', resizes: 'Resizer', pings: 'Pinger', rotates: 'Rotator', collects: 'Collector', splits: 'Splitter', rolls: 'Roller', tails: 'Tailer' };
 const BREAK = /^(to|for|with|on|in|at|by|and|or|when|so|from|using|via|while|before|after|based|over|where|as|that|which|who|if|like|into|about|across|between|during|without|per|than)$/;
 
 // "a discord bot that tracks my friends game wins" -> "Friends Game Wins Tracker" (falls back to the first 3 meaningful words)
@@ -275,12 +278,12 @@ function projectName(idea) {
   if (um) { const hw = um[1].split(/\s+/).filter(w => !STOP.has(w) && !FILLER.has(w)); if (hw.length >= 2 && hw.length <= 3 && !/^(app|tool|thing|website|site|webapp|cli|bot|extension|plugin)$/.test(hw[0])) return 'AI ' + titleCase(hw.join(' ')); }
   // "a mobile app that uses ai to identify plants" -> "AI Plant Identifier": no thing named before "that uses ai", so name it after the AI feature
   const aiFeat = !!um;
-  const all = idea.toLowerCase().replace(/[\u2018\u2019]/g, "'").replace(/\b(it|that|there|what|here|he|she|let|who)'s\b/g, '$1').replace(/\b(\w+)'(re|ll|ve|d|m)\b/g, '$1').replace(/\b(my|our|your|their|his|her)\s+(clan|guild|team|company|server|squad|crew|group|class|org|community|channel|discord|work|office|club|league)'s\b/g, '$1').replace(/\b([a-z0-9]+)'s\b/g, '$1\u0001s').replace(/\bpico[- ]8\b/g, 'pico8').replace(/\bthree\.js\b/g, 'threejs').replace(/\bnext\.?js\b/g, 'nextjs').replace(/\bunreal engine( \d)?\b/g, 'unreal').replace(/\bturn[- ]based\b/g, 'turnbased').replace(/\bvs ?code\b|\bvisual studio code\b/g, 'vscode').replace(/[^a-z0-9\s\u0001]/g, ' ').replace(/\u0001(?!s\b)/g, ' ').split(/\s+/).filter(Boolean).map(w => w.replace(/\u0001/g, "'"));
+  const all = idea.toLowerCase().replace(/[\u2018\u2019]/g, "'").replace(/^\s*(?:an?\s+)?(?:website|site|web app|webapp|page|app)\s+that(?:'s|\s+is)\s+(?:an?\s+)?(?=[a-z])/, '').replace(/\bd&d\b/g, 'dnd').replace(/\b(?:rust|golang|go)\s+(?=(?:cli|tui|command|terminal|script|program|binary|tool)\b)/g, '').replace(/\b(it|that|there|what|here|he|she|let|who)'s\b/g, '$1').replace(/\b(\w+)'(re|ll|ve|d|m)\b/g, '$1').replace(/\b(my|our|your|their|his|her)\s+(clan|guild|team|company|server|squad|crew|group|class|org|community|channel|discord|work|office|club|league)'s\b/g, '$1').replace(/\b([a-z0-9]+)'s\b/g, '$1\u0001s').replace(/\bpico[- ]8\b/g, 'pico8').replace(/\bthree\.js\b/g, 'threejs').replace(/\bnext\.?js\b/g, 'nextjs').replace(/\bunreal engine( \d)?\b/g, 'unreal').replace(/\bturn[- ]based\b/g, 'turnbased').replace(/\bvs ?code\b|\bvisual studio code\b/g, 'vscode').replace(/[^a-z0-9\s\u0001]/g, ' ').replace(/\u0001(?!s\b)/g, ' ').split(/\s+/).filter(Boolean).map(w => w.replace(/\u0001/g, "'"));
   // a base-form verb word used as a noun ("a workout log for my phone", "a meal plan app") is part of the name, not the action
   const nounUse = i => !/s$/.test(all[i]) && i > 0 && !STOP.has(all[i - 1]) && !FILLER.has(all[i - 1]) && !BREAK.test(all[i - 1]) && !/^(i|we|you|they|people|users|gamers|players|can|will|to)$/.test(all[i - 1]) && (i === all.length - 1 || BREAK.test(all[i + 1]) || KIND.has(all[i + 1]) || all[i + 1] === 'app' || /^(generator|maker|builder|creator|planner|tracker|writer)$/.test(all[i + 1]));
   // newer verbs name tools ("pings my servers"), not games ("a game where a wizard rotates the world")
   const gameIdea = /\b(game|platformer|roguelike|roguelite|metroidvania|rpg|shooter|sim|simulator|visual novel)\b/.test(all.join(' '));
-  const vi = all.findIndex((w, i) => VERB[w] && i > 0 && !nounUse(i) && !(/^(pings|rotates|collects|splits)$/.test(w) && (gameIdea || !/^(that|which|who|it|and)$/.test(all[i - 1]))));
+  const vi = all.findIndex((w, i) => VERB[w] && i > 0 && !nounUse(i) && !(w === 'rolls' && /^(back|out|over|up)$/.test(all[i + 1] || '')) && !(/^(pings|rotates|collects|splits|rolls|tails)$/.test(w) && (gameIdea || !/^(that|which|who|it|and)$/.test(all[i - 1]))));
   if (vi > 0) {
     // "tracks how much I spend on Claude Code each day" -> "Claude Code Spend Tracker"
     const rest = all.slice(vi + 1);
@@ -295,17 +298,32 @@ function projectName(idea) {
       if (tgt.length) return titleCase(tgt.join(' ')) + (noun ? ' ' + noun : '') + ' ' + VERB[all[vi]];
     }
     const obj = [];
-    let oi = vi + 1;
+    let oi = vi + 1, last = -1;
     while (/^(up|out|off|away|down)$/.test(all[oi] || '')) oi++; // "cleans up my downloads" -> skip "up"
-    for (const w of all.slice(oi)) {
+    for (let j = oi; j < all.length; j++) {
+      const w = all[j];
       if (BREAK.test(w)) { if (obj.length) break; else continue; }
       if (STOP.has(w) || FILLER.has(w) || KIND.has(w)) continue;
-      obj.push(w);
+      obj.push(w); last = j;
       if (obj.length === 3) break;
     }
     // "uses whisper to transcribe and summarize": the object is another verb, not a thing to name the project after
     if (obj.every(w => VERB[w])) obj.length = 0;
     if (obj.length && aiFeat) { const last = obj.length - 1; if (!/(ss|us|is)$/.test(obj[last])) obj[last] = obj[last].replace(/(calor|zomb|cook|mov|self|smooth|goal|pix|brown)ies$/, '$1ie').replace(/ies$/, 'y').replace(/([^s])s$/, '$1'); return 'AI ' + titleCase(obj.join(' ')) + ' ' + VERB[all[vi]]; }
+    // "turns my git log into a changelog" -> "Changelog Generator"; "converts markdown to html" -> "Markdown to HTML Converter"
+    if (obj.length && obj.length <= 2 && VERB[all[vi]] === 'Converter' && (all[last + 1] === 'into' || (all[last + 1] === 'to' && /^converts?$/.test(all[vi])))) {
+      const tg = [];
+      for (const w of all.slice(last + 2)) { if (BREAK.test(w)) { if (tg.length) break; else continue; } if (STOP.has(w) || FILLER.has(w) || KIND.has(w)) continue; tg.push(w); if (tg.length === 2) break; }
+      if (tg.length) {
+        const GEN = /^(changelogs?|release notes|flashcards?|quiz|quizzes|summary|summaries|podcasts?|threads?|newsletters?|playlists?|slides|presentations?|blog posts?|memes?|stickers?|wallpapers?)$/;
+        if (GEN.test(tg.join(' '))) return titleCase(tg.join(' ').replace(/^(flashcard|podcast|thread|newsletter|playlist|presentation|meme|sticker|wallpaper|changelog)s$/, '$1').replace(/^(blog post)s$/, '$1').replace(/^quizzes$/, 'quiz').replace(/^summaries$/, 'summary')) + ' Generator';
+        return titleCase(obj.join(' ')) + ' to ' + titleCase(tg.join(' ')) + ' Converter';
+      }
+    }
+    // "shows price per ounce on amazon" -> "Price per Ounce Calculator"
+    if (obj.length && obj.length < 3 && all[last + 1] === 'per' && /^(ounce|oz|pound|lb|gram|kg|kilo|liter|litre|unit|serving|item|load|mile|gallon|sheet|roll|count|square foot|sq)$/.test(all[last + 2] || '')) return titleCase(obj.join(' ')) + ' per ' + titleCase(all[last + 2]) + (VERB[all[vi]] === 'Viewer' ? ' Calculator' : ' ' + VERB[all[vi]]);
+    // "tracks my dog's walks" -> "Dog Walk Tracker" (not "Dog's Walks Tracker")
+    if (obj.length === 2 && /'s$/.test(obj[0]) && /[^s]s$/.test(obj[1]) && !/(ss|us|is)$/.test(obj[1])) { obj[0] = obj[0].slice(0, -2); obj[1] = obj[1].replace(/ies$/, 'y').replace(/s$/, ''); }
     // "renames my photos by date" -> "Photo Date Renamer", "downloads youtube transcripts" -> "YouTube Transcript Downloader"
     if (obj.length && /^(Renamer|Downloader|Resizer)$/.test(VERB[all[vi]])) {
       const last = obj.length - 1;
@@ -327,10 +345,13 @@ function projectName(idea) {
   // a lone generic word ("a game where you...", "a vr app for meditation") reads badly; prefix what comes after the break
   if (words.length === 2 && /^(threejs|unity|godot|phaser|roblox|unreal|pico8|browser|web|online|simple|small|tiny|little|fun|mobile)$/.test(words[0]) && words[1] === 'game' && stopAt < all.length) words.shift();
   // "a godot platformer about a snail with a jetpack" -> "Snail Jetpack Platformer" (engine + genre alone says nothing about this game)
-  if (words.length === 2 && /^(unity|godot|phaser|roblox|unreal|pico8|threejs)$/.test(words[0]) && /^(platformer|roguelike|roguelite|metroidvania|shooter|rpg|puzzler|deckbuilder|racer|runner|brawler|beat em up|soulslike)$/.test(words[1]) && /^(about|where|with|starring|featuring|of)$/.test(all[stopAt] || '')) {
+  if (words.length === 2 && /^(unity|godot|phaser|roblox|unreal|pico8|threejs)$/.test(words[0]) && /^(platformer|roguelike|roguelite|metroidvania|shooter|rpg|puzzler|deckbuilder|racer|runner|brawler|beat em up|soulslike|obby)$/.test(words[1]) && /^(about|where|with|starring|featuring|of)$/.test(all[stopAt] || '')) {
     const th = [];
-    for (const w of all.slice(stopAt + 1)) { if (/^(where|that|which|who|when|while|to|for|in|on|at|and|or|but)$/.test(w) && th.length) break; if (BREAK.test(w) || STOP.has(w) || FILLER.has(w) || KIND.has(w) || /^(you|player|players)$/.test(w)) continue; th.push(w); if (th.length === 2) break; }
-    if (th.length) return titleCase(th.join(' ') + ' ' + words[1]);
+    // "a roblox obby about escaping a haunted school" -> "Haunted School Escape Obby" (the action goes after the place)
+    const GER = { escaping: 'escape', surviving: 'survival', climbing: 'climb', racing: 'race', running: 'run', jumping: 'jump', parkouring: 'parkour', hiding: 'hide and seek' };
+    let ger = '';
+    for (const w of all.slice(stopAt + 1)) { if (/^(where|that|which|who|when|while|to|for|in|on|at|and|or|but)$/.test(w) && th.length) break; if (BREAK.test(w) || STOP.has(w) || FILLER.has(w) || KIND.has(w) || /^(you|player|players)$/.test(w)) continue; if (GER[w] && !th.length && !ger) { ger = GER[w]; continue; } th.push(w); if (th.length === 2) break; }
+    if (th.length) return titleCase(th.join(' ') + (ger ? ' ' + ger : '') + ' ' + words[1]);
   }
   // "an MCP server that reads my Notion roadmap" -> "Notion MCP Server"
   if (words.join(' ') === 'mcp server' && stopAt < all.length) { const brand = all.slice(stopAt).find(w => ACRO[w] && !/^(ai|mcp|api|llm|gpt|claude|cursor|vscode|cli|ui|mvp)$/.test(w)); if (brand) return titleCase(brand + ' mcp server'); }
@@ -341,6 +362,7 @@ function projectName(idea) {
     for (const w of all.slice(stopAt + 1)) {
       // "a pico-8 game about a cat that collects fish" -> "Cat Collects Fish Game" (not "Cat Game")
       if (/^(that|who|which)$/.test(w) && more.length === 1) continue;
+      if (!more.length && /^(managing|organizing|organising|tracking|browsing|viewing|controlling|keeping)$/.test(w)) continue; // "a rust tui for managing my todo list" -> "Todo List TUI"
       if (BREAK.test(w)) { if (more.length) break; else continue; }
       if (STOP.has(w) || FILLER.has(w) || KIND.has(w) || w === words[0]) continue;
       more.push(w);
@@ -441,6 +463,23 @@ function generate(idea) {
       if (ow.length) name = titleCase(ow.join(' ')) + (/\b(sets? up|setup|bootstraps?|installs?|configures?)\b/.test(lower) ? ' Setup Script' : ' Script');
     }
     boss = 'Portable, safe shell: quoting paths with spaces, macOS Bash 3.2 and BSD tools (sed -i, date, stat) vs GNU on Linux, cleanup with trap on errors, and never deleting the wrong thing when a variable is empty';
+  }
+  // "a rust cli that finds duplicate files" / "a go cli that checks my sites": one compiled binary (clap + cargo-dist, cobra + GoReleaser), not a Node/npx package
+  const tui = keys[0] === 'cli' && /\b(tui|terminal ui)\b/.test(lower);
+  const cliLang = keys[0] === 'cli' && !bashCli && !/\b(python|node|typescript|javascript|powershell)\b/.test(lower) ? (/\b(rust|cargo|ratatui)\b/.test(lower) ? 'rust' : /\b(golang|bubble ?tea)\b|\bgo (cli|tui|command|terminal|program|binary|tool)\b|\b(in|with|using|written in) go\b/.test(lower) ? 'go' : null) : null;
+  if (cliLang) {
+    const ls = cliLang === 'rust'
+      ? [['Rust + clap (derive API)', 'Typed flags and subcommands with --help generated from your structs; AI tools write idiomatic clap well.'], tui ? ['ratatui + crossterm', 'The standard Rust TUI stack: immediate-mode widgets, with crossterm handling keys and the terminal on macOS, Linux and Windows.'] : ['anyhow + indicatif', 'Readable error chains and progress bars with almost no code.'], ['cargo fmt, clippy and test (+ assert_cmd)', 'Formatting, lints and tests are built in; assert_cmd runs your binary in tests the way a user would.'], ['cargo-dist (GitHub Releases) + crates.io', 'Builds prebuilt binaries for macOS, Linux and Windows with a shell/Homebrew installer, and cargo install works for Rust users.']]
+      : [['Go + cobra (or the standard flag package for a single command)', 'Subcommands, flags and --help the way kubectl and gh do it; AI tools write solid Go CLIs.'], tui ? ['Bubble Tea + Lip Gloss (Charm)', 'The go-to Go TUI framework (Elm-style model, update, view) with styling; AI tools know it well.'] : ['One static binary (go build)', 'No runtime to install; cross-compile for macOS, Linux and Windows with GOOS/GOARCH.'], ['go test + golangci-lint', 'Tests and the common linters in one command each, easy to run in CI.'], ['GoReleaser + GitHub Releases (Homebrew tap)', 'Tag a version and it builds every platform\'s binary, checksums and a Homebrew formula; go install works for Go users.']];
+    for (let k = 0; k < 4; k++) if (stack[k] && TYPES.cli.stack.some(([tech]) => tech === stack[k].tech)) stack[k] = { tech: ls[k][0], why: ls[k][1] };
+    const ni = must.indexOf('Runnable with npx from a fresh folder');
+    if (ni >= 0) must[ni] = cliLang === 'rust' ? 'Installs as one binary (cargo install or a cargo-dist release) and runs on a fresh machine with no runtime' : 'Installs as one static binary (go install or a GoReleaser release) and runs on a fresh machine with no runtime';
+    boss = cliLang === 'rust' ? 'Shipping one fast binary everywhere: macOS, Linux and Windows builds in CI, paths and terminals that differ, and errors people can act on (keep data ownership simple so you are not fighting the borrow checker)' : 'Shipping one binary everywhere: cross-compiling for macOS (Intel and Apple Silicon), Linux and Windows, paths and line endings, and errors people can act on';
+  }
+  if (tui) {
+    const ci = must.indexOf('One command that does the core job, with --help');
+    if (ci >= 0) must[ci] = 'A full-screen terminal UI with keyboard navigation (arrows or j/k, enter, q to quit) and a --help flag';
+    boss = 'Terminal UI edge cases: window resizes, restoring the terminal on a crash or Ctrl-C, and keys and colors that differ across terminals and Windows';
   }
   // "a pico-8 game about ...": PICO-8's limits are the real constraint, and it ships as a cart + web export
   if (engine === 'pico8') {
@@ -742,6 +781,30 @@ function generate(idea) {
     else if (/\blm[- ]?studio\b/.test(lower)) name = 'LM Studio Chat';
     else name = 'Local LLM Chat';
   }
+  // "a firefox extension that mutes autoplay videos": WebExtensions (browser.*) + web-ext + addons.mozilla.org, not Chrome MV3 + CRXJS
+  const firefox = keys[0] === 'extension' && !vscode && !raycast && !figma && /\bfirefox\b/.test(lower);
+  const crossBrowser = firefox && /\b(chrome|chromium|edge|brave|safari|all browsers|every browser|any browser|cross[- ]browser)\b/.test(lower);
+  if (firefox) {
+    primary = { ...primary, label: crossBrowser ? 'Browser Extension' : 'Firefox Extension' };
+    const fs = crossBrowser
+      ? [['WXT (Vite-based) + TypeScript', 'One codebase that builds both the Chrome MV3 and the Firefox package, using the promise-based browser.* API everywhere.'], ['web-ext (run, lint)', 'Mozilla\'s CLI: test the Firefox build in a clean profile and catch what addons.mozilla.org review rejects.'], ['browser.storage (WXT storage helper)', 'The same settings code works in both browsers.'], ['Chrome Web Store + addons.mozilla.org', 'Two listings, two reviews; WXT zips both builds for you.']]
+      : [['WebExtensions (manifest.json with browser_specific_settings.gecko.id) + TypeScript', 'Firefox\'s extension API: the promise-based browser.* namespace (webextension-polyfill if you later port to Chrome).'], ['web-ext (run, lint, build)', 'Mozilla\'s CLI: web-ext run opens a clean Firefox profile with your add-on and reloads it on save; lint catches what review rejects.'], ['browser.storage', 'Built-in persistence; storage.sync follows the user across their Firefox installs.'], ['addons.mozilla.org (AMO)', 'Firefox only installs signed add-ons; list it on AMO (or self-distribute a signed .xpi) after a review.']];
+    for (let k = 0; k < 3; k++) { const i = stack.findIndex(x => x.tech === TYPES.extension.stack[k][0]); if (i >= 0) stack[i] = { tech: fs[k][0], why: fs[k][1] }; }
+    if (!stack.find(x => x.tech === fs[3][0])) stack.splice(3, 0, { tech: fs[3][0], why: fs[3][1] });
+    for (let k = 0; k < must.length; k++) must[k] = must[k] === 'Settings saved in chrome.storage' ? (crossBrowser ? 'Settings saved with browser.storage so the same code runs in Chrome and Firefox' : 'Settings saved in browser.storage.sync') : crossBrowser ? must[k] : must[k].replace(/\bchrome\.(storage|alarms|notifications|idle|action)\b/g, 'browser.$1').replace(/\bChrome\b/g, 'Firefox').replace(/^A service worker that/, 'A background script (event page) that');
+    must.push(crossBrowser ? 'Builds and loads in both Chrome and Firefox (wxt build -b firefox) and passes web-ext lint' : 'Loads with web-ext run in a clean Firefox profile and passes web-ext lint');
+    if (boss === TYPES.extension.boss) boss = crossBrowser ? 'Handling sites that change their DOM, plus Chrome vs Firefox differences (service worker vs event-page background, manifest keys, API gaps) and passing two store reviews' : 'Handling sites that change their DOM, plus Firefox specifics: an event-page background script (not a Chrome service worker), the gecko add-on id, and passing addons.mozilla.org review (no remote code, readable source)';
+    else if (!crossBrowser) boss = boss.replace(/\bchrome\.(storage|alarms|notifications|idle|action)\b/g, 'browser.$1').replace(/MV3 service worker sleeps/g, 'background script restarts').replace(/so the worker wakes/g, 'so the background script wakes').replace(/throttles the worker/g, 'suspends the background script').replace(/\bChrome\b/g, 'Firefox');
+  }
+  // "a ttrpg initiative tracker": turn order, HP and conditions at the table, kept in the browser (no login, server or cron)
+  const initTracker = /^(web|mobile)$/.test(keys[0]) && !secondary && /\b(initiative|turn order|combat tracker|encounter tracker)\b/.test(lower) && (TABLETOP.test(lower) || /\b(combat|encounters?|monsters?)\b/.test(lower));
+  if (initTracker) {
+    const si = stack.findIndex(x => /Supabase/.test(x.tech));
+    if (si >= 0) stack[si] = { tech: 'localStorage (or IndexedDB via Dexie)', why: 'Encounters live in the browser: no login or server at the table, and a refresh mid-fight loses nothing.' };
+    must.length = 0;
+    must.push('Add combatants (name, initiative roll, HP, AC) and sort them into turn order, with ties broken by a dex modifier', 'A next-turn button that highlights whose turn it is and counts rounds', 'Track HP (damage and healing) and conditions (poisoned, prone, concentrating) with durations that tick down each round', 'The encounter saved in localStorage so a refresh or a closed tab mid-fight loses nothing');
+    boss = 'Table speed: adding monsters, ties, delayed turns and new arrivals in a few taps mid-fight without losing the turn order';
+  }
   if (secondary) must.push('Integration point with your ' + lbl(secondary.label) + ' component');
   const loot = new Set();
   for (const f of FLAVOR) if (f.kw.some(k => hasWord(lower, k) || (k.length > 4 && lower.includes(k)))) f.loot.forEach(l => loot.add(l));
@@ -759,6 +822,11 @@ function generate(idea) {
   if (runTimer) { loot.delete('Leaderboards'); ['Import and export LiveSplit (.lss) splits', 'Sum of best and best possible time'].forEach(l => loot.add(l)); }
   ['Polish pass and onboarding', 'Share / invite flow', 'Basic analytics'].forEach(l => loot.add(l));
   if (raycast) loot.delete('Share / invite flow');
+  if (cliLang || tui) { loot.delete('Share / invite flow'); loot.delete('Basic analytics'); [cliLang === 'go' ? 'Shell completions (cobra completion)' : cliLang === 'rust' ? 'Shell completions (clap_complete)' : 'Shell completions', 'A --json output mode for scripts', 'A Homebrew tap so macOS users can brew install it'].forEach(l => loot.add(l)); }
+  if (firefox) { loot.delete('Share / invite flow'); ['Firefox for Android support (gecko_android in the manifest)', 'A toolbar badge showing how often it acted on this page'].forEach(l => loot.add(l)); }
+  if (initTracker) { loot.delete('Share / invite flow'); loot.delete('Steam / game API integration'); loot.delete('Achievement badges'); loot.delete('Leaderboards'); ['Monster presets from the 5e SRD (HP, AC, initiative bonus)', 'A player-facing view for a second screen that hides monster HP', 'A d20 + modifier initiative roller'].forEach(l => loot.add(l)); }
+  if (cliLang || tui || firefox || initTracker) ['Polish pass and onboarding', 'Basic analytics'].forEach(l => { if (loot.delete(l)) loot.add(l); });
+  if (engine === 'pico8') { ['Steam / game API integration', 'Leaderboards', 'Achievement badges', 'Share / invite flow', 'Basic analytics'].forEach(l => loot.delete(l)); const pl = ['A title screen and a high score saved with cartdata / dget / dset', 'Post the .p8.png cart on the Lexaloffle BBS so players find it in Splore', 'Gamepad support checked in the web export (btn works with controllers)']; const rest = [...loot]; loot.clear(); pl.concat(rest).forEach(l => loot.add(l)); }
   if (bashCli) { loot.delete('Share / invite flow'); loot.delete('Basic analytics'); ['A cron (or launchd) example to run it on a schedule', 'Quiet (-q) and verbose (-v) output modes'].forEach(l => loot.add(l)); }
   if (figma) { loot.delete('Share / invite flow'); loot.delete('Basic analytics'); loot.delete('Conversation memory'); ['Run on a whole page, not just the selection', 'A Dev Mode (codegen) version for developers'].forEach(l => loot.add(l)); }
 
@@ -797,6 +865,11 @@ function generate(idea) {
     { title: 'Polish and launch', text: `Review "${name}" like a picky user. List the top 10 rough edges (UX, copy, errors, performance), then fix the top 5. Next, write a README with a one-line pitch, setup, usage, and a demo section, and give me deploy steps for the stack above. Then give me a post-deploy check for the 5 things that most often break when a vibe-coded app goes live, with how to test and fix each on this stack: environment variables missing on the host, a 404 when refreshing a page that isn't the home page, login or OAuth redirects still pointing to localhost, database row-level security (or equivalent access rules) left off, and the custom domain's DNS not resolving. Skip any that don't apply to this stack.` },
 
   ];
+  if (engine === 'pico8') {
+    const hi = plan[0].steps.indexOf('Get a "hello world" running locally and commit');
+    if (hi >= 0) plan[0].steps[hi] = 'Get one sprite moving with the arrow keys (_init, _update, _draw), save the .p8 cart and commit';
+    prompts[1].text = prompts[1].text.replace('the minimal code for a working "hello world"', 'the minimal .p8 cart where one sprite moves with the arrow keys (_init, _update, _draw)');
+  }
   if (keys[0] === 'game') prompts.push({ title: 'After launch: keep players playing', text: `"${name}" is live. Here are its numbers: average playtime [X], share of players still playing 1 minute after starting [Y], share who come back the next day [Z]. Read the code and, for each number, explain what in the game is causing it (load size and order, first-minute difficulty, how much content one run has, reasons to return). Then write a fix plan with one phase per number, first-minute first. For each fix give the files, the change and a test I can run. Make one commit per phase and stop after each so I can ship it and watch the numbers.` });
 
   return { mvp, stack, plan, prompts, totalXp: plan.reduce((a, l) => a + l.xp, 0), engine: 'template-v1' };
