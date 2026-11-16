@@ -104,12 +104,13 @@ const MCMOD_FABRIC = [['Fabric API (Java 21) + Fabric Loom (Gradle)', 'The light
 const MCMOD_FABRIC_MUST = ['One new thing registered (an item, block, or command) that works in a test world', 'The core mechanic driven by one event or mixin', 'A config file with sensible defaults', 'Runs in a clean Fabric install with only Fabric API alongside'];
 const COZY = /\b(cozy|cosy|farming|farm|sim|simulator|sandbox|life sim|idle|incremental|tycoon|management|builder|city builder|crafting|walking sim|relaxing)\b/;
 // Gentle themes (cooking, serving, collecting, delivering, gardening) are cozy loops too, unless the idea names combat or another game genre.
-const GENTLE = /\b(cook|cooks|cooking|bake|bakes|baking|serve|serves|serving|restaurant|cafe|bakery|ramen|tea shop|coffee shop|garden|gardening|collect|collects|collecting|gather|gathers|gathering|deliver|delivers|delivering|delivery|mail|decorate|decorates|decorating|fishing)\b/;
+const GENTLE = /\b(cook|cooks|cooking|bake|bakes|baking|serve|serves|serving|restaurant|cafe|bakery|ramen|tea shop|coffee shop|garden|gardening|collect|collects|collecting|gather|gathers|gathering|deliver|delivers|delivering|delivery|mail|decorate|decorates|decorating|fishing|paint|paints|painting|graffiti|draw|draws|drawing|sculpt|sculpts|sculpting)\b/;
 const NOT_GENTLE = /\b(shoot|shoots|shooter|fight|fights|fighting|enemy|enemies|zombie|zombies|kill|kills|boss|bosses|battle|combat|gun|guns|sword|swords|war|survive|survival|dungeon|roguelike|roguelite|platformer|tower defen[cs]e|racing|race|puzzle|match-3|card game|deckbuilder|chess|trivia|word game|escape room|multiplayer|turn-based|turn based|strategy|rpg|obby|horror)\b/;
 function cozyLoop(lower) {
   if (/\b(cook|cooks|cooking|bake|bakes|baking|serve|serves|serving|restaurant|cafe|bakery|ramen|tea shop|coffee shop)\b/.test(lower)) return 'A core loop the player repeats (take an order, cook or prepare it, serve it, earn tips)';
   if (/\b(deliver|delivers|delivering|delivery|mail)\b/.test(lower)) return 'A core loop the player repeats (pick up, travel, deliver, get paid or thanked)';
   if (/\b(collect|collects|collecting|gather|gathers|gathering)\b/.test(lower)) return 'A core loop the player repeats (explore, collect, bring it back, unlock a new area)';
+  if (/\b(paint|paints|painting|graffiti|draw|draws|drawing|sculpt|sculpts|sculpting)\b/.test(lower)) return 'A core loop the player repeats (pick a spot, create the piece, step back to see it, unlock new colors or tools)';
   if (/\b(fishing)\b/.test(lower)) return 'A core loop the player repeats (cast, wait, reel in, sell or log the catch)';
   return null;
 }
@@ -177,6 +178,9 @@ const STT = /\b(transcrib\w*|transcriptions?|speech[- ]to[- ]text|dictation)\b|\
 // chat with a model running on your machine (Ollama, LM Studio); a usage monitor stays a data tool
 const LOCAL_LLM = /\b(ollama|lm studio|lmstudio|lm-studio|localai|local-ai|llama\.?cpp|gpt4all)\b|\blocal (llms?|models?)\b/;
 const TABLETOP = /\b(ttrpgs?|d&d|dnd|dungeons (and|&) dragons|tabletop|pathfinder|initiative|character sheets?|dungeon master|game master)\b/;
+// a Go or Rust HTTP backend ("a go web server", "a rust web api", "a rest api in golang", "an axum server")
+const GO_RUST_WEB = /\b(go|golang|rust)\s+(web\s+)?(servers?|apis?|backends?|http servers?|rest apis?|web services?|microservices?|web apps?)\b|\b(web servers?|apis?|backends?|http servers?|rest apis?|web services?|microservices?) (in|with|using|written in) (go|golang|rust)\b|\b(axum|actix|actix-web|go-chi|gin-gonic)\b/;
+function goRustWeb(t) { return GO_RUST_WEB.test(t) && !/\b(discord|telegram|slack|twitch|bot|minecraft|game|games|cli|tui|command line|terminal|mcp|extension|plugin|plugins|mods?|players?|wipes?|oxide|umod|raid\w*)\b/.test(t); }
 const STOP = new Set('a an the to for of and or that i my me with on in it is be build make create want app project idea simple'.split(' '));
 
 function detectTypes(text) {
@@ -202,7 +206,7 @@ function detectTypes(text) {
   const gameGenre = /\b(game|sim|simulator|visual novel) (where|about|in which|set)\b|\bvisual novel\b|\b(platformer|rpg|roguelike|shooter|puzzle|arcade|tower defense|card game|deckbuilder|multiplayer|level|player|enemy|enemies|npc|npcs|dungeon|escape room)\b/.test(t);
   // a game with AI features ("an rpg where the npcs are llm agents") is a game first, with an AI component
   if (keys[0] === 'agent' && keys.includes('game') && gameGenre) { keys.splice(keys.indexOf('game'), 1); keys.unshift('game'); }
-  if (keys[0] === 'game' && !gameGenre && /\b(pick|picks|recommend\w*|suggest\w*|choose|finder|track\w*|backlog|library|wishlist|review\w*|deals?|rat(e|es|ing|ings)|timer|stats|compar\w*|performance|benchmarks?|generator|sprites?|assets?|overlay|splits|wiki|guides?|launcher)\b/.test(t) || (keys[0] === 'game' && !gameGenre && /\b(leaderboards?|standings|elo|rankings?|tournaments?|brackets?|schedul\w*)\b/.test(t) && /\b(website|site|web ?app|app|page|tracker|dashboard|for (my|our))\b/.test(t) && !/\bgames? (with|where|about|in which|that has)\b/.test(t))) { keys.shift(); if (!keys.includes('web') && !keys.includes('data')) keys.unshift('web'); }
+  if (keys[0] === 'game' && !gameGenre && /\b(pick|picks|recommend\w*|suggest\w*|choose|finder|track\w*|backlog|library|wishlist|review\w*|deals?|rat(e|es|ing|ings)|timer|stats|compar\w*|performance|benchmarks?|generator|sprites?|assets?|overlay|splits|wiki|guides?|launcher)\b/.test(t) || (keys[0] === 'game' && !gameGenre && /\b(leaderboards?|standings|elo|rankings?|tournaments?|brackets?|schedul\w*)\b/.test(t) && /\b(website|site|web ?app|app|page|tracker|dashboard|for (my|our)|schedulers?|planners?|leaderboards? (for|of))\b/.test(t) && !/\bgames? (with|where|about|in which|that has)\b/.test(t))) { keys.shift(); if (!keys.includes('web') && !keys.includes('data')) keys.unshift('web'); }
   // a bot/tool that is merely about games ("tracks my friends' game wins") shouldn't also get a game engine
   if (keys[0] !== 'game' && keys.includes('game') && !gameGenre && !/\b(unity|godot|three\.?js)\b/.test(t)) keys.splice(keys.indexOf('game'), 1);
   // "an MCP server that lets my coding agent read X": the agent is the client, so plan only the MCP server
@@ -253,6 +257,12 @@ function detectTypes(text) {
     if (ai1 >= 0 && keys.some(k => /^(mobile|extension|bot|cli|game|mcmod|overlay)$/.test(k))) keys.splice(ai1, 1);
     else if (ai1 === 0 || keys[0] === 'web') { if (ai1 > 0) keys.splice(ai1, 1); keys[0] = 'aiapp'; const w = keys.indexOf('web'); if (w > 0) keys.splice(w, 1); } else keys.splice(ai1, 1);
   }
+  // "a chess game against an ai that trash talks": a turn-based game whose opponent talks; the LLM is a feature, not a tool-calling agent loop
+  if (keys[0] === 'game' && keys.includes('agent') && /\bagainst (an? |the )?(ai|computer|bot|llm|cpu)\b(?! (bosses|enem(y|ies)|monsters?|robots?|zombies?|aliens?|minions?|soldiers?|arm(y|ies)|swarms?|hordes?|drones?|waves?))|\b(trash[- ]?talk\w*|banter\w*|taunt\w*|smack[- ]talk\w*)\b/.test(t)) keys.splice(keys.indexOf('agent'), 1);
+  // "a site that's a directory of ai tools": a listing site about AI, not an agent or an LLM app
+  if (/\b(directory|directories|list|catalog|catalogue|collection|database|gallery|showcase|marketplace|aggregator) (of|for) (the |all |top |best |free |new |cool |useful )*(ai|llm|gpt|chatgpt|mcp)\b/.test(t) && !/\b(chatbots?|agents? that|assistants? that|uses? (ai|gpt|claude|an llm)|summar\w*|generat\w*)\b/.test(t)) { for (const k of ['agent', 'aiapp', 'persona', 'rag', 'mcp']) { const i = keys.indexOf(k); if (i >= 0) keys.splice(i, 1); } if (!keys.includes('web')) keys.unshift('web'); }
+  // "a go web server that shortens urls" / "a rust web api for my todo app": a Go or Rust HTTP backend, not a Next.js app or a cron data fetcher
+  if (goRustWeb(t)) { keys.length = 0; keys.push('web'); }
   // "a raycast extension for my notion tasks" is a Raycast (macOS launcher) extension, not a browser extension or a web app
   if (/\braycast (extensions?|plugins?|commands?|scripts?)\b|\bextensions? for raycast\b|\bfor raycast\b/.test(t)) { for (const k of ['extension', 'web', 'mobile', 'cli', 'data']) { const i = keys.indexOf(k); if (i >= 0) keys.splice(i, 1); } keys.unshift('extension'); }
   // "a figma plugin that exports colors as tailwind config" is a Figma plugin, not a web app or a browser extension
@@ -260,16 +270,18 @@ function detectTypes(text) {
   return keys.length ? keys.slice(0, 2) : ['web'];
 }
 
-const ACRO = { html: 'HTML', gif: 'GIF', gifs: 'GIFs', dnd: 'D&D', ttrpg: 'TTRPG', ttrpgs: 'TTRPGs', tui: 'TUI', ai: 'AI', rag: 'RAG', mcp: 'MCP', cli: 'CLI', pdfs: 'PDFs', obsidian: 'Obsidian', saas: 'SaaS', claude: 'Claude', cursor: 'Cursor', vscode: 'VS Code', turnbased: 'Turn-Based', api: 'API', llm: 'LLM', gpt: 'GPT', ios: 'iOS', iphone: 'iPhone', mvp: 'MVP', rpg: 'RPG', ui: 'UI', '2d': '2D', '3d': '3D', npc: 'NPC', mmo: 'MMO', fps: 'FPS', pc: 'PC', vr: 'VR', ar: 'AR', youtube: 'YouTube', github: 'GitHub', tiktok: 'TikTok', gpu: 'GPU', cpu: 'CPU', pdf: 'PDF', seo: 'SEO', sql: 'SQL', npcs: 'NPCs', unity: 'Unity', godot: 'Godot', unreal: 'Unreal', ue5: 'UE5', obby: 'Obby', threejs: 'Three.js', webgl: 'WebGL', discord: 'Discord', telegram: 'Telegram', slack: 'Slack', twitter: 'Twitter', reddit: 'Reddit', steam: 'Steam', chrome: 'Chrome', android: 'Android', notion: 'Notion', spotify: 'Spotify', twitch: 'Twitch', minecraft: 'Minecraft', roblox: 'Roblox', xbox: 'Xbox', playstation: 'PlayStation', openai: 'OpenAI', chatgpt: 'ChatGPT', nextjs: 'Next.js', obs: 'OBS', csv: 'CSV', json: 'JSON', npx: 'npx', woocommerce: 'WooCommerce', ollama: 'Ollama', todoist: 'Todoist', raycast: 'Raycast', figma: 'Figma', figjam: 'FigJam', tailwind: 'Tailwind', pico8: 'PICO-8', jira: 'Jira', heic: 'HEIC', jpg: 'JPG', png: 'PNG' };
+const ACRO = { html: 'HTML', gif: 'GIF', gifs: 'GIFs', dnd: 'D&D', ttrpg: 'TTRPG', ttrpgs: 'TTRPGs', tui: 'TUI', ai: 'AI', rag: 'RAG', mcp: 'MCP', cli: 'CLI', pdfs: 'PDFs', obsidian: 'Obsidian', saas: 'SaaS', claude: 'Claude', cursor: 'Cursor', vscode: 'VS Code', turnbased: 'Turn-Based', api: 'API', llm: 'LLM', gpt: 'GPT', ios: 'iOS', iphone: 'iPhone', mvp: 'MVP', rpg: 'RPG', ui: 'UI', '2d': '2D', '3d': '3D', npc: 'NPC', mmo: 'MMO', fps: 'FPS', pc: 'PC', vr: 'VR', ar: 'AR', youtube: 'YouTube', github: 'GitHub', tiktok: 'TikTok', gpu: 'GPU', cpu: 'CPU', pdf: 'PDF', seo: 'SEO', sql: 'SQL', npcs: 'NPCs', unity: 'Unity', godot: 'Godot', unreal: 'Unreal', ue5: 'UE5', obby: 'Obby', threejs: 'Three.js', webgl: 'WebGL', discord: 'Discord', telegram: 'Telegram', slack: 'Slack', twitter: 'Twitter', reddit: 'Reddit', steam: 'Steam', chrome: 'Chrome', android: 'Android', notion: 'Notion', spotify: 'Spotify', twitch: 'Twitch', minecraft: 'Minecraft', roblox: 'Roblox', xbox: 'Xbox', playstation: 'PlayStation', openai: 'OpenAI', chatgpt: 'ChatGPT', nextjs: 'Next.js', obs: 'OBS', csv: 'CSV', json: 'JSON', npx: 'npx', woocommerce: 'WooCommerce', ollama: 'Ollama', todoist: 'Todoist', raycast: 'Raycast', figma: 'Figma', figjam: 'FigJam', tailwind: 'Tailwind', pico8: 'PICO-8', jira: 'Jira', heic: 'HEIC', jpg: 'JPG', png: 'PNG', url: 'URL', urls: 'URLs', pr: 'PR', prs: 'PRs', rust: 'Rust', golang: 'Go', linkedin: 'LinkedIn', whatsapp: 'WhatsApp', gitlab: 'GitLab', elo: 'Elo', sqlite: 'SQLite' };
+// app names that are also common words ("linear", "stripe"): only treated as brands when naming an MCP server, so "a linear progression game" keeps its lowercase word
+const MCP_BRANDS = { linear: 'Linear', gitlab: 'GitLab', asana: 'Asana', trello: 'Trello', stripe: 'Stripe', shopify: 'Shopify', gmail: 'Gmail', postgres: 'Postgres', postgresql: 'PostgreSQL', supabase: 'Supabase', airtable: 'Airtable', sentry: 'Sentry', vercel: 'Vercel', cloudflare: 'Cloudflare', zotero: 'Zotero', hubspot: 'HubSpot', salesforce: 'Salesforce', confluence: 'Confluence', clickup: 'ClickUp', plex: 'Plex', jellyfin: 'Jellyfin', kubernetes: 'Kubernetes', docker: 'Docker', mongodb: 'MongoDB', redis: 'Redis', anki: 'Anki', readwise: 'Readwise', strava: 'Strava', zendesk: 'Zendesk', intercom: 'Intercom', calendly: 'Calendly', dropbox: 'Dropbox', bluesky: 'Bluesky', mastodon: 'Mastodon', grafana: 'Grafana', datadog: 'Datadog', posthog: 'PostHog', mailchimp: 'Mailchimp', quickbooks: 'QuickBooks', ynab: 'YNAB', basecamp: 'Basecamp', miro: 'Miro', excalidraw: 'Excalidraw', logseq: 'Logseq', raindrop: 'Raindrop', instapaper: 'Instapaper' };
 function titleCase(s) { return s.split(' ').map(w => ACRO[w] || (/'s$/.test(w) && ACRO[w.slice(0, -2)] ? ACRO[w.slice(0, -2)] + "'s" : w.replace(/(^|[^a-z0-9'])([a-z0-9])/g, (m, a, c) => a + c.toUpperCase()))).join(' '); }
 function hasWord(text, k) { return new RegExp('(^|[^a-z0-9])' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '($|[^a-z0-9])').test(text); }
-function lbl(l) { return l.toLowerCase().replace(/\bai\b/g, 'AI').replace(/\bapi\b/g, 'API').replace(/\bmcp\b/g, 'MCP').replace(/\bvs code\b/g, 'VS Code').replace(/\bminecraft\b/g, 'Minecraft').replace(/\bcli\b/g, 'CLI').replace(/\brag\b/g, 'RAG').replace(/\bfigma\b/g, 'Figma'); }
+function lbl(l) { return l.toLowerCase().replace(/\bai\b/g, 'AI').replace(/\bapi\b/g, 'API').replace(/\bmcp\b/g, 'MCP').replace(/\bvs code\b/g, 'VS Code').replace(/\bminecraft\b/g, 'Minecraft').replace(/\bcli\b/g, 'CLI').replace(/\brag\b/g, 'RAG').replace(/\bfigma\b/g, 'Figma').replace(/\bgo\b/g, 'Go').replace(/\brust\b/g, 'Rust'); }
 function article(w) { if (/^RAG\b/.test(w)) return 'a'; if (/^[A-Z]{2,}/.test(w)) return /^[AEFHILMNORSX]/.test(w) ? 'an' : 'a'; return /^[aeiou]/i.test(w) ? 'an' : 'a'; }
 
 const FILLER = new Set('helps help lets let allows allow can will you your which who where when using use uses via from into just some every all also really like new built made so tells shows gives are was were has have get gets play plays playing style'.split(' '));
 const KIND = new Set('cli bot tool extension plugin agent website site webapp saas platform thing chrome browser discord telegram slack mobile ios android iphone web'.split(' '));
-const VERB = { track: 'Tracker', tracks: 'Tracker', summarize: 'Summarizer', summarizes: 'Summarizer', review: 'Reviewer', reviews: 'Reviewer', pick: 'Picker', picks: 'Picker', find: 'Finder', finds: 'Finder', recommend: 'Recommender', recommends: 'Recommender', suggest: 'Suggester', suggests: 'Suggester', plan: 'Planner', plans: 'Planner', generate: 'Generator', generates: 'Generator', monitor: 'Monitor', monitors: 'Monitor', alert: 'Alerts', alerts: 'Alerts', organize: 'Organizer', organizes: 'Organizer', schedule: 'Scheduler', schedules: 'Scheduler', compare: 'Comparer', compares: 'Comparer', translate: 'Translator', translates: 'Translator', scrape: 'Scraper', scrapes: 'Scraper', log: 'Logger', logs: 'Logger', remind: 'Reminder', reminds: 'Reminder', count: 'Counter', counts: 'Counter', rate: 'Rater', rates: 'Rater', write: 'Writer', writes: 'Writer', build: 'Builder', builds: 'Builder', create: 'Creator', creates: 'Creator', explain: 'Explainer', explains: 'Explainer', analyze: 'Analyzer', analyzes: 'Analyzer', post: 'Poster', posts: 'Poster', send: 'Sender', sends: 'Sender', watch: 'Watcher', watches: 'Watcher', run: 'Runner', runs: 'Runner', show: 'Viewer', shows: 'Viewer', turn: 'Converter', turns: 'Converter', block: 'Blocker', blocks: 'Blocker', book: 'Booker', books: 'Booker', teach: 'Tutor', teaches: 'Tutor', convert: 'Converter', converts: 'Converter', rename: 'Renamer', renames: 'Renamer', hide: 'Hider', hides: 'Hider', triage: 'Triager', triages: 'Triager', scaffold: 'Scaffolder', scaffolds: 'Scaffolder', check: 'Checker', checks: 'Checker', identify: 'Identifier', identifies: 'Identifier', recognize: 'Identifier', recognizes: 'Identifier', scan: 'Scanner', scans: 'Scanner', roast: 'Roaster', roasts: 'Roaster', grade: 'Grader', grades: 'Grader', rank: 'Ranker', ranks: 'Ranker', estimate: 'Estimator', estimates: 'Estimator', calculate: 'Calculator', calculates: 'Calculator', transcribe: 'Transcriber', transcribes: 'Transcriber', clean: 'Cleaner', cleans: 'Cleaner', cleanup: 'Cleaner', delete: 'Deleter', deletes: 'Deleter', remove: 'Remover', removes: 'Remover', backs: 'Backup', mutes: 'Muter', downloads: 'Downloader', exports: 'Exporter', resizes: 'Resizer', pings: 'Pinger', rotates: 'Rotator', collects: 'Collector', splits: 'Splitter', rolls: 'Roller', tails: 'Tailer' };
-const BREAK = /^(to|for|with|on|in|at|by|and|or|when|so|from|using|via|while|before|after|based|over|where|as|that|which|who|if|like|into|about|across|between|during|without|per|than)$/;
+const VERB = { track: 'Tracker', tracks: 'Tracker', summarize: 'Summarizer', summarizes: 'Summarizer', review: 'Reviewer', reviews: 'Reviewer', pick: 'Picker', picks: 'Picker', find: 'Finder', finds: 'Finder', recommend: 'Recommender', recommends: 'Recommender', suggest: 'Suggester', suggests: 'Suggester', plan: 'Planner', plans: 'Planner', generate: 'Generator', generates: 'Generator', monitor: 'Monitor', monitors: 'Monitor', alert: 'Alerts', alerts: 'Alerts', organize: 'Organizer', organizes: 'Organizer', schedule: 'Scheduler', schedules: 'Scheduler', compare: 'Comparer', compares: 'Comparer', translate: 'Translator', translates: 'Translator', scrape: 'Scraper', scrapes: 'Scraper', log: 'Logger', logs: 'Logger', remind: 'Reminder', reminds: 'Reminder', count: 'Counter', counts: 'Counter', rate: 'Rater', rates: 'Rater', write: 'Writer', writes: 'Writer', build: 'Builder', builds: 'Builder', create: 'Creator', creates: 'Creator', explain: 'Explainer', explains: 'Explainer', analyze: 'Analyzer', analyzes: 'Analyzer', post: 'Poster', posts: 'Poster', send: 'Sender', sends: 'Sender', watch: 'Watcher', watches: 'Watcher', run: 'Runner', runs: 'Runner', show: 'Viewer', shows: 'Viewer', turn: 'Converter', turns: 'Converter', block: 'Blocker', blocks: 'Blocker', book: 'Booker', books: 'Booker', teach: 'Tutor', teaches: 'Tutor', convert: 'Converter', converts: 'Converter', rename: 'Renamer', renames: 'Renamer', hide: 'Hider', hides: 'Hider', triage: 'Triager', triages: 'Triager', scaffold: 'Scaffolder', scaffolds: 'Scaffolder', check: 'Checker', checks: 'Checker', identify: 'Identifier', identifies: 'Identifier', recognize: 'Identifier', recognizes: 'Identifier', scan: 'Scanner', scans: 'Scanner', roast: 'Roaster', roasts: 'Roaster', grade: 'Grader', grades: 'Grader', rank: 'Ranker', ranks: 'Ranker', estimate: 'Estimator', estimates: 'Estimator', calculate: 'Calculator', calculates: 'Calculator', transcribe: 'Transcriber', transcribes: 'Transcriber', clean: 'Cleaner', cleans: 'Cleaner', cleanup: 'Cleaner', delete: 'Deleter', deletes: 'Deleter', remove: 'Remover', removes: 'Remover', backs: 'Backup', mutes: 'Muter', downloads: 'Downloader', exports: 'Exporter', resizes: 'Resizer', pings: 'Pinger', rotates: 'Rotator', collects: 'Collector', splits: 'Splitter', rolls: 'Roller', tails: 'Tailer', shorten: 'Shortener', shortens: 'Shortener', lists: 'List', bump: 'Bumper', bumps: 'Bumper' };
+const BREAK = /^(to|for|with|on|in|at|by|and|or|when|so|from|using|via|while|before|after|based|over|where|as|that|which|who|if|like|into|about|across|between|during|without|per|than|against)$/;
 
 // "a discord bot that tracks my friends game wins" -> "Friends Game Wins Tracker" (falls back to the first 3 meaningful words)
 function projectName(idea) {
@@ -279,6 +291,12 @@ function projectName(idea) {
   // "a mobile app that uses ai to identify plants" -> "AI Plant Identifier": no thing named before "that uses ai", so name it after the AI feature
   const aiFeat = !!um;
   const all = idea.toLowerCase().replace(/[\u2018\u2019]/g, "'").replace(/^\s*(?:an?\s+)?(?:website|site|web app|webapp|page|app)\s+that(?:'s|\s+is)\s+(?:an?\s+)?(?=[a-z])/, '').replace(/\bd&d\b/g, 'dnd').replace(/\b(?:rust|golang|go)\s+(?=(?:cli|tui|command|terminal|script|program|binary|tool)\b)/g, '').replace(/\b(it|that|there|what|here|he|she|let|who)'s\b/g, '$1').replace(/\b(\w+)'(re|ll|ve|d|m)\b/g, '$1').replace(/\b(my|our|your|their|his|her)\s+(clan|guild|team|company|server|squad|crew|group|class|org|community|channel|discord|work|office|club|league)'s\b/g, '$1').replace(/\b([a-z0-9]+)'s\b/g, '$1\u0001s').replace(/\bpico[- ]8\b/g, 'pico8').replace(/\bthree\.js\b/g, 'threejs').replace(/\bnext\.?js\b/g, 'nextjs').replace(/\bunreal engine( \d)?\b/g, 'unreal').replace(/\bturn[- ]based\b/g, 'turnbased').replace(/\bvs ?code\b|\bvisual studio code\b/g, 'vscode').replace(/[^a-z0-9\s\u0001]/g, ' ').replace(/\u0001(?!s\b)/g, ' ').split(/\s+/).filter(Boolean).map(w => w.replace(/\u0001/g, "'"));
+  // "an ai that names my d&d characters" -> "D&D Character Name Generator"
+  const nm = all.join(' ').match(/^(?:an?|my)? ?(?:[a-z0-9]+ )?(?:ai|bot|tool|app|website|site|generator|thing|gpt|llm)(?: \w+)?? (?:that|which|to) names? (?:my|our|your|the|new)? ?((?:[a-z0-9']+ ){0,2}?[a-z0-9']+?)(?: (?:for|in|from|based|with|by|using)\b.*)?$/);
+  if (nm) { const w = nm[1].split(' ').filter(x => !STOP.has(x) && !FILLER.has(x)); if (w.length && w.length <= 3) { const l = w.length - 1; if (!/(ss|us|is)$/.test(w[l])) w[l] = w[l].replace(/ies$/, 'y').replace(/([^s])s$/, '$1'); return titleCase(w.join(' ')) + ' Name Generator'; } }
+  // "a directory of ai tools" / "a list of free game assets" -> "AI Tools Directory"
+  const coll = all.join(' ').match(/^(?:an?|my|the)? ?(directory|list|catalog|catalogue|collection|database|gallery|showcase|archive|map|wiki|library|aggregator) (?:of|for) (?:the |all |top |best |cool |useful )*((?:[a-z0-9']+ ){0,2}[a-z0-9']+?)(?: (?:that|which|with|for|in|from|where|by|so|to)\b.*)?$/);
+  if (coll) { const w = coll[2].split(' ').filter(x => !STOP.has(x) && !FILLER.has(x)); if (w.length && w.length <= 3) return titleCase(w.join(' ') + ' ' + coll[1].replace('catalogue', 'catalog')); }
   // a base-form verb word used as a noun ("a workout log for my phone", "a meal plan app") is part of the name, not the action
   const nounUse = i => !/s$/.test(all[i]) && i > 0 && !STOP.has(all[i - 1]) && !FILLER.has(all[i - 1]) && !BREAK.test(all[i - 1]) && !/^(i|we|you|they|people|users|gamers|players|can|will|to)$/.test(all[i - 1]) && (i === all.length - 1 || BREAK.test(all[i + 1]) || KIND.has(all[i + 1]) || all[i + 1] === 'app' || /^(generator|maker|builder|creator|planner|tracker|writer)$/.test(all[i + 1]));
   // newer verbs name tools ("pings my servers"), not games ("a game where a wizard rotates the world")
@@ -325,7 +343,7 @@ function projectName(idea) {
     // "tracks my dog's walks" -> "Dog Walk Tracker" (not "Dog's Walks Tracker")
     if (obj.length === 2 && /'s$/.test(obj[0]) && /[^s]s$/.test(obj[1]) && !/(ss|us|is)$/.test(obj[1])) { obj[0] = obj[0].slice(0, -2); obj[1] = obj[1].replace(/ies$/, 'y').replace(/s$/, ''); }
     // "renames my photos by date" -> "Photo Date Renamer", "downloads youtube transcripts" -> "YouTube Transcript Downloader"
-    if (obj.length && /^(Renamer|Downloader|Resizer)$/.test(VERB[all[vi]])) {
+    if (obj.length && /^(Renamer|Downloader|Resizer|Identifier|Scanner|Shortener)$/.test(VERB[all[vi]])) {
       const last = obj.length - 1;
       if (!/(ss|us|is)$/.test(obj[last])) obj[last] = obj[last].replace(/ies$/, 'y').replace(/([^s])s$/, '$1');
       const bi = all.indexOf('by', vi);
@@ -340,10 +358,13 @@ function projectName(idea) {
     if (STOP.has(w) || FILLER.has(w)) continue;
     if (KIND.has(w) && words.length >= 2) continue; // "youtube summarizer chrome extension" -> "YouTube Summarizer"
     words.push(w);
-    if (words.length === 3) break;
+    if (words.length === 3) { const nx = all[i + 1]; if (nx && /^(generator|maker|builder|scheduler|tracker|planner|finder|picker|timer|counter|calculator|converter|randomizer|roller|leaderboard|bot|checker)$/.test(nx) && !words.includes(nx)) words.push(nx); break; }
   }
   // a lone generic word ("a game where you...", "a vr app for meditation") reads badly; prefix what comes after the break
   if (words.length === 2 && /^(threejs|unity|godot|phaser|roblox|unreal|pico8|browser|web|online|simple|small|tiny|little|fun|mobile)$/.test(words[0]) && words[1] === 'game' && stopAt < all.length) words.shift();
+  // "a unity vr game where you paint graffiti" -> "Graffiti Painting VR Game"
+  let dimMod = '';
+  if (words.length === 3 && /^(threejs|unity|godot|phaser|roblox|unreal|browser|web|mobile)$/.test(words[0]) && /^(vr|ar|3d|2d)$/.test(words[1]) && words[2] === 'game' && BREAK.test(all[all.indexOf('game') + 1] || '')) { stopAt = all.indexOf('game') + 1; dimMod = words[1]; words.splice(0, 2); }
   // "a godot platformer about a snail with a jetpack" -> "Snail Jetpack Platformer" (engine + genre alone says nothing about this game)
   if (words.length === 2 && /^(unity|godot|phaser|roblox|unreal|pico8|threejs)$/.test(words[0]) && /^(platformer|roguelike|roguelite|metroidvania|shooter|rpg|puzzler|deckbuilder|racer|runner|brawler|beat em up|soulslike|obby)$/.test(words[1]) && /^(about|where|with|starring|featuring|of)$/.test(all[stopAt] || '')) {
     const th = [];
@@ -354,7 +375,7 @@ function projectName(idea) {
     if (th.length) return titleCase(th.join(' ') + (ger ? ' ' + ger : '') + ' ' + words[1]);
   }
   // "an MCP server that reads my Notion roadmap" -> "Notion MCP Server"
-  if (words.join(' ') === 'mcp server' && stopAt < all.length) { const brand = all.slice(stopAt).find(w => ACRO[w] && !/^(ai|mcp|api|llm|gpt|claude|cursor|vscode|cli|ui|mvp)$/.test(w)); if (brand) return titleCase(brand + ' mcp server'); }
+  if (words.join(' ') === 'mcp server' && stopAt < all.length) { const rest = all.slice(stopAt); const brand = rest.find(w => ACRO[w] && !/^(ai|mcp|api|llm|gpt|claude|cursor|vscode|cli|ui|mvp)$/.test(w)); if (brand) return titleCase(brand + ' mcp server'); const hi = rest.join(' ').indexOf('home assistant'); if (hi >= 0) return 'Home Assistant MCP Server'; const cb = rest.find(w => MCP_BRANDS[w]); if (cb) return MCP_BRANDS[cb] + ' MCP Server'; }
   // "a tower defense game with zombies" -> "Zombie Tower Defense"
   if (/^tower defen[cs]e game$/.test(words.join(' ')) && /^(with|where|against|of|about|featuring)$/.test(all[all.indexOf('game') + 1] || '')) { const th = []; for (const w of all.slice(all.indexOf('game') + 2)) { if (BREAK.test(w) || /^(attack|invade|come|try|want)\w*$/.test(w)) break; if (!STOP.has(w) && !FILLER.has(w) && !KIND.has(w) && !/^(enem(y|ies)|waves?|towers?|levels?)$/.test(w)) th.push(w); } const theme = th[th.length - 1]; if (theme) return titleCase(theme.replace(/(zomb|cook|pix|goal)ies$/, '$1ie').replace(/ies$/, 'y').replace(/([^s])s$/, '$1') + ' ' + words.slice(0, 2).join(' ')); }
   if (words.length === 1 && stopAt < all.length) {
@@ -368,12 +389,14 @@ function projectName(idea) {
       more.push(w);
       if (more.length === 3) break;
     }
-    if (more.length) return titleCase(more.join(' ') + ' ' + words[0]);
+    const GERUND = { paint: 'painting', build: 'building', cook: 'cooking', grow: 'growing', draw: 'drawing', explore: 'exploring', fix: 'fixing', catch: 'catching', fly: 'flying', drive: 'driving', sculpt: 'sculpting', spray: 'spraying', dig: 'digging', mine: 'mining', fish: 'fishing', bake: 'baking', brew: 'brewing', tame: 'taming', sort: 'sorting', stack: 'stacking' };
+    if (words[0] === 'game' && more.length === 2 && GERUND[more[0]] && all[stopAt] === 'where' && /^(you|players?)$/.test(all[stopAt + 1] || '') && all[stopAt + 2] === more[0]) return titleCase(more[1] + ' ' + GERUND[more[0]] + (dimMod ? ' ' + dimMod : '') + ' game');
+    if (more.length) return titleCase(more.join(' ') + (dimMod ? ' ' + dimMod : '') + ' ' + words[0]);
   }
   return titleCase(words.join(' ')) || 'My Project';
 }
 
-function fixCase(s) { return s.replace(/\bpico[- ]?8\b/gi, 'PICO-8').replace(/\bthree\.?js\b/g, 'Three.js').replace(/\bnext\.?js\b/gi, 'Next.js').replace(/\bunreal engine\b/gi, 'Unreal Engine').replace(/[A-Za-z0-9]+/g, (w, i, str) => (w === w.toLowerCase() && ACRO[w] && w !== 'ar' && str[i - 1] !== '.') ? ACRO[w] : w); }
+function fixCase(s) { return s.replace(/\bgo (?=(web |http |rest )?(servers?|apis?|backends?|cli|tui|command|program|binary|tool|microservices?)\b)/gi, 'Go ').replace(/\bpico[- ]?8\b/gi, 'PICO-8').replace(/\bthree\.?js\b/g, 'Three.js').replace(/\bnext\.?js\b/gi, 'Next.js').replace(/\bunreal engine\b/gi, 'Unreal Engine').replace(/[A-Za-z0-9]+/g, (w, i, str) => (w === w.toLowerCase() && ACRO[w] && w !== 'ar' && str[i - 1] !== '.') ? ACRO[w] : w); }
 function cap(s) { s = s.trim(); return /^[a-z][A-Z]/.test(s) ? s : s.charAt(0).toUpperCase() + s.slice(1); }
 
 function generate(idea) {
@@ -805,6 +828,65 @@ function generate(idea) {
     must.push('Add combatants (name, initiative roll, HP, AC) and sort them into turn order, with ties broken by a dex modifier', 'A next-turn button that highlights whose turn it is and counts rounds', 'Track HP (damage and healing) and conditions (poisoned, prone, concentrating) with durations that tick down each round', 'The encounter saved in localStorage so a refresh or a closed tab mid-fight loses nothing');
     boss = 'Table speed: adding monsters, ties, delayed turns and new arrivals in a few taps mid-fight without losing the turn order';
   }
+  // "a go web server that shortens urls" / "a rust web api for my todo app": one Go (net/http + chi) or Rust (axum) binary with SQLite, not Next.js + Supabase
+  const webLang = keys[0] === 'web' && !secondary && goRustWeb(lower) ? (/\b(rust|axum|actix|actix-web)\b/.test(lower) ? 'rust' : 'go') : null;
+  const shortener = !!webLang && /\b(shorten\w*|short (links?|urls?)|url shortener)\b/.test(lower);
+  if (webLang) {
+    const apiOnly = /\b(apis?|backends?|rest|microservices?)\b/.test(lower) && !/\b(web ?apps?|pages?|website|site|dashboard|ui|frontend)\b/.test(lower);
+    const ws = webLang === 'rust'
+      ? [['Rust + axum + tokio', 'The most-used Rust web framework (from the tokio team): handlers are plain async functions with typed extractors, and AI tools write it well.'], ['SQLite with sqlx (migrations + compile-time checked queries)', 'One database file and no server to run; sqlx checks your SQL against the schema when you build.'], apiOnly ? ['serde JSON + tower-http (CORS, tracing, timeouts)', 'Typed request and response bodies, plus the middleware every API needs, in a few lines.'] : ['askama templates + htmx', 'Server-rendered pages checked at compile time, with a little interactivity and no JavaScript build step.'], ['One binary in a slim Docker image on Fly.io or Render (SQLite on a volume)', 'Build once, run anywhere; keep the database file on a persistent volume so a redeploy keeps your data.']]
+      : [['Go 1.22+ net/http + chi router', 'The standard library already serves HTTP well; chi adds route groups and middleware without a framework, and AI tools write idiomatic Go handlers.'], ['SQLite (modernc.org/sqlite, no cgo) + sqlc', 'One database file and no server to run; sqlc turns plain SQL into typed Go functions.'], apiOnly ? ['encoding/json + chi middleware (logging, CORS, timeouts)', 'JSON in and out with no extra framework, plus the middleware every API needs.'] : ['html/template + htmx', 'Server-rendered pages with a little interactivity and no JavaScript build step.'], ['One static binary in a small Docker image on Fly.io or Render (SQLite on a volume)', 'Cross-compiles to a single file; keep the database file on a persistent volume so a redeploy keeps your data.']];
+    stack.length = 0;
+    for (const [tech, why] of ws) stack.push({ tech, why });
+    primary = { ...primary, label: (webLang === 'rust' ? 'Rust' : 'Go') + (apiOnly ? ' Web API' : ' Web Server') };
+    must.length = 0;
+    must.push(shortener ? 'POST /shorten takes a URL, rejects invalid ones and returns a short code; GET /{code} redirects (302) to the original URL' : 'One route that does the core job end to end (create and read), with the right status codes (201, 400, 404)', 'Data saved in SQLite with a migration file, so a restart or redeploy loses nothing', webLang === 'rust' ? 'Handler tests with cargo test (tower::ServiceExt::oneshot against the router)' : 'Handler tests with go test and net/http/httptest', 'Input validated, errors returned as JSON with a clear message, and every request logged (' + (webLang === 'rust' ? 'tracing' : 'log/slog') + ')', 'Builds into one binary and deploys from a Dockerfile to a public URL');
+    boss = (webLang === 'rust' ? 'Async Rust in a web server: shared state (Arc<AppState> with the sqlx pool), error types that turn into HTTP responses (IntoResponse), and keeping compile times sane' : 'Production basics in one binary: timeouts on the http.Server, graceful shutdown on SIGTERM, SQLite in WAL mode with one writer, and config from env vars') + (shortener ? '; plus short codes that never collide and redirects that stay fast' : '');
+    if (shortener) name = 'URL Shortener';
+    else if (/^(Go|Golang|Rust) (Web |REST |HTTP )?(Server|API|Backend|Service)$/.test(name)) { const fm = lower.match(/\bfor (?:my|our|a|the) ([a-z0-9]+(?: [a-z0-9]+)?) (?:app|site|website|game|project|blog|store)\b/); if (fm) name = titleCase(fm[1].split(' ').filter(w => !STOP.has(w) && !FILLER.has(w)).join(' ')) + ' API'; }
+  }
+  // "a board game night scheduler": find a date that works for the group, then RSVP; guests should not need an account
+  const groupSched = /^(web|mobile)$/.test(keys[0]) && !secondary && /\b(schedul\w*|planners?|availability|when2meet|doodle|find a (date|time|day))\b/.test(lower) && /\b(game nights?|board games?|d&d|dnd|sessions?|ttrpgs?|raids?|lan part(y|ies)|poker nights?|movie nights?|trivia nights?|hangouts?|campaigns?|meetups?|band practice|book club|game days?)\b/.test(lower) && !/\b(workouts?|meals?|posts?|tweets?|study|classes|shifts?|employees?|appointments?|patients?)\b/.test(lower);
+  if (groupSched) {
+    const si = stack.findIndex(x => /Supabase/.test(x.tech));
+    if (si >= 0) stack[si] = { tech: 'Supabase (Postgres; no login for guests)', why: 'Stores events, slots and votes; guests join from a share link with just a display name, so nobody has to sign up.' };
+    must.length = 0;
+    must.push('Create an event with 3-10 candidate dates and times and get a share link', 'Friends open the link, type a name and mark each slot yes / maybe / no, with no account', 'A grid showing who is free when, with the best slot highlighted', 'Lock in the date, then show an RSVP list (going / maybe / out) with an optional max table size and waitlist');
+    boss = 'Time zones and identity without logins: slots stored in UTC and shown in each guest\'s zone, and a per-guest edit link so nobody can overwrite someone else\'s votes';
+    if (/^Board Game Night$/.test(name) || / Night$/.test(name) && /\bschedul/.test(lower)) name += ' Scheduler';
+  }
+  // "a leaderboard for my friends' chess games": log results, update Elo, show standings
+  const ratingBoard = /^(web|mobile)$/.test(keys[0]) && !secondary && /\b(leaderboards?|standings|elo|rankings?|ladder)\b/.test(lower) && /\b(games?|matches|chess|ping ?pong|table tennis|pool|billiards|smash|fifa|darts|foosball|mario kart|tennis|pickleball|padel|cornhole|league|club|office|friends?)\b/.test(lower) && !/\b(sales|stocks?|github|stars|crypto|steps|fitness|workouts?|students?|grades?)\b/.test(lower);
+  if (ratingBoard) {
+    must.length = 0;
+    must.push('Record a match in a few taps: the players, the winner (or a draw) and the date', 'Ratings update with Elo (everyone starts at 1200, K = 32) and a standings table sorted by rating', 'A player page with rating history and recent results', 'Edit or delete a wrong result and recompute every rating from the match log');
+    boss = 'Rating correctness: draws, new players (provisional until ~5 games), and replaying the whole match log after an edit so the standings stay right';
+  }
+  // "a chess game against an ai that trash talks": the engine picks moves; an LLM only writes the banter
+  const vsAI = keys[0] === 'game' && /\bagainst (an? |the )?(ai|computer|bot|llm|cpu)\b(?! (bosses|enem(y|ies)|monsters?|robots?|zombies?|aliens?|minions?|soldiers?|arm(y|ies)|swarms?|hordes?|drones?|waves?))|\b(trash[- ]?talk\w*|banter\w*|taunt\w*|smack[- ]talk\w*)\b/.test(lower);
+  const trash = vsAI && /\b(trash[- ]?talk\w*|banter\w*|taunt\w*|smack[- ]talk\w*|roasts?|insults?|talks?|chats?|commentary)\b/.test(lower);
+  if (vsAI) {
+    const chess = /\bchess\b/.test(lower);
+    const li = stack.findIndex(x => /^An LLM API behind/.test(x.tech));
+    if (li >= 0) stack.splice(li, 1);
+    if (chess && !engine) {
+      stack[0] = { tech: 'Vite + TypeScript + react-chessboard (or chessground)', why: 'A ready-made drag-and-drop board, so you build the game, not a chess UI; skip Phaser for a board game.' };
+      const ki = stack.findIndex(x => /^Kenney/.test(x.tech)); if (ki >= 0) stack.splice(ki, 1);
+      stack.splice(1, 0, { tech: 'chess.js + Stockfish (WASM, in a Web Worker)', why: 'chess.js knows every rule (castling, en passant, checkmate), so you never write move validation; Stockfish picks the AI\'s move at an adjustable skill level without freezing the page.' });
+      const ti = must.indexOf(TURN_MUST[1]);
+      if (ti >= 0) must[ti] = 'One full turn: you move (legal moves only, from chess.js) and the AI replies with a Stockfish move at a chosen skill level';
+    } else {
+      const ti = must.indexOf(TURN_MUST[1]);
+      if (ti >= 0) must[ti] = 'One full turn: you act and the computer opponent responds with a legal move picked by simple rules or a search (minimax), at a chosen difficulty';
+    }
+    if (trash) {
+      stack.push({ tech: 'An LLM API behind one server function (a persona prompt for the trash talk)', why: 'Only the banter comes from the model; moves come from the ' + (chess ? 'engine' : 'game logic') + ', so the AI never plays an illegal move. Keep the API key on the server.' });
+      must.push('After each move, one short in-character trash-talk line from the LLM (given the move and who is winning), capped per game, with a mute toggle');
+      boss = (must.length && boss === TURN_BOSS ? TURN_BOSS : boss) + '; plus trash talk that reacts to the real position (send the move and who is ahead, not the whole game) without slowing the reply or crossing into mean';
+    }
+    const gw = (lower.match(/\b(chess|checkers|go|connect four|connect 4|tic tac toe|poker|blackjack|card game|board game|othello|reversi|backgammon|battleship|pong|air hockey)\b/) || [])[1];
+    if (gw) name = (trash ? 'Trash-Talking ' + titleCase(gw) + ' AI' : titleCase(gw) + ' vs AI');
+  }
   if (secondary) must.push('Integration point with your ' + lbl(secondary.label) + ' component');
   const loot = new Set();
   for (const f of FLAVOR) if (f.kw.some(k => hasWord(lower, k) || (k.length > 4 && lower.includes(k)))) f.loot.forEach(l => loot.add(l));
@@ -828,6 +910,12 @@ function generate(idea) {
   if (cliLang || tui || firefox || initTracker) ['Polish pass and onboarding', 'Basic analytics'].forEach(l => { if (loot.delete(l)) loot.add(l); });
   if (engine === 'pico8') { ['Steam / game API integration', 'Leaderboards', 'Achievement badges', 'Share / invite flow', 'Basic analytics'].forEach(l => loot.delete(l)); const pl = ['A title screen and a high score saved with cartdata / dget / dset', 'Post the .p8.png cart on the Lexaloffle BBS so players find it in Splore', 'Gamepad support checked in the web export (btn works with controllers)']; const rest = [...loot]; loot.clear(); pl.concat(rest).forEach(l => loot.add(l)); }
   if (bashCli) { loot.delete('Share / invite flow'); loot.delete('Basic analytics'); ['A cron (or launchd) example to run it on a schedule', 'Quiet (-q) and verbose (-v) output modes'].forEach(l => loot.add(l)); }
+  const lootFront = arr => { const rest = [...loot]; loot.clear(); arr.forEach(l => loot.add(l)); rest.forEach(l => loot.add(l)); };
+  if (webLang) { ['Share / invite flow', 'Basic analytics', 'Polish pass and onboarding'].forEach(l => loot.delete(l)); lootFront([shortener ? 'Click counts per link and a custom alias option' : 'An OpenAPI spec (and a /docs page) for the API', 'Rate limiting middleware per IP', 'A /healthz endpoint and structured logs your host can read']); }
+  if (groupSched) { ['Steam / game API integration', 'Leaderboards', 'Achievement badges', 'Share / invite flow', 'Discord share button'].forEach(l => loot.delete(l)); lootFront(['Add to calendar (.ics file / Google Calendar link) once the date is locked', 'A Discord webhook or email reminder the day before', /\bboard games?\b/.test(lower) ? 'A "what are we playing?" vote from a BoardGameGeek collection' : 'Repeat the same group every week or month']); }
+  if (ratingBoard) { ['Steam / game API integration', 'Achievement badges', 'Leaderboards', 'Friend lists', 'Realtime updates (WebSockets)', 'Moderation tools'].forEach(l => loot.delete(l)); lootFront(['Head-to-head record between any two players', /\bchess\b/.test(lower) ? 'Import games from Lichess or Chess.com by username' : 'Seasons that reset the standings', 'A share card image of the current top 3']); }
+  if (vsAI) { ['Steam / game API integration', 'Achievement badges', 'Model picker', 'Conversation memory', 'Eval set to test quality'].forEach(l => loot.delete(l)); if (!trash) loot.delete('Cost / token meter'); lootFront(['Pick a difficulty' + (trash ? ' and an opponent personality' : ''), /\bchess\b/.test(lower) ? 'Move list (PGN) with undo and a "show me the best move" hint' : 'Undo and a hint button']); }
+  if (webLang || groupSched || ratingBoard) ['Polish pass and onboarding', 'Basic analytics'].forEach(l => { if (loot.delete(l)) loot.add(l); });
   if (figma) { loot.delete('Share / invite flow'); loot.delete('Basic analytics'); loot.delete('Conversation memory'); ['Run on a whole page, not just the selection', 'A Dev Mode (codegen) version for developers'].forEach(l => loot.add(l)); }
 
   const stackLine = stack.slice(0, 3).map(s => s.tech).join(', ');
