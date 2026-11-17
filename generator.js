@@ -107,11 +107,13 @@ const COZY = /\b(cozy|cosy|farming|farm|sim|simulator|sandbox|life sim|idle|incr
 const GENTLE = /\b(cook|cooks|cooking|bake|bakes|baking|serve|serves|serving|restaurant|cafe|bakery|ramen|tea shop|coffee shop|garden|gardening|collect|collects|collecting|gather|gathers|gathering|deliver|delivers|delivering|delivery|mail|decorate|decorates|decorating|fishing|paint|paints|painting|graffiti|draw|draws|drawing|sculpt|sculpts|sculpting)\b/;
 const NOT_GENTLE = /\b(shoot|shoots|shooter|fight|fights|fighting|enemy|enemies|zombie|zombies|kill|kills|boss|bosses|battle|combat|gun|guns|sword|swords|war|survive|survival|dungeon|roguelike|roguelite|platformer|tower defen[cs]e|racing|race|puzzle|match-3|card game|deckbuilder|chess|trivia|word game|escape room|multiplayer|turn-based|turn based|strategy|rpg|obby|horror)\b/;
 function cozyLoop(lower) {
+  if (/\blighthouses?\b/.test(lower)) return 'A core loop the player repeats (keep the lamp lit and fuelled, spot ships in the fog or storm, guide them past the rocks, earn supplies for upgrades)';
   if (/\b(cook|cooks|cooking|bake|bakes|baking|serve|serves|serving|restaurant|cafe|bakery|ramen|tea shop|coffee shop)\b/.test(lower)) return 'A core loop the player repeats (take an order, cook or prepare it, serve it, earn tips)';
   if (/\b(deliver|delivers|delivering|delivery|mail)\b/.test(lower)) return 'A core loop the player repeats (pick up, travel, deliver, get paid or thanked)';
   if (/\b(collect|collects|collecting|gather|gathers|gathering)\b/.test(lower)) return 'A core loop the player repeats (explore, collect, bring it back, unlock a new area)';
   if (/\b(paint|paints|painting|graffiti|draw|draws|drawing|sculpt|sculpts|sculpting)\b/.test(lower)) return 'A core loop the player repeats (pick a spot, create the piece, step back to see it, unlock new colors or tools)';
   if (/\b(fishing)\b/.test(lower)) return 'A core loop the player repeats (cast, wait, reel in, sell or log the catch)';
+  if (MGMT_GAME.test(lower)) return 'A core loop the player repeats (visitors or jobs arrive, you handle them, earn money or reputation, spend it on upgrades)';
   return null;
 }
 const COZY_MUST = ['A core loop the player repeats (e.g. plant, wait, harvest, sell)', 'One progression system (unlocks, upgrades, or money)', 'Save and load so progress survives a restart', 'A clear on-screen goal for the first 5 minutes'];
@@ -181,6 +183,12 @@ const TABLETOP = /\b(ttrpgs?|d&d|dnd|dungeons (and|&) dragons|tabletop|pathfinde
 // a Go or Rust HTTP backend ("a go web server", "a rust web api", "a rest api in golang", "an axum server")
 const GO_RUST_WEB = /\b(go|golang|rust)\s+(web\s+)?(servers?|apis?|backends?|http servers?|rest apis?|web services?|microservices?|web apps?)\b|\b(web servers?|apis?|backends?|http servers?|rest apis?|web services?|microservices?) (in|with|using|written in) (go|golang|rust)\b|\b(axum|actix|actix-web|go-chi|gin-gonic)\b/;
 function goRustWeb(t) { return GO_RUST_WEB.test(t) && !/\b(discord|telegram|slack|twitch|bot|minecraft|game|games|cli|tui|command line|terminal|mcp|extension|plugin|plugins|mods?|players?|wipes?|oxide|umod|raid\w*)\b/.test(t); }
+// a game played in chat by a bot ("a twitch bot that runs a trivia game")
+const CHAT_GAME = /\b(trivia|quiz\w*|hangman|word games?|guessing games?|guess the \w+|wordle|riddles?|would you rather|bingo|rock paper scissors)\b/;
+// a plugin for Rust the game (Oxide/uMod, Carbon); "a rust web server" / "a rust cli" stay Rust the language
+const RUST_GAME_PLUGIN = /\brust (game )?servers? (plugins?|mods?)\b|\b(plugins?|mods?) for (my |our |a |the )?rust (game )?servers?\b|\b(oxide|umod)\b(?! (cleaner|remover|layer|film))|\brust (game )?(plugins?|mods?)\b.*\b(players?|wipes?|raid\w*|bases?|loot|clans?|kits?|teleport\w*)\b/;
+// "a game where you run a lighthouse" / "... manage a zoo": a management game about a place, not "Lighthouse Runner"
+const MGMT_GAME = /\b(?:where|in which) (?:you|players?|the player) (?:run|runs|manage|manages|operate|operates|keep|keeps|tend|tends|own|owns|look after|looks after) (?:a|an|the|your|their|my|our)? ?(?:little |small |tiny |cozy |cosy |haunted |floating |busy |remote |lonely |seaside )?(lighthouse|cafe|coffee shop|tea shop|shop|store|restaurant|bakery|farm|zoo|aquarium|hotel|inn|tavern|bar|pub|museum|hospital|theme park|amusement park|airport|space station|train station|station|bookshop|bookstore|library|colony|town|village|school|ranch|food truck|pizzeria|arcade|motel|spa|pet shop|flower shop|florist|lemonade stand|island|factory|brewery|vineyard|campsite|laundromat|diner|ramen shop|noodle shop|potion shop|garden|greenhouse)s?\b/;
 const STOP = new Set('a an the to for of and or that i my me with on in it is be build make create want app project idea simple'.split(' '));
 
 function detectTypes(text) {
@@ -198,6 +206,8 @@ function detectTypes(text) {
   if (!scored.find(x => x[0] === 'game') && /\b(?!(?:a|an|the|my|our|your|for|of|esim)\b)[a-z]+ (sim|simulator)s?\b(?! (card|cards|racing|racer|rig|rigs|league|wheel|swap|data|only|tray))/.test(t) && !/\b(stock|trading|market|investing|investment|portfolio|budget|retirement|loan|mortgage|monte carlo|physics|circuit|network|esim)\b/.test(t)) scored.push(['game', 2]);
   scored.sort((a, b) => b[1] - a[1]);
   const keys = scored.map(x => x[0]);
+  // "a twitch bot that runs a trivia game": a chat game played in Twitch/Discord chat is a bot, not a Phaser game
+  if (keys.includes('bot') && keys.includes('game') && CHAT_GAME.test(t) && /\b(twitch|discord|telegram|slack|whatsapp|chat) bots?\b/.test(t) && !/\b(unity|godot|phaser|roblox|unreal|three\.?js|pico-?8)\b/.test(t)) keys.splice(keys.indexOf('game'), 1);
   // generic "app/web/tool" shouldn't beat specific types
   if (keys.length > 1 && keys[0] === 'web') keys.push(keys.shift());
   // "app"/"tool" alone is just a noun, not a web-app signal when a specific type was found
@@ -206,7 +216,7 @@ function detectTypes(text) {
   const gameGenre = /\b(game|sim|simulator|visual novel) (where|about|in which|set)\b|\bvisual novel\b|\b(platformer|rpg|roguelike|shooter|puzzle|arcade|tower defense|card game|deckbuilder|multiplayer|level|player|enemy|enemies|npc|npcs|dungeon|escape room)\b/.test(t);
   // a game with AI features ("an rpg where the npcs are llm agents") is a game first, with an AI component
   if (keys[0] === 'agent' && keys.includes('game') && gameGenre) { keys.splice(keys.indexOf('game'), 1); keys.unshift('game'); }
-  if (keys[0] === 'game' && !gameGenre && /\b(pick|picks|recommend\w*|suggest\w*|choose|finder|track\w*|backlog|library|wishlist|review\w*|deals?|rat(e|es|ing|ings)|timer|stats|compar\w*|performance|benchmarks?|generator|sprites?|assets?|overlay|splits|wiki|guides?|launcher)\b/.test(t) || (keys[0] === 'game' && !gameGenre && /\b(leaderboards?|standings|elo|rankings?|tournaments?|brackets?|schedul\w*)\b/.test(t) && /\b(website|site|web ?app|app|page|tracker|dashboard|for (my|our)|schedulers?|planners?|leaderboards? (for|of))\b/.test(t) && !/\bgames? (with|where|about|in which|that has)\b/.test(t))) { keys.shift(); if (!keys.includes('web') && !keys.includes('data')) keys.unshift('web'); }
+  if (keys[0] === 'game' && !gameGenre && /\b(pick|picks|recommend\w*|suggest\w*|choose|finder|track\w*|backlog|library|wishlist|review\w*|deals?|rat(e|es|ing|ings)|timer|stats|compar\w*|performance|benchmarks?|generator|sprites?|assets?|overlay|splits|wiki|guides?|launcher|lists?|tier ?lists?|collections?|catalog(ue)?s?|favou?rites?|vot(e|es|ing)|polls?)\b/.test(t) || (keys[0] === 'game' && !gameGenre && /\b(leaderboards?|standings|elo|rankings?|tournaments?|brackets?|schedul\w*)\b/.test(t) && /\b(website|site|web ?app|app|page|tracker|dashboard|for (my|our)|schedulers?|planners?|leaderboards? (for|of))\b/.test(t) && !/\bgames? (with|where|about|in which|that has)\b/.test(t))) { keys.shift(); if (!keys.includes('web') && !keys.includes('data')) keys.unshift('web'); }
   // a bot/tool that is merely about games ("tracks my friends' game wins") shouldn't also get a game engine
   if (keys[0] !== 'game' && keys.includes('game') && !gameGenre && !/\b(unity|godot|three\.?js)\b/.test(t)) keys.splice(keys.indexOf('game'), 1);
   // "an MCP server that lets my coding agent read X": the agent is the client, so plan only the MCP server
@@ -259,10 +269,14 @@ function detectTypes(text) {
   }
   // "a chess game against an ai that trash talks": a turn-based game whose opponent talks; the LLM is a feature, not a tool-calling agent loop
   if (keys[0] === 'game' && keys.includes('agent') && /\bagainst (an? |the )?(ai|computer|bot|llm|cpu)\b(?! (bosses|enem(y|ies)|monsters?|robots?|zombies?|aliens?|minions?|soldiers?|arm(y|ies)|swarms?|hordes?|drones?|waves?))|\b(trash[- ]?talk\w*|banter\w*|taunt\w*|smack[- ]talk\w*)\b/.test(t)) keys.splice(keys.indexOf('agent'), 1);
+  // "a fighting game against ai bosses" / "a shooter against ai enemies": enemy AI is game logic (state machines), not an LLM agent
+  if (keys[0] === 'game' && keys.includes('agent') && /\b(ai|computer|cpu) (bosses|boss|enem(y|ies)|opponents?|drivers?|racers?|monsters?|bots?|soldiers?|units?|zombies?|guards?)\b/.test(t) && !/\b(llm|llms|gpt|chatgpt|claude|language models?|agents?|talk\w*|chat\w*|convers\w*|dialog\w*|banter\w*|trash[- ]?talk\w*)\b/.test(t)) keys.splice(keys.indexOf('agent'), 1);
   // "a site that's a directory of ai tools": a listing site about AI, not an agent or an LLM app
   if (/\b(directory|directories|list|catalog|catalogue|collection|database|gallery|showcase|marketplace|aggregator) (of|for) (the |all |top |best |free |new |cool |useful )*(ai|llm|gpt|chatgpt|mcp)\b/.test(t) && !/\b(chatbots?|agents? that|assistants? that|uses? (ai|gpt|claude|an llm)|summar\w*|generat\w*)\b/.test(t)) { for (const k of ['agent', 'aiapp', 'persona', 'rag', 'mcp']) { const i = keys.indexOf(k); if (i >= 0) keys.splice(i, 1); } if (!keys.includes('web')) keys.unshift('web'); }
   // "a go web server that shortens urls" / "a rust web api for my todo app": a Go or Rust HTTP backend, not a Next.js app or a cron data fetcher
   if (goRustWeb(t)) { keys.length = 0; keys.push('web'); }
+  // "a rust server plugin" / "an oxide plugin that adds kits": a C# plugin for Rust the game (Oxide/uMod or Carbon), planned on its own stack
+  if (RUST_GAME_PLUGIN.test(t)) { keys.length = 0; keys.push('web'); }
   // "a raycast extension for my notion tasks" is a Raycast (macOS launcher) extension, not a browser extension or a web app
   if (/\braycast (extensions?|plugins?|commands?|scripts?)\b|\bextensions? for raycast\b|\bfor raycast\b/.test(t)) { for (const k of ['extension', 'web', 'mobile', 'cli', 'data']) { const i = keys.indexOf(k); if (i >= 0) keys.splice(i, 1); } keys.unshift('extension'); }
   // "a figma plugin that exports colors as tailwind config" is a Figma plugin, not a web app or a browser extension
@@ -326,7 +340,15 @@ function projectName(idea) {
       if (obj.length === 3) break;
     }
     // "uses whisper to transcribe and summarize": the object is another verb, not a thing to name the project after
-    if (obj.every(w => VERB[w])) obj.length = 0;
+    if (obj.every(w => VERB[w]) && !(/^(Scheduler|Writer|Generator|Planner|Sender|Organizer|Summarizer)$/.test(VERB[all[vi]]) && obj.length === 1 && /^(posts|logs|alerts|reviews|lists|plans|books)$/.test(obj[0]))) obj.length = 0;
+    // "writes my dungeon master session recaps" -> "Session Recap Writer": a long noun phrase keeps its last two words (the head noun and one modifier)
+    if (obj.length === 3 && /^(Writer|Generator|Summarizer)$/.test(VERB[all[vi]]) && last >= 0 && all[last + 1] && !BREAK.test(all[last + 1]) && !STOP.has(all[last + 1]) && !FILLER.has(all[last + 1]) && !KIND.has(all[last + 1]) && !VERB[all[last + 1]]) { obj.splice(0, 3, obj[2], all[last + 1]); last++; }
+    // "writes my blog posts" -> "Blog Post Writer", "writes cover letters" -> "Cover Letter Writer"
+    if (obj.length && /^(Writer|Scheduler)$/.test(VERB[all[vi]]) && /[^s]s$/.test(obj[obj.length - 1]) && !/(us|is)$/.test(obj[obj.length - 1]) && !/^(lyrics|news|minutes|docs|notes|series|status|thanks|terms|stats|specs|ads|dms|prs|faqs|rules)$/.test(obj[obj.length - 1])) obj[obj.length - 1] = obj[obj.length - 1].replace(/ies$/, 'y').replace(/s$/, '');
+    // "schedules posts on twitter" -> "Twitter Post Scheduler"; "schedules tweets" -> "Tweet Scheduler"
+    if (obj.length === 1 && /^(Scheduler|Poster)$/.test(VERB[all[vi]]) && /^(posts?|tweets?|threads?|reels?|videos?|stories)$/.test(obj[0])) { const pf = all.slice(last + 1).find(w => /^(twitter|x|instagram|linkedin|bluesky|threads|mastodon|facebook|tiktok|reddit|youtube|pinterest)$/.test(w)); obj[0] = obj[0].replace(/ies$/, 'y').replace(/s$/, ''); if (pf && obj[0] !== 'tweet') obj.unshift(pf === 'x' ? 'X' : pf); }
+    // "reminds my family about birthdays" -> "Family Birthday Reminder"
+    if (obj.length === 1 && VERB[all[vi]] === 'Reminder' && /^(about|of)$/.test(all[last + 1] || '') && all[last + 2] && !BREAK.test(all[last + 2]) && !STOP.has(all[last + 2]) && !FILLER.has(all[last + 2]) && !/^(it|this|that|things?|stuff)$/.test(all[last + 2])) obj.push(all[last + 2].replace(/ies$/, 'y').replace(/([^s])s$/, '$1'));
     if (obj.length && aiFeat) { const last = obj.length - 1; if (!/(ss|us|is)$/.test(obj[last])) obj[last] = obj[last].replace(/(calor|zomb|cook|mov|self|smooth|goal|pix|brown)ies$/, '$1ie').replace(/ies$/, 'y').replace(/([^s])s$/, '$1'); return 'AI ' + titleCase(obj.join(' ')) + ' ' + VERB[all[vi]]; }
     // "turns my git log into a changelog" -> "Changelog Generator"; "converts markdown to html" -> "Markdown to HTML Converter"
     if (obj.length && obj.length <= 2 && VERB[all[vi]] === 'Converter' && (all[last + 1] === 'into' || (all[last + 1] === 'to' && /^converts?$/.test(all[vi])))) {
@@ -436,7 +458,8 @@ function generate(idea) {
   const stack = (engine ? GAME_ENGINES[engine] : vscode ? VSCODE_STACK : raycast ? RAYCAST_STACK : figma ? FIGMA_STACK : fabric ? MCMOD_FABRIC : primary.stack).map(([tech, why]) => ({ tech, why }));
   if (engine && engine !== 'roblox' && (engine === 'unreal' || /\b(3d|three dimensional|vr|virtual reality)\b|\bthree\.?js\b/.test(lower))) stack.push({ tech: 'Blender + Blender MCP (optional)', why: 'Lets Claude Code or Cursor model and export simple 3D assets for you, so you are not stuck on art.' });
   const botSdk = () => {
-    const sdk = /\btelegram\b/.test(lower) ? ['Node.js + grammY (Telegram)', 'Modern, well-documented Telegram bot framework; easy for AI tools to write.']
+    const sdk = /\bwhatsapp\b/.test(lower) ? ['Node.js + WhatsApp Cloud API (Meta) or Twilio for WhatsApp', 'The official ways to message on WhatsApp from code (Twilio has the easiest sandbox); messages you start outside a 24-hour reply window must use a pre-approved template.']
+      : /\btelegram\b/.test(lower) ? ['Node.js + grammY (Telegram)', 'Modern, well-documented Telegram bot framework; easy for AI tools to write.']
       : /\bslack\b/.test(lower) ? ['Node.js + Slack Bolt', "Slack's official bot framework, with slash commands and events built in."]
       : /\btwitch\b/.test(lower) ? ['Node.js + tmi.js / Twurple (Twitch)', 'Reads and posts Twitch chat; Twurple also covers the Twitch API.']
       : /\bdiscord\b/.test(lower) ? ['Node.js + discord.js', 'Best docs and examples for Discord bots; easy for AI tools to write.']
@@ -444,7 +467,10 @@ function generate(idea) {
     const i = stack.findIndex(s => s.tech.startsWith(TYPES.bot.stack[0][0]));
     if (sdk && i >= 0) stack[i] = { tech: sdk[0], why: sdk[1] + (i > 0 ? ' (for the bot side)' : '') };
   };
-  const cozy = keys[0] === 'game' && ((COZY.test(lower) && !/\b(flight|racing|driving|space|combat|battle|war|mech) (sim|simulator)\b/.test(lower)) || (GENTLE.test(lower) && !NOT_GENTLE.test(lower)));
+  // "a godot game where you run a lighthouse and guide ships" -> "Lighthouse Keeper Game" with a gentle management loop
+  const mgmt = keys[0] === 'game' && !NOT_GENTLE.test(lower) && lower.match(MGMT_GAME);
+  if (mgmt) name = mgmt[1] === 'lighthouse' ? 'Lighthouse Keeper Game' : titleCase(mgmt[1]) + ' Management Game';
+  const cozy = !!mgmt || keys[0] === 'game' && ((COZY.test(lower) && !/\b(flight|racing|driving|space|combat|battle|war|mech) (sim|simulator)\b/.test(lower)) || (GENTLE.test(lower) && !NOT_GENTLE.test(lower)));
   if (secondary) for (const [tech, why] of secondary.stack.slice(0, 2)) if (!stack.find(s => s.tech === tech)) stack.push({ tech, why: why + ' (for the ' + lbl(secondary.label) + ' side)' });
   if (keys[1] === 'rag' && !stack.find(s => s.tech === TYPES.rag.stack[2][0])) stack.push({ tech: TYPES.rag.stack[2][0], why: TYPES.rag.stack[2][1] + ' (for the RAG chatbot side)' });
   botSdk();
@@ -771,6 +797,31 @@ function generate(idea) {
     }
     name = name.replace(/^Take (\w+?)s? Reminder$/, '$1 Reminder').replace(/^Drink Water Reminder$/, 'Water Reminder').replace(/^([A-Z][a-z]+[^su])s Reminder$/, '$1 Reminder');
   }
+  // "a twitch bot that runs a trivia game": rounds played in chat with points, not a Phaser game
+  const chatGame = keys[0] === 'bot' && !secondary && !reminder && CHAT_GAME.test(lower) && !RAG.test(lower);
+  if (chatGame) {
+    const twitchy = /\btwitch\b/.test(lower);
+    const g = (lower.match(CHAT_GAME) || ['trivia'])[0].replace(/^quiz\w*$/, 'quiz').replace(/^guess(ing games?| the \w+)$/, 'guessing game').replace(/^word games?$/, 'word game').replace(/^riddles?$/, 'riddle');
+    const plat = (lower.match(/\b(twitch|discord|telegram|slack|whatsapp)\b/) || [])[1];
+    name = titleCase(((plat ? plat + ' ' : '') + g).replace(/ game$/, '')) + ' Bot';
+    const cmd = twitchy ? '!' : '/';
+    must.length = 0;
+    const qa = /^(trivia|quiz|riddle)$/.test(g);
+    must.push(qa ? cmd + g + ' starts a round: the bot posts a question and accepts the first correct answer in chat within 30 seconds' : cmd + g.split(' ')[0] + ' starts a round in chat; players guess with a message and the bot replies with the result until someone wins or time runs out', 'Points per user saved in SQLite, with a ' + cmd + 'top leaderboard', qa ? 'A question bank from Open Trivia DB or your own JSON file, with no repeats until it runs out' : 'A word or puzzle list in a JSON file, with no repeats until it runs out', 'Mod-only start/stop and a cooldown so the game never floods chat');
+    boss = 'Fair answers in a busy chat: matching answers despite case, typos and accents, deciding who was first under chat lag, and staying under the platform\'s message rate limits';
+  }
+  // "a whatsapp bot that ...": a WhatsApp number on the Cloud API or Twilio, with no slash commands
+  if (keys[0] === 'bot' && /\bwhatsapp\b/.test(lower)) {
+    for (let k = 0; k < must.length; k++) must[k] = must[k].replace('Connect the bot and respond to one slash command', 'Connect a WhatsApp number (the Cloud API test number or the Twilio sandbox) and reply to one incoming message').replace(/^A \/remind command to set/, 'A "remind" message to set').replace(', plus /list and /stop', ', plus "list" and "stop" replies');
+    boss += '; plus WhatsApp rules: messages you start outside the 24-hour reply window must use a pre-approved template, and group chats need the right API access';
+  }
+  // "a whatsapp bot that reminds my family about birthdays": once a year per person, not an every-N-minutes reminder
+  if (keys[0] === 'bot' && /\bbirthdays?\b/.test(lower) && /\b(remind\w*|notif\w*|alerts?|wish\w*|announce\w*|posts?)\b/.test(lower)) {
+    const ri = must.findIndex(m => /^A (\/remind|"remind") (command|message)/.test(m));
+    if (ri >= 0) must[ri] = 'Add birthdays (name + date, year optional) with one command, and list the upcoming ones';
+    must.push('A daily check at a set hour in the group\'s time zone that sends the birthday message on the day, with an optional heads-up a few days before');
+    boss = boss.replace(/^Reminders that fire on time for every user: per-user time zones and daylight saving/, 'Birthdays that fire on the right day every year: the group\'s time zone, February 29 birthdays');
+  }
   // "Cleans Up Downloads CLI" -> "Downloads Cleaner CLI"; "backs up my dotfiles" -> "Dotfiles Backup CLI"
   if (/\b(Cleaner|Backup)$/.test(name)) {
     name = name.replace(/\b(Folder|Directory|Dir) Cleaner$/, 'Cleaner');
@@ -862,6 +913,45 @@ function generate(idea) {
     must.push('Record a match in a few taps: the players, the winner (or a draw) and the date', 'Ratings update with Elo (everyone starts at 1200, K = 32) and a standings table sorted by rating', 'A player page with rating history and recent results', 'Edit or delete a wrong result and recompute every rating from the match log');
     boss = 'Rating correctness: draws, new players (provisional until ~5 games), and replaying the whole match log after an edit so the standings stay right';
   }
+  // "a web app where my friends vote on movie night": a share-link poll with no guest accounts (the scheduler flow, voting on options instead of dates)
+  const groupVote = /^(web|mobile)$/.test(keys[0]) && !secondary && !groupSched && !ratingBoard && /\b(vot(e|es|ing)|polls?)\b/.test(lower) && /\b(friends?|family|group|we|our|us|roommates?|team|crew|squad|club|party|guests?|nights?)\b/.test(lower) && !/\b(elections?|ballots?|candidates?|politic\w*|surveys?|forms?|upvot\w*|downvot\w*|stack overflow|reddit|polling station)\b/.test(lower);
+  if (groupVote) {
+    const si = stack.findIndex(x => /Supabase/.test(x.tech));
+    if (si >= 0) stack[si] = { tech: 'Supabase (Postgres + Realtime; no login for guests)', why: 'Stores polls, options and votes and pushes live results; friends vote from a share link with just a display name, so nobody signs up.' };
+    must.length = 0;
+    must.push('Create a poll with 2-10 options (movies, games, places or dishes) and get a share link', 'Friends open the link, type a name and vote with no account (one vote each, changeable until the poll closes)', 'Live results with the leader highlighted', 'Close the poll and announce the winner, with ties broken by a runoff or a coin flip');
+    boss = 'One person, one vote without logins: a per-guest edit link or device token so nobody can vote twice or change someone else\'s vote, plus a fair tie-break everyone accepts';
+    const ev = lower.match(/\b(movie|game|board game|pizza|trivia|karaoke|date|poker|d&d|dnd|book club) nights?\b/);
+    const on = lower.match(/\b(?:vot\w*|polls?) (?:on|for|about) (?:the |our |a |which |what |where |tonight'?s? )?([a-z]+)/);
+    if (ev) name = titleCase(ev[1].replace(/^d&d$/, 'dnd') + ' night') + (/\bpolls?\b/.test(lower) && !/\bvot/.test(lower) ? ' Poll' : ' Vote');
+    else if (on && !STOP.has(on[1]) && !BREAK.test(on[1])) name = titleCase(on[1].replace(/ies$/, 'y').replace(/([^s])s$/, '$1')) + ' Vote';
+    else { const fr = lower.match(/\b(?:vot\w*|polls?)\b.*?\bfor (?:our|my|the|a) ([a-z]+(?: [a-z]+)?)\b/); if (fr) name = titleCase(fr[1].split(' ').filter(w => !STOP.has(w) && !FILLER.has(w) && !BREAK.test(w)).join(' ')) + (/\bpolls?\b/.test(lower) && !/\bvot/.test(lower) ? ' Poll' : ' Vote'); }
+  }
+  // "a rust server plugin": Rust (the game) plugins are C# on Oxide/uMod (or Carbon), tested on a local dedicated server
+  const rustPlugin = keys[0] === 'web' && !secondary && RUST_GAME_PLUGIN.test(lower);
+  if (rustPlugin) {
+    primary = { ...primary, label: 'Rust Server Plugin' };
+    stack.length = 0;
+    [['C# plugin for Oxide/uMod (works on Carbon too)', 'One .cs file the server compiles on load; Oxide hooks (OnPlayerConnected, OnEntityDeath, OnLootSpawn) and AI tools know the API from thousands of public plugins.'], ['A local Rust dedicated server via SteamCMD with Oxide installed', 'Test every change on your own box: drop the .cs into oxide/plugins and it hot-reloads, no client restarts.'], ['Visual Studio Code or Rider with the Oxide/Rust DLLs referenced', 'Autocomplete and compile errors before you upload, instead of reading the server console.'], ['uMod / Codefling (publish) + GitHub (source)', 'Where Rust server owners look for plugins.']].forEach(([tech, why]) => stack.push({ tech, why }));
+    must.length = 0;
+    const cmdW = (lower.match(/\badds? (?:a |an |the |custom |new )?([a-z]+)/) || [])[1];
+    must.push('One chat command' + (cmdW ? ' (/' + cmdW.replace(/s$/, '') + ')' : '') + ' registered with a permission (permission.RegisterPermission) that only granted players can use', 'One Oxide hook that drives the core mechanic', 'Settings in a JSON config file and messages in a lang file, both created with sensible defaults on first load', 'Player data saved to a data file so it survives restarts, and reset (or not) on purpose at a wipe');
+    boss = 'Server performance and wipes: hooks run on the main thread, so no heavy work per tick or per entity, timers instead of loops, and data that behaves correctly after a monthly forced wipe and Rust update';
+    const ad = lower.match(/\badds? (?:a |an |the |custom |new |more )?([a-z]+(?: [a-z]+)?)/);
+    if (ad) { const w = ad[1].split(' ').filter(x => !STOP.has(x) && !FILLER.has(x) && !BREAK.test(x) && !/^(players?|to|commands?)$/.test(x)); name = 'Rust ' + titleCase(w.join(' ') || ad[1]) + ' Plugin'; } else name = 'Rust Server Plugin';
+  }
+  // "a web app to schedule posts on twitter": compose, queue, and a worker that posts on time through the platform API
+  const socialSched = /^(web|mobile)$/.test(keys[0]) && !secondary && !groupSched && /\b(schedul\w*|queue\w*)\b/.test(lower) && /\b(posts?|tweets?|threads?|reels?)\b/.test(lower) && /\b(twitter|x|tweets?|instagram|linkedin|bluesky|threads|mastodon|facebook|tiktok|social media|socials)\b/.test(lower);
+  if (socialSched) {
+    const api = /\binstagram\b/.test(lower) ? ['Instagram Graph API (content publishing)', 'The official way to publish posts; needs an Instagram business or creator account linked to a Facebook page.'] : /\blinkedin\b/.test(lower) ? ['LinkedIn Posts API (OAuth 2.0)', 'Posts to your profile with the w_member_social scope.'] : /\bbluesky\b/.test(lower) ? ['@atproto/api (Bluesky)', 'Free, open API; log in with an app password.'] : /\bmastodon\b/.test(lower) ? ['Mastodon REST API (masto.js)', 'Free API with native scheduled_at support on most servers.'] : ['X API v2 via twitter-api-v2 (OAuth 2.0 PKCE)', 'Typed client for posting on X; check the API plan limits (posting needs at least the free tier) before you build.'];
+    stack.splice(2, 0, { tech: api[0], why: api[1] }, { tech: 'A cron job or queue worker (Vercel Cron, Inngest or a 1-minute loop)', why: 'Posts go out at their scheduled time even when nobody has the app open.' });
+    must.length = 0;
+    must.push('Write a post with a live character count and a preview', 'Pick a date and time in your own time zone and add it to the queue', 'A worker that publishes due posts through the API and marks each one posted or failed (with the error)', 'A queue view to edit, reschedule or delete upcoming posts');
+    boss = 'Posting exactly once, on time: OAuth tokens that expire and refresh, API rate limits and paid tiers, retries that never double-post, and time zones / daylight saving in the schedule';
+  }
+  // "an ai that writes my dungeon master session recaps": paste raw notes, get a recap
+  const recap = keys[0] === 'aiapp' && /\brecaps?\b/.test(lower);
+  if (recap) { const fi = must.findIndex(m => /^One input form/.test(m)); if (fi >= 0) must[fi] = 'One box to paste raw session notes (bullet points, a chat log or a transcript) plus the cast\'s names, so the recap spells them right'; }
   // "a chess game against an ai that trash talks": the engine picks moves; an LLM only writes the banter
   const vsAI = keys[0] === 'game' && /\bagainst (an? |the )?(ai|computer|bot|llm|cpu)\b(?! (bosses|enem(y|ies)|monsters?|robots?|zombies?|aliens?|minions?|soldiers?|arm(y|ies)|swarms?|hordes?|drones?|waves?))|\b(trash[- ]?talk\w*|banter\w*|taunt\w*|smack[- ]talk\w*)\b/.test(lower);
   const trash = vsAI && /\b(trash[- ]?talk\w*|banter\w*|taunt\w*|smack[- ]talk\w*|roasts?|insults?|talks?|chats?|commentary)\b/.test(lower);
@@ -887,6 +977,9 @@ function generate(idea) {
     const gw = (lower.match(/\b(chess|checkers|go|connect four|connect 4|tic tac toe|poker|blackjack|card game|board game|othello|reversi|backgammon|battleship|pong|air hockey)\b/) || [])[1];
     if (gw) name = (trash ? 'Trash-Talking ' + titleCase(gw) + ' AI' : titleCase(gw) + ' vs AI');
   }
+  // "a fighting game against ai bosses": the boss AI is a small state machine with readable tells
+  const aiFoes = keys[0] === 'game' && !cozy && !turn && !tower && !vehicle && /\b(ai|computer|cpu) (bosses|boss|enem(y|ies)|opponents?)\b/.test(lower);
+  if (aiFoes) { const ei = must.indexOf('One enemy or obstacle type'); if (ei >= 0) must[ei] = /\bboss(es)?\b/.test(lower) ? 'One boss whose AI is a small state machine (idle, approach, attack, recover) with a readable tell before each attack' : 'One enemy type whose AI is a small state machine (patrol, chase, attack) with a readable tell before it attacks'; }
   if (secondary) must.push('Integration point with your ' + lbl(secondary.label) + ' component');
   const loot = new Set();
   for (const f of FLAVOR) if (f.kw.some(k => hasWord(lower, k) || (k.length > 4 && lower.includes(k)))) f.loot.forEach(l => loot.add(l));
@@ -915,7 +1008,15 @@ function generate(idea) {
   if (groupSched) { ['Steam / game API integration', 'Leaderboards', 'Achievement badges', 'Share / invite flow', 'Discord share button'].forEach(l => loot.delete(l)); lootFront(['Add to calendar (.ics file / Google Calendar link) once the date is locked', 'A Discord webhook or email reminder the day before', /\bboard games?\b/.test(lower) ? 'A "what are we playing?" vote from a BoardGameGeek collection' : 'Repeat the same group every week or month']); }
   if (ratingBoard) { ['Steam / game API integration', 'Achievement badges', 'Leaderboards', 'Friend lists', 'Realtime updates (WebSockets)', 'Moderation tools'].forEach(l => loot.delete(l)); lootFront(['Head-to-head record between any two players', /\bchess\b/.test(lower) ? 'Import games from Lichess or Chess.com by username' : 'Seasons that reset the standings', 'A share card image of the current top 3']); }
   if (vsAI) { ['Steam / game API integration', 'Achievement badges', 'Model picker', 'Conversation memory', 'Eval set to test quality'].forEach(l => loot.delete(l)); if (!trash) loot.delete('Cost / token meter'); lootFront(['Pick a difficulty' + (trash ? ' and an opponent personality' : ''), /\bchess\b/.test(lower) ? 'Move list (PGN) with undo and a "show me the best move" hint' : 'Undo and a hint button']); }
-  if (webLang || groupSched || ratingBoard) ['Polish pass and onboarding', 'Basic analytics'].forEach(l => { if (loot.delete(l)) loot.add(l); });
+  if (groupVote) { ['Steam / game API integration', 'Leaderboards', 'Achievement badges', 'Share / invite flow', 'Discord share button', 'Friend lists', 'Moderation tools'].forEach(l => loot.delete(l)); lootFront([/\bmovies?\b/.test(lower) ? 'Search movies from TMDB (poster, runtime, where to stream) to add options' : /\bgames?\b/.test(lower) ? 'Add options from a BoardGameGeek collection or Steam library' : 'Suggest-an-option mode so anyone can add choices', 'Ranked-choice voting for bigger groups', 'A Discord webhook that posts the winner']); }
+  if (rustPlugin) { ['Share / invite flow', 'Basic analytics', 'Polish pass and onboarding', 'Steam / game API integration', 'Achievement badges', 'Leaderboards'].forEach(l => loot.delete(l)); lootFront(['An in-game UI panel with CUI', 'A Discord webhook for key events (raids, kills, kit claims)', 'Publish on uMod or Codefling with a config example and permissions table']); }
+  if (socialSched) { ['Share / invite flow'].forEach(l => loot.delete(l)); lootFront(['Best-time-to-post suggestions from your past engagement', 'Threads (multi-post) and image attachments', 'A calendar view of the queue']); }
+  if (chatGame) { ['Steam / game API integration', 'Share / invite flow'].forEach(l => loot.delete(l)); lootFront([/^(trivia|quiz)/.test((lower.match(CHAT_GAME) || [''])[0]) ? 'Categories and difficulty picked per round' : 'Word categories and difficulty picked per round', /\btwitch\b/.test(lower) ? 'Channel-point redemptions to start a round' : 'Weekly season reset with a champion role', /\btwitch\b/.test(lower) ? 'An OBS overlay showing the current question and top 5' : 'Daily streak bonus points']); }
+  if (recap) { ['Model picker', 'Conversation memory'].forEach(l => loot.delete(l)); lootFront(['Campaign memory: past recaps saved so the next one keeps names and plot threads straight', 'Voice options: in-world chronicle, bard\'s tale, or plain bullet summary']); }
+  if (mgmt) { ['Steam / game API integration', 'Leaderboards'].forEach(l => loot.delete(l)); lootFront([mgmt[1] === 'lighthouse' ? 'A storm and night cycle that changes how many ships come and how hard they are to guide' : 'A day/night or season cycle that changes what arrives', 'Upgrades the player can see change the ' + mgmt[1], 'A logbook of milestones saved with the game']); }
+  if (aiFoes) { const li = stack.findIndex(x => /^An LLM API behind/.test(x.tech)); if (li >= 0) stack.splice(li, 1); ['Model picker', 'Conversation memory', 'Cost / token meter', 'Eval set to test quality'].forEach(l => loot.delete(l)); lootFront([/\bboss(es)?\b/.test(lower) ? 'A second phase for the boss (new attack pattern below half health)' : 'Enemies that coordinate (flank, take cover, call for help)', 'Difficulty settings that change AI reaction time, not just damage']); }
+  if (keys[0] === 'bot' && /\bbirthdays?\b/.test(lower)) lootFront(['A custom message per person (with their age when the year is known)', 'A gift-idea list per person, shared with the family']);
+  if (webLang || groupSched || ratingBoard || groupVote || rustPlugin || socialSched || chatGame) ['Polish pass and onboarding', 'Basic analytics'].forEach(l => { if (loot.delete(l)) loot.add(l); });
   if (figma) { loot.delete('Share / invite flow'); loot.delete('Basic analytics'); loot.delete('Conversation memory'); ['Run on a whole page, not just the selection', 'A Dev Mode (codegen) version for developers'].forEach(l => loot.add(l)); }
 
   const stackLine = stack.slice(0, 3).map(s => s.tech).join(', ');
