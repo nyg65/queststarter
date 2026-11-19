@@ -319,7 +319,7 @@ function projectName(idea) {
   const nounUse = i => !/s$/.test(all[i]) && i > 0 && !STOP.has(all[i - 1]) && !FILLER.has(all[i - 1]) && !BREAK.test(all[i - 1]) && !/^(i|we|you|they|people|users|gamers|players|can|will|to)$/.test(all[i - 1]) && (i === all.length - 1 || BREAK.test(all[i + 1]) || KIND.has(all[i + 1]) || all[i + 1] === 'app' || /^(generator|maker|builder|creator|planner|tracker|writer)$/.test(all[i + 1]));
   // newer verbs name tools ("pings my servers"), not games ("a game where a wizard rotates the world")
   const gameIdea = /\b(game|platformer|roguelike|roguelite|metroidvania|rpg|shooter|sim|simulator|visual novel)\b/.test(all.join(' '));
-  const vi = all.findIndex((w, i) => VERB[w] && i > 0 && !nounUse(i) && !(w === 'rolls' && /^(back|out|over|up)$/.test(all[i + 1] || '')) && !(/^(pings|rotates|collects|splits|rolls|tails|sorts?)$/.test(w) && (gameIdea || !/^(that|which|who|it|and)$/.test(all[i - 1]))));
+  const vi = all.findIndex((w, i) => VERB[w] && i > 0 && !nounUse(i) && !(w === 'rolls' && /^(back|out|over|up)$/.test(all[i + 1] || '')) && !(w === 'books' && /^(sort|sorts|sorting|read|reads|reading|shelve|shelves|shelving|stack|stacks|stacking|organize|organizes|organizing|return|returns|returning|stamp|stamps|collect|collects|collecting|my|our|your|the|old|rare|library|comic|picture)$/.test(all[i - 1] || '')) && !(/^(pings|rotates|collects|splits|rolls|tails|sorts?)$/.test(w) && (gameIdea || !(/^(that|which|who|it|and)$/.test(all[i - 1]) || (w === 'sort' && all[i - 1] === 'to')))));
   if (vi > 0) {
     // "tracks how much I spend on Claude Code each day" -> "Claude Code Spend Tracker"
     const rest = all.slice(vi + 1);
@@ -353,6 +353,12 @@ function projectName(idea) {
     if (obj.length === 1 && /^(Scheduler|Poster)$/.test(VERB[all[vi]]) && /^(posts?|tweets?|threads?|reels?|videos?|stories)$/.test(obj[0])) { const pf = all.slice(last + 1).find(w => /^(twitter|x|instagram|linkedin|bluesky|threads|mastodon|facebook|tiktok|reddit|youtube|pinterest)$/.test(w)); obj[0] = obj[0].replace(/ies$/, 'y').replace(/s$/, ''); if (pf && obj[0] !== 'tweet') obj.unshift(pf === 'x' ? 'X' : pf); }
     // "reminds my family about birthdays" -> "Family Birthday Reminder"
     if (obj.length === 1 && VERB[all[vi]] === 'Reminder' && /^(about|of)$/.test(all[last + 1] || '') && all[last + 2] && !BREAK.test(all[last + 2]) && !STOP.has(all[last + 2]) && !FILLER.has(all[last + 2]) && !/^(it|this|that|things?|stuff)$/.test(all[last + 2])) { const ab = [all[last + 2]]; const n3 = all[last + 3]; if (n3 && !BREAK.test(n3) && !STOP.has(n3) && !FILLER.has(n3) && !KIND.has(n3) && (!VERB[n3] || !all[last + 4] || BREAK.test(all[last + 4])) && !/^(every|each|daily|weekly|today|tomorrow|tonight|morning|night|week|day)$/.test(n3)) ab.push(n3); ab[ab.length - 1] = ab[ab.length - 1].replace(/ies$/, 'y').replace(/([^s])s$/, '$1'); obj.push(...ab); }
+    if (obj.length === 1 && VERB[all[vi]] === 'Reminder' && /^(team|group|clan|guild|channel|squad|crew|class|staff|employees|coworkers|colleagues|family|friends|roommates|housemates|kids|students|members|everyone|users|server)$/.test(obj[0]) && all[last + 1] === 'to' && all[last + 2]) {
+      const tv = []; let k = last + 3;
+      while (/^(out|up|in|on|off|their|our|his|her|its|the|a|an|my|your)$/.test(all[k] || '')) k++;
+      for (; k < all.length; k++) { const w = all[k]; if (BREAK.test(w) || /^(every|each|daily|weekly|today|tomorrow|tonight|before|by|their|our)$/.test(w)) { if (tv.length) break; else continue; } if (STOP.has(w) || FILLER.has(w) || KIND.has(w)) continue; tv.push(w); if (tv.length === 2) break; }
+      if (tv.length) { const l = tv.length - 1; if (!/(ss|us|is)$/.test(tv[l])) tv[l] = tv[l].replace(/ies$/, 'y').replace(/([^s])s$/, '$1'); if (/^(vote|review|check|update|backup|stretch|workout|call)$/.test(all[last + 2])) tv.push(all[last + 2]); obj.splice(0, 1, ...tv); }
+    }
     if (obj.length && aiFeat) { const last = obj.length - 1; if (!/(ss|us|is)$/.test(obj[last])) obj[last] = obj[last].replace(/(calor|zomb|cook|mov|self|smooth|goal|pix|brown)ies$/, '$1ie').replace(/ies$/, 'y').replace(/([^s])s$/, '$1'); return 'AI ' + titleCase(obj.join(' ')) + ' ' + VERB[all[vi]]; }
     // "turns my git log into a changelog" -> "Changelog Generator"; "converts markdown to html" -> "Markdown to HTML Converter"
     if (obj.length && obj.length <= 2 && VERB[all[vi]] === 'Converter' && (all[last + 1] === 'into' || (all[last + 1] === 'to' && /^converts?$/.test(all[vi])))) {
@@ -369,12 +375,14 @@ function projectName(idea) {
     // "tracks my dog's walks" -> "Dog Walk Tracker" (not "Dog's Walks Tracker")
     if (obj.length === 2 && /'s$/.test(obj[0]) && /[^s]s$/.test(obj[1]) && !/(ss|us|is)$/.test(obj[1])) { obj[0] = obj[0].slice(0, -2); obj[1] = obj[1].replace(/ies$/, 'y').replace(/s$/, ''); }
     // "renames my photos by date" -> "Photo Date Renamer", "downloads youtube transcripts" -> "YouTube Transcript Downloader"
-    if (obj.length && /^(Renamer|Downloader|Resizer|Identifier|Scanner|Shortener|Sorter)$/.test(VERB[all[vi]])) {
+    if (obj.length && /^(Renamer|Downloader|Resizer|Identifier|Scanner|Shortener|Sorter|Booker|Splitter)$/.test(VERB[all[vi]])) {
       const last = obj.length - 1;
       if (!/(ss|us|is)$|^downloads$/.test(obj[last])) obj[last] = obj[last].replace(/ies$/, 'y').replace(/([^s])s$/, '$1');
       const bi = all.indexOf('by', vi);
       if (VERB[all[vi]] === 'Renamer' && bi > vi && all[bi + 1] && /^(date|name|size|type|time|month|year|artist|album|title|camera|location)$/.test(all[bi + 1]) && obj.length < 3) obj.push(all[bi + 1]);
     }
+    // "tracks crypto prices" -> "Crypto Price Tracker", "checks ssl certificates" -> "SSL Certificate Checker"
+    if (obj.length && /^(Tracker|Checker|Monitor|Alerts|Watcher)$/.test(VERB[all[vi]]) && /^(prices|ranks|certificates|certs|links|domains)$/.test(obj[obj.length - 1])) obj[obj.length - 1] = obj[obj.length - 1].replace(/s$/, '');
     if (obj.length) return titleCase(obj.join(' ')) + ' ' + VERB[all[vi]];
   }
   const words = [];
@@ -387,10 +395,18 @@ function projectName(idea) {
     if (words.length === 3) { const nx = all[i + 1]; if (nx && /^(generator|maker|builder|scheduler|tracker|planner|finder|picker|timer|counter|calculator|converter|randomizer|roller|leaderboard|bot|checker)$/.test(nx) && !words.includes(nx)) words.push(nx); break; }
   }
   // a lone generic word ("a game where you...", "a vr app for meditation") reads badly; prefix what comes after the break
-  if (words.length === 2 && /^(threejs|unity|godot|phaser|roblox|unreal|pico8|browser|web|online|simple|small|tiny|little|fun|mobile)$/.test(words[0]) && words[1] === 'game' && stopAt < all.length) words.shift();
+  if (words.length === 2 && /^(threejs|unity|godot|phaser|roblox|unreal|pico8|browser|web|online|simple|small|tiny|little|fun|mobile|cozy|cosy|relaxing|chill|casual)$/.test(words[0]) && words[1] === 'game' && stopAt < all.length) words.shift();
   // "a unity vr game where you paint graffiti" -> "Graffiti Painting VR Game"
   let dimMod = '';
   if (words.length === 3 && /^(threejs|unity|godot|phaser|roblox|unreal|browser|web|mobile)$/.test(words[0]) && /^(vr|ar|3d|2d)$/.test(words[1]) && words[2] === 'game' && BREAK.test(all[all.indexOf('game') + 1] || '')) { stopAt = all.indexOf('game') + 1; dimMod = words[1]; words.splice(0, 2); }
+  // "a godot puzzle game about light and mirrors" -> "Light and Mirrors Puzzle Game" (engine + genre alone says nothing about this game)
+  const egi = all.indexOf('game');
+  if (words.length === 3 && /^(unity|godot|phaser|roblox|unreal|pico8|threejs)$/.test(words[0]) && /^(puzzle|horror|stealth|rhythm|physics|survival|strategy|card|word|racing|fighting|adventure|action|mystery|detective|cooking|fishing)$/.test(words[1]) && words[2] === 'game' && egi > 0 && /^(about|with|featuring|starring)$/.test(all[egi + 1] || '')) {
+    const th = []; let and = false;
+    for (const w of all.slice(egi + 2)) { if (w === 'and' && th.length === 1 && !and) { and = true; continue; } if (BREAK.test(w) || /^(where|that|which|who|when|while)$/.test(w)) { if (th.length) break; else continue; } if (STOP.has(w) || FILLER.has(w) || KIND.has(w) || /^(you|player|players)$/.test(w)) continue; th.push(w); if (th.length === 2) break; }
+    if (th.length === 1 && !/(ss|us|is)$/.test(th[0])) th[0] = th[0].replace(/ies$/, 'y').replace(/([^s])s$/, '$1');
+    if (th.length) return titleCase(th.join(and && th.length === 2 ? ' and ' : ' ') + ' ' + words[1] + ' game').replace(/ And /, ' and ');
+  }
   // "a godot platformer about a snail with a jetpack" -> "Snail Jetpack Platformer" (engine + genre alone says nothing about this game)
   if (words.length === 2 && /^(unity|godot|phaser|roblox|unreal|pico8|threejs)$/.test(words[0]) && /^(platformer|roguelike|roguelite|metroidvania|shooter|rpg|puzzler|deckbuilder|racer|runner|brawler|beat em up|soulslike|obby)$/.test(words[1]) && /^(about|where|with|starring|featuring|of)$/.test(all[stopAt] || '')) {
     const th = [];
@@ -416,7 +432,7 @@ function projectName(idea) {
       if (more.length === 3) break;
     }
     const GERUND = { paint: 'painting', build: 'building', cook: 'cooking', grow: 'growing', draw: 'drawing', explore: 'exploring', fix: 'fixing', catch: 'catching', fly: 'flying', drive: 'driving', sculpt: 'sculpting', spray: 'spraying', dig: 'digging', mine: 'mining', fish: 'fishing', bake: 'baking', brew: 'brewing', tame: 'taming', sort: 'sorting', stack: 'stacking' };
-    if (words[0] === 'game' && more.length === 2 && GERUND[more[0]] && all[stopAt] === 'where' && /^(you|players?)$/.test(all[stopAt + 1] || '') && all[stopAt + 2] === more[0]) return titleCase(more[1] + ' ' + GERUND[more[0]] + (dimMod ? ' ' + dimMod : '') + ' game');
+    if (words[0] === 'game' && more.length === 2 && GERUND[more[0]] && all[stopAt] === 'where' && /^(you|players?)$/.test(all[stopAt + 1] || '') && all[stopAt + 2] === more[0]) return titleCase((/(ss|us|is)$/.test(more[1]) ? more[1] : more[1].replace(/ies$/, 'y').replace(/([^s])s$/, '$1')) + ' ' + GERUND[more[0]] + (dimMod ? ' ' + dimMod : '') + ' game');
     if (more.length) return titleCase(more.join(' ') + (dimMod ? ' ' + dimMod : '') + ' ' + words[0]);
   }
   return titleCase(words.join(' ')) || 'My Project';
@@ -1011,6 +1027,70 @@ function generate(idea) {
     const w = chase[2].split(/\s+/); const cut = w.findIndex(x => BREAK.test(x) || STOP.has(x) || FILLER.has(x)); const tw = cut >= 0 ? w.slice(0, cut) : w;
     if (tw.length) { const l = tw.length - 1; if (!/(ss|us|is)$/.test(tw[l])) tw[l] = tw[l].replace(/(zomb|cook|goal)ies$/, '$1ie').replace(/ies$/, 'y').replace(/([^s])s$/, '$1'); const gen = (lower.match(/\b(platformer|runner|shooter|roguelike|roguelite|rpg|obby|metroidvania)\b/) || [, 'game'])[1]; const act = /^(escape|escapes)$/.test(chase[1]) ? 'escape' : /^hides?$/.test(chase[1]) ? 'hiding' : 'chase'; name = titleCase(tw.join(' ') + ' ' + act + ' ' + gen); }
   }
+  // "a steam deck app that tracks my playtime": the Steam Web API has the hours (total, last 2 weeks, Deck vs desktop); daily snapshots make the history
+  const steamPlay = /^(web|mobile|data)$/.test(keys[0]) && !secondary && /\bsteam\b/.test(lower) && /\b(playtime|play time|hours played|time played|hours|how long i play\w*)\b/.test(lower) && !/\b(bot|discord|twitch)\b/.test(lower);
+  if (steamPlay) {
+    name = 'Steam Playtime Tracker';
+    primary = { ...primary, label: 'Web App' };
+    stack.length = 0;
+    [['Next.js (App Router) + TypeScript', 'One app for the pages and the server routes that call Steam; opens fine in the Steam Deck browser.'], ['Steam Web API (GetOwnedGames + GetRecentlyPlayedGames) with a server-side key', 'Total, last-two-weeks and Steam Deck playtime (playtime_deck_forever) per game for any public profile; the Web API key never reaches the browser.'], ['Supabase (Postgres) + a daily cron (Vercel Cron)', 'Steam only gives running totals, so a daily snapshot per game is what turns them into hours per day and week.'], ['Tailwind CSS + a chart library (Recharts)', 'A small, readable dashboard at the Deck\'s 1280x800.'], ['Optional later: a Decky Loader plugin (React + Python)', 'Shows the same stats in the Steam Deck quick access menu in Game Mode; ship the web app first.']].forEach(([tech, why]) => stack.push({ tech, why }));
+    must.length = 0;
+    must.push('Sign in through Steam (OpenID) or paste a SteamID / profile URL, with a clear message when the profile or its game details are private', 'Fetch owned and recently played games from the Steam Web API and show hours per game: total, last 2 weeks, and Steam Deck vs desktop', 'A daily snapshot job that stores each game\'s playtime, so you can chart hours per day and per week', 'A dashboard sized for the Steam Deck browser: top games, this week vs last week, and longest streak');
+    boss = 'Steam data limits: playtime only for public profiles, totals that update late, no per-session history (you build it from daily snapshots and their differences), and one server-side API key shared by every user under Steam\'s rate limit';
+  }
+  // "a website that shows when my favorite streamers are live": the Twitch Helix API (+ EventSub) answers "who is live", not a generic scraper
+  const liveTrack = /^(web|mobile)$/.test(keys[0]) && !secondary && !steamPlay && /\b(streamers?|twitch channels?|twitch streams?)\b/.test(lower) && /\b(live|online|streaming|on air)\b/.test(lower) && !/\b(overlay|obs|chat|alerts? box|clips?)\b/.test(lower);
+  if (liveTrack) {
+    name = 'Streamer Live Tracker';
+    const si = stack.findIndex(x => /Supabase/.test(x.tech));
+    const tw = [{ tech: 'Twitch Helix API (Get Streams with up to 100 user_login values) via an app access token', why: 'One call says who is live, with title, game, viewers and start time; the client-credentials token stays on the server.' }, { tech: 'Twitch EventSub (stream.online / stream.offline webhooks)', why: 'Twitch tells you the moment someone goes live, instead of polling every minute.' }];
+    if (si >= 0) stack.splice(si, 1, ...tw, { tech: 'localStorage for the followed list (Supabase later for accounts and alerts)', why: 'Nobody needs an account to follow a few streamers.' }); else stack.push(...tw);
+    must.length = 0;
+    must.push('Add streamers by Twitch username, checked with Get Users (avatar and display name), saved in the browser', 'Live now first: thumbnail, title, game, viewer count and uptime, each linking to the stream', 'One cached server route that asks Helix for every followed streamer in a single batched call, refreshed about once a minute', 'Offline streamers below with when they were last live');
+    boss = 'Fresh live status without hammering Twitch: one cached, batched Helix call shared by all visitors (rate limits), app tokens that expire, and EventSub webhook signatures, challenges and revoked subscriptions';
+  }
+  // "a web app that splits restaurant bills": items, people, tax and tip, exact cents, and a share link, not accounts + a generic schema
+  const billSplit = /^(web|mobile)$/.test(keys[0]) && !secondary && (/\bsplitwise\b/.test(lower) || (/\bsplit\w*\b/.test(lower) && /\b(bills?|checks?|tabs?|expenses?|costs?|dinner|restaurant|receipts?|rent|groceries)\b/.test(lower))) && !/\b(pdfs?|files?|videos?|audio|screens?|keyboards?|tests?|traffic|text)\b/.test(lower);
+  if (billSplit) {
+    const exp = /\b(expenses?|costs?|splitwise|trips?|rent|groceries|roommates?|housemates?|flatmates?)\b/.test(lower) && !/\b(bills?|checks?|tabs?|dinner|restaurant|receipts?)\b/.test(lower);
+    if (/\bsplitwise\b/.test(lower)) name = 'Splitwise Clone'; else if (exp) name = /\brent\b/.test(lower) && !/\bexpenses?\b/.test(lower) ? 'Rent Splitter' : (/\btrips?\b/.test(lower) ? 'Trip ' : /\b(roommates?|housemates?|flatmates?)\b/.test(lower) ? 'Roommate ' : '') + 'Expense Splitter'; else name = 'Bill Splitter';
+    const si = stack.findIndex(x => /Supabase/.test(x.tech));
+    if (si >= 0) stack[si] = { tech: 'Supabase (Postgres; ' + (exp ? 'groups' : 'bills') + ' behind an unguessable share link, no sign-up)', why: 'Everyone opens the same link and sees the same numbers; amounts stored as integer cents.' };
+    must.length = 0;
+    if (exp) must.push('Create a group, add people by name and get a share link (no sign-up)', 'Add an expense: who paid, how much, and split evenly, by shares or by exact amounts', 'Balances: who owes whom, simplified to the fewest payments', 'Settle up: mark a payment as done, with an edit / delete history of every expense');
+    const scanBill = !exp && /\b(scans?|scanning|photos?|camera|receipts?)\b/.test(lower);
+    if (scanBill && !stack.some(x => /vision/.test(x.tech))) stack.push({ tech: 'A vision-capable model API (GPT-4o, Claude or Gemini) called from one server function', why: 'Send the receipt photo, get the items back as JSON; keep the API key on the server, never in the app.' });
+    if (!exp) must.push(scanBill ? 'Snap or upload a receipt photo and read the items, prices, tax and tip with a vision model, editable before you split' : 'Enter the bill: items with prices (or just a total), plus tax and tip as % or an amount', 'Add the people and tap who had each item (shared items split between the people who had them)', 'Per-person totals with tax and tip split in proportion, rounded so the parts add up exactly to the bill', 'A share link (no sign-up) where everyone sees what they owe and can mark it paid');
+    boss = 'Money math you can trust: integer cents, rounding remainders that still add up to the total, tax and tip split in proportion, and two people editing the same ' + (exp ? 'group' : 'bill') + ' at once';
+  }
+  // "an ai agent that books my flights": real fares from a flights API, and nothing is paid for without a yes
+  const flightAgent = keys[0] === 'agent' && /\bflights?\b/.test(lower) && /\b(books?|booking|finds?|search\w*)\b/.test(lower);
+  if (flightAgent) {
+    stack.splice(3, 0, { tech: 'Duffel API (flight search, offers and orders; free test mode)', why: 'Real fares and bookings through one modern API; build everything against test mode before any real card is charged.' });
+    const bk = /\b(books?|booking)\b/.test(lower);
+    const ti = must.indexOf('Two real tools the agent can call');
+    if (ti >= 0) must[ti] = bk ? 'Two real tools: search flights (Duffel offer requests) and book a chosen offer, both in Duffel test mode first' : 'Two real tools: search flights (Duffel offer requests) and save a route to re-check for price drops';
+    const hi = must.findIndex(m => /^Hard limits/.test(m));
+    if (hi >= 0 && bk) must[hi] = 'Hard limits: a max price and max steps, and the agent shows the exact flight, times and price and waits for your yes before it books';
+    boss = bk ? 'Making the agent reliable with real money: offers that expire or change price, wrong dates or airports from a vague request, and never booking (or double-booking) without a confirmed yes' : 'Making the agent reliable: wrong dates or airports from a vague request, offers that expire or change price between searches, and search costs under control';
+  }
+  // "a typing speed game": a typing loop (words, live letter feedback, WPM + accuracy), not a player and an enemy
+  const typingGame = keys[0] === 'game' && !cozy && !quizGame && /\b(typing|wpm|words per minute)\b/.test(lower);
+  if (typingGame) {
+    const foes = /\b(zombies?|enem(y|ies)|monsters?|aliens?|invaders?|asteroids?|meteors?|shoot\w*|ships?|defen[cs]e)\b/.test(lower);
+    const fw = (lower.match(/\b(zombies?|monsters?|aliens?|invaders?|asteroids?|meteors?|ghosts?|robots?|dragons?)\b/) || [])[1];
+    if (fw && name === 'Typing Game') name = titleCase(fw.replace(/(zomb)ies$/, '$1ie').replace(/([^s])s$/, '$1')) + ' Typing Game';
+    must.length = 0;
+    must.push(foes ? 'Enemies move toward you, each carrying a word; typing a word correctly destroys that enemy' : 'A word list (a few hundred common words in a JSON file) shown as a line of text to type', 'Live feedback: each letter turns green or red as you type, with backspace to fix mistakes', 'A timed run (30 or 60 seconds' + (foes ? ', or until an enemy reaches you' : '') + ') ending on a results screen with WPM, accuracy and your best score', 'Difficulty that ramps: longer words and less time as the run goes on');
+    boss = 'Fair, responsive input: keydown handling with no missed or doubled letters, a WPM formula (correct characters / 5 per minute) that matches typing sites, and mobile / IME keyboards that do not send normal key events';
+  }
+  // "a roblox farming game": the cozy loop, but saves and money live on the server (DataStore), like any Roblox game
+  if (engine === 'roblox' && cozy) {
+    const si = must.indexOf(COZY_MUST[2]);
+    if (si >= 0) must[si] = 'Progress (coins, upgrades, unlocks) saved with DataStoreService so it survives rejoining';
+    must.push('Money and upgrades changed only on the server (RemoteEvents ask, the server checks), never trusted from the client');
+    boss = COZY_BOSS + '; plus DataStore saves that never lose or duplicate progress, and a server that never trusts the client';
+  }
   // "an ai that writes my dungeon master session recaps": paste raw notes, get a recap
   const recap = keys[0] === 'aiapp' && /\brecaps?\b/.test(lower);
   if (recap) { const fi = must.findIndex(m => /^One input form/.test(m)); if (fi >= 0) must[fi] = 'One box to paste raw session notes (bullet points, a chat log or a transcript) plus the cast\'s names, so the recap spells them right'; }
@@ -1079,6 +1159,10 @@ function generate(idea) {
   if (recap) { ['Model picker', 'Conversation memory'].forEach(l => loot.delete(l)); lootFront(['Campaign memory: past recaps saved so the next one keeps names and plot threads straight', 'Voice options: in-world chronicle, bard\'s tale, or plain bullet summary']); }
   if (mgmt) { ['Steam / game API integration', 'Leaderboards'].forEach(l => loot.delete(l)); lootFront([mgmt[1] === 'lighthouse' ? 'A storm and night cycle that changes how many ships come and how hard they are to guide' : 'A day/night or season cycle that changes what arrives', 'Upgrades the player can see change the ' + mgmt[1], 'A logbook of milestones saved with the game']); }
   if (aiFoes) { const li = stack.findIndex(x => /^An LLM API behind/.test(x.tech)); if (li >= 0) stack.splice(li, 1); ['Model picker', 'Conversation memory', 'Cost / token meter', 'Eval set to test quality'].forEach(l => loot.delete(l)); lootFront([/\bboss(es)?\b/.test(lower) ? 'A second phase for the boss (new attack pattern below half health)' : 'Enemies that coordinate (flank, take cover, call for help)', 'Difficulty settings that change AI reaction time, not just damage']); }
+  if (steamPlay) { ['Share / invite flow', 'Leaderboards', 'Achievement badges', 'Steam / game API integration'].forEach(l => loot.delete(l)); lootFront(['A weekly recap card (hours, top game, Deck vs desktop) to share', 'Compare with friends from your Steam friends list (public profiles)', 'Backlog view: owned games with zero hours']); }
+  if (liveTrack) { ['Share / invite flow', 'Steam / game API integration', 'Leaderboards', 'Achievement badges'].forEach(l => loot.delete(l)); lootFront(['Browser push notifications when a followed streamer goes live', 'Log in with Twitch to import your follows (Get Followed Streams, user:read:follows)', 'YouTube and Kick streamers in the same list']); }
+  if (billSplit) { ['Leaderboards', 'Achievement badges', 'Steam / game API integration'].forEach(l => loot.delete(l)); ['Friend lists', 'Moderation tools'].forEach(l => loot.delete(l)); lootFront(['Venmo / PayPal / Cash App pay links per person', /\b(scans?|scanning|photos?|camera|receipts?)\b/.test(lower) ? 'Save past bills per group so regulars are one tap away' : 'Scan a receipt photo to fill in the items (a vision model)', 'A currency per ' + (/\btrips?\b/.test(lower) ? 'trip' : 'group') + ' with conversion']); }
+  if (typingGame) { ['Model picker', 'Conversation memory'].forEach(l => loot.delete(l)); lootFront(['A daily challenge text that is the same for everyone, with a leaderboard', 'Per-key mistake heatmap after each run']); }
   if (keys[0] === 'bot' && /\bbirthdays?\b/.test(lower)) lootFront(['A custom message per person (with their age when the year is known)', 'A gift-idea list per person, shared with the family']);
   if (webLang || groupSched || ratingBoard || groupVote || rustPlugin || socialSched || chatGame) ['Polish pass and onboarding', 'Basic analytics'].forEach(l => { if (loot.delete(l)) loot.add(l); });
   if (figma) { loot.delete('Share / invite flow'); loot.delete('Basic analytics'); loot.delete('Conversation memory'); ['Run on a whole page, not just the selection', 'A Dev Mode (codegen) version for developers'].forEach(l => loot.add(l)); }
