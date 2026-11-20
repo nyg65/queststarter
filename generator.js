@@ -285,12 +285,22 @@ function detectTypes(text) {
   if (/\braycast (extensions?|plugins?|commands?|scripts?)\b|\bextensions? for raycast\b|\bfor raycast\b/.test(t)) { for (const k of ['extension', 'web', 'mobile', 'cli', 'data']) { const i = keys.indexOf(k); if (i >= 0) keys.splice(i, 1); } keys.unshift('extension'); }
   // "a figma plugin that exports colors as tailwind config" is a Figma plugin, not a web app or a browser extension
   if (FIGMA.test(t)) { for (const k of ['extension', 'web', 'mobile', 'cli', 'data', 'aiapp', 'agent']) { const i = keys.indexOf(k); if (i >= 0) keys.splice(i, 1); } keys.unshift('extension'); }
+  // "a mobile app that shows which twitch streamers are live": an app about Twitch, not a Twitch chat bot
+  if (keys[0] === 'bot' && /\btwitch\b/.test(t) && !/\b(bots?|chatbot|discord|slack|telegram|chat|commands?|overlay)\b/.test(t) && /\b(streamers?|channels?|streams?)\b/.test(t) && /\b(live|online)\b/.test(t) && /\b(apps?|website|site|page|dashboard|ios|iphone|android)\b/.test(t)) { const m = keys.includes('mobile') || /\b(mobile|ios|iphone|android)\b/.test(t) ? 'mobile' : 'web'; keys.length = 0; keys.push(m); }
+  // "a discord bot that posts when my favorite streamer goes live": a chat bot fed by Twitch, one type
+  if (keys[0] === 'bot' && streamLiveBot(t)) { keys.length = 0; keys.push('bot'); }
+  // "a steam bot that tracks game prices": a price-alert bot, not a web app + bot
+  if (keys.includes('bot') && /\bbots?\b/.test(t) && steamPrice(t)) { keys.length = 0; keys.push('bot'); }
   return keys.length ? keys.slice(0, 2) : ['web'];
 }
 
 const ACRO = { html: 'HTML', gif: 'GIF', gifs: 'GIFs', dnd: 'D&D', ttrpg: 'TTRPG', ttrpgs: 'TTRPGs', tui: 'TUI', ai: 'AI', rag: 'RAG', mcp: 'MCP', cli: 'CLI', pdfs: 'PDFs', obsidian: 'Obsidian', saas: 'SaaS', claude: 'Claude', cursor: 'Cursor', vscode: 'VS Code', turnbased: 'Turn-Based', api: 'API', llm: 'LLM', gpt: 'GPT', ios: 'iOS', iphone: 'iPhone', mvp: 'MVP', rpg: 'RPG', ui: 'UI', '2d': '2D', '3d': '3D', npc: 'NPC', mmo: 'MMO', fps: 'FPS', pc: 'PC', vr: 'VR', ar: 'AR', youtube: 'YouTube', github: 'GitHub', tiktok: 'TikTok', gpu: 'GPU', cpu: 'CPU', pdf: 'PDF', seo: 'SEO', sql: 'SQL', npcs: 'NPCs', unity: 'Unity', godot: 'Godot', unreal: 'Unreal', ue5: 'UE5', obby: 'Obby', threejs: 'Three.js', webgl: 'WebGL', discord: 'Discord', telegram: 'Telegram', slack: 'Slack', twitter: 'Twitter', reddit: 'Reddit', steam: 'Steam', chrome: 'Chrome', android: 'Android', notion: 'Notion', spotify: 'Spotify', twitch: 'Twitch', minecraft: 'Minecraft', roblox: 'Roblox', xbox: 'Xbox', playstation: 'PlayStation', openai: 'OpenAI', chatgpt: 'ChatGPT', nextjs: 'Next.js', obs: 'OBS', csv: 'CSV', json: 'JSON', npx: 'npx', woocommerce: 'WooCommerce', ollama: 'Ollama', todoist: 'Todoist', raycast: 'Raycast', figma: 'Figma', figjam: 'FigJam', tailwind: 'Tailwind', pico8: 'PICO-8', jira: 'Jira', heic: 'HEIC', jpg: 'JPG', png: 'PNG', url: 'URL', urls: 'URLs', pr: 'PR', prs: 'PRs', rust: 'Rust', golang: 'Go', linkedin: 'LinkedIn', whatsapp: 'WhatsApp', gitlab: 'GitLab', elo: 'Elo', sqlite: 'SQLite', dns: 'DNS', ssl: 'SSL', tls: 'TLS', http: 'HTTP', https: 'HTTPS', javascript: 'JavaScript', typescript: 'TypeScript' };
 // app names that are also common words ("linear", "stripe"): only treated as brands when naming an MCP server, so "a linear progression game" keeps its lowercase word
 const MCP_BRANDS = { linear: 'Linear', gitlab: 'GitLab', asana: 'Asana', trello: 'Trello', stripe: 'Stripe', shopify: 'Shopify', gmail: 'Gmail', postgres: 'Postgres', postgresql: 'PostgreSQL', supabase: 'Supabase', airtable: 'Airtable', sentry: 'Sentry', vercel: 'Vercel', cloudflare: 'Cloudflare', zotero: 'Zotero', hubspot: 'HubSpot', salesforce: 'Salesforce', confluence: 'Confluence', clickup: 'ClickUp', plex: 'Plex', jellyfin: 'Jellyfin', kubernetes: 'Kubernetes', docker: 'Docker', mongodb: 'MongoDB', redis: 'Redis', anki: 'Anki', readwise: 'Readwise', strava: 'Strava', zendesk: 'Zendesk', intercom: 'Intercom', calendly: 'Calendly', dropbox: 'Dropbox', bluesky: 'Bluesky', mastodon: 'Mastodon', grafana: 'Grafana', datadog: 'Datadog', posthog: 'PostHog', mailchimp: 'Mailchimp', quickbooks: 'QuickBooks', ynab: 'YNAB', basecamp: 'Basecamp', miro: 'Miro', excalidraw: 'Excalidraw', logseq: 'Logseq', raindrop: 'Raindrop', instapaper: 'Instapaper' };
+// "a discord bot that posts when my favorite streamer goes live" / "... alerts my server when i go live on twitch": live alerts from the Twitch API
+function streamLiveBot(t) { return /\b(discord|slack|telegram|guilded)\b/.test(t) && /\b(go|goes|going|went|is|are|gets?) live\b|\blive (alerts?|notifications?|pings?|announcements?)\b|\bstream (alerts?|notifications?)\b/.test(t) && /\b(streamers?|twitch|streams?|streaming|i go|i'm)\b/.test(t) && !(/\b(youtube|kick)\b/.test(t) && !/\btwitch\b/.test(t)) && !/\b(overlay|obs)\b/.test(t); }
+// "a steam bot that tracks game prices" / "a website that tracks steam game prices": Steam store prices (and IsThereAnyDeal), not a generic scraper
+function steamPrice(t) { return /\bsteam\b/.test(t) && /\b(prices?|sales?|deals?|discounts?|on sale)\b/.test(t) && /\b(track\w*|alerts?|notif\w*|watch\w*|tells?|pings?|posts?|checks?|monitors?|drops?|wishlist|price tracker)\b/.test(t) && !/\b(skins?|items?|market|cs2|csgo|tf2|trading|inventory|stocks?|crypto)\b/.test(t); }
 function titleCase(s) { return s.split(' ').map(w => ACRO[w] || (/'s$/.test(w) && ACRO[w.slice(0, -2)] ? ACRO[w.slice(0, -2)] + "'s" : w.replace(/(^|[^a-z0-9'])([a-z0-9])/g, (m, a, c) => a + c.toUpperCase()))).join(' '); }
 function hasWord(text, k) { return new RegExp('(^|[^a-z0-9])' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '($|[^a-z0-9])').test(text); }
 function lbl(l) { return l.toLowerCase().replace(/\bai\b/g, 'AI').replace(/\bapi\b/g, 'API').replace(/\bmcp\b/g, 'MCP').replace(/\bvs code\b/g, 'VS Code').replace(/\bminecraft\b/g, 'Minecraft').replace(/\bcli\b/g, 'CLI').replace(/\brag\b/g, 'RAG').replace(/\bfigma\b/g, 'Figma').replace(/\bgo\b/g, 'Go').replace(/\brust\b/g, 'Rust'); }
@@ -383,6 +393,8 @@ function projectName(idea) {
     }
     // "tracks crypto prices" -> "Crypto Price Tracker", "checks ssl certificates" -> "SSL Certificate Checker"
     if (obj.length && /^(Tracker|Checker|Monitor|Alerts|Watcher)$/.test(VERB[all[vi]]) && /^(prices|ranks|certificates|certs|links|domains)$/.test(obj[obj.length - 1])) obj[obj.length - 1] = obj[obj.length - 1].replace(/s$/, '');
+    // "finds cheap flights" -> "Cheap Flight Finder", "finds recipes" -> "Recipe Finder"
+    if (obj.length && VERB[all[vi]] === 'Finder' && /^(flights|recipes|jobs|deals|links|hotels|apartments|games|movies|books|restaurants|events|gigs|houses|cars|bugs|typos|coupons|internships|roommates|friends|teammates|players|podcasts|songs|tracks|shows|places|campsites|tickets)$/.test(obj[obj.length - 1])) obj[obj.length - 1] = obj[obj.length - 1].replace(/s$/, '');
     if (obj.length) return titleCase(obj.join(' ')) + ' ' + VERB[all[vi]];
   }
   const words = [];
@@ -401,11 +413,16 @@ function projectName(idea) {
   if (words.length === 3 && /^(threejs|unity|godot|phaser|roblox|unreal|browser|web|mobile)$/.test(words[0]) && /^(vr|ar|3d|2d)$/.test(words[1]) && words[2] === 'game' && BREAK.test(all[all.indexOf('game') + 1] || '')) { stopAt = all.indexOf('game') + 1; dimMod = words[1]; words.splice(0, 2); }
   // "a godot puzzle game about light and mirrors" -> "Light and Mirrors Puzzle Game" (engine + genre alone says nothing about this game)
   const egi = all.indexOf('game');
-  if (words.length === 3 && /^(unity|godot|phaser|roblox|unreal|pico8|threejs)$/.test(words[0]) && /^(puzzle|horror|stealth|rhythm|physics|survival|strategy|card|word|racing|fighting|adventure|action|mystery|detective|cooking|fishing)$/.test(words[1]) && words[2] === 'game' && egi > 0 && /^(about|with|featuring|starring)$/.test(all[egi + 1] || '')) {
+  // "a horror game about a haunted school" / "a godot horror game set in an abandoned hospital" -> "Haunted School Horror Game" / "Abandoned Hospital Horror Game"
+  const ENG_RE = /^(unity|godot|phaser|roblox|unreal|pico8|threejs)$/, GENRE_RE = /^(puzzle|horror|stealth|rhythm|physics|survival|strategy|card|word|racing|fighting|adventure|action|mystery|detective|cooking|fishing)$/;
+  if (words.length === 3 && !ENG_RE.test(words[0]) && GENRE_RE.test(words[0]) && words[1] === 'game' && words[2] === 'set' && all[egi + 2] === 'in') words.pop();
+  const setIn = egi > 0 && (all[egi + 1] === 'set' && /^(in|inside|on|aboard)$/.test(all[egi + 2] || '') ? 3 : /^(in|inside|aboard)$/.test(all[egi + 1] || '') ? 2 : 0);
+  const gw = words.length === 3 && ENG_RE.test(words[0]) ? words.slice(1) : words.length === 2 && /^(horror|puzzle|stealth|mystery|detective)$/.test(words[0]) ? words : null;
+  if (gw && GENRE_RE.test(gw[0]) && gw[1] === 'game' && egi > 0 && (/^(about|with|featuring|starring)$/.test(all[egi + 1] || '') && (words.length === 3 || all[egi + 1] === 'about') || setIn) && !(setIn && /^(vr|ar|3d|2d|mobile|browser|web|phones?|pc|steam|first|third|unity|godot|unreal|roblox|phaser|javascript|typescript|python|lua|c|gdscript|pixel|real|one|a|my|the)$/.test((all.slice(egi + setIn).find(w => !/^(an?|the)$/.test(w))) || '') && !/^(an?|the)$/.test(all[egi + setIn] || 'x'))) {
     const th = []; let and = false;
-    for (const w of all.slice(egi + 2)) { if (w === 'and' && th.length === 1 && !and) { and = true; continue; } if (BREAK.test(w) || /^(where|that|which|who|when|while)$/.test(w)) { if (th.length) break; else continue; } if (STOP.has(w) || FILLER.has(w) || KIND.has(w) || /^(you|player|players)$/.test(w)) continue; th.push(w); if (th.length === 2) break; }
+    for (const w of all.slice(egi + (setIn || 2))) { if (w === 'and' && th.length === 1 && !and) { and = true; continue; } if (BREAK.test(w) || /^(where|that|which|who|when|while)$/.test(w)) { if (th.length) break; else continue; } if (STOP.has(w) || FILLER.has(w) || KIND.has(w) || /^(you|player|players)$/.test(w)) continue; th.push(w); if (th.length === 2) break; }
     if (th.length === 1 && !/(ss|us|is)$/.test(th[0])) th[0] = th[0].replace(/ies$/, 'y').replace(/([^s])s$/, '$1');
-    if (th.length) return titleCase(th.join(and && th.length === 2 ? ' and ' : ' ') + ' ' + words[1] + ' game').replace(/ And /, ' and ');
+    if (th.length) return titleCase(th.join(and && th.length === 2 ? ' and ' : ' ') + ' ' + gw[0] + ' game').replace(/ And /, ' and ');
   }
   // "a godot platformer about a snail with a jetpack" -> "Snail Jetpack Platformer" (engine + genre alone says nothing about this game)
   if (words.length === 2 && /^(unity|godot|phaser|roblox|unreal|pico8|threejs)$/.test(words[0]) && /^(platformer|roguelike|roguelite|metroidvania|shooter|rpg|puzzler|deckbuilder|racer|runner|brawler|beat em up|soulslike|obby)$/.test(words[1]) && /^(about|where|with|starring|featuring|of)$/.test(all[stopAt] || '')) {
@@ -432,6 +449,9 @@ function projectName(idea) {
       if (more.length === 3) break;
     }
     const GERUND = { paint: 'painting', build: 'building', cook: 'cooking', grow: 'growing', draw: 'drawing', explore: 'exploring', fix: 'fixing', catch: 'catching', fly: 'flying', drive: 'driving', sculpt: 'sculpting', spray: 'spraying', dig: 'digging', mine: 'mining', fish: 'fishing', bake: 'baking', brew: 'brewing', tame: 'taming', sort: 'sorting', stack: 'stacking' };
+    const NOUNV = { repair: 'repair', restore: 'restoration', deliver: 'delivery', rescue: 'rescue', clean: 'cleaning', wash: 'washing', decorate: 'decorating', knit: 'knitting', feed: 'feeding' };
+    if (words[0] === 'game' && more.length === 3 && (GERUND[more[0]] || NOUNV[more[0]]) && /^(old|broken|ancient|rare|tiny|little|lost|magic|magical|cute|small|big|giant|wild|stray|abandoned|dusty|vintage|antique|damaged|hungry|sick|injured|dirty|fresh|hot|warm)$/.test(more[1]) && all[stopAt] === 'where' && /^(you|players?)$/.test(all[stopAt + 1] || '') && all[stopAt + 2] === more[0]) more.splice(1, 1);
+    if (words[0] === 'game' && more.length === 2 && NOUNV[more[0]] && all[stopAt] === 'where' && /^(you|players?)$/.test(all[stopAt + 1] || '') && all[stopAt + 2] === more[0]) return titleCase((/(ss|us|is)$/.test(more[1]) ? more[1] : more[1].replace(/(zomb|cook|goal)ies$/, '$1ie').replace(/ies$/, 'y').replace(/([^s])s$/, '$1')) + ' ' + NOUNV[more[0]] + (dimMod ? ' ' + dimMod : '') + ' game');
     if (words[0] === 'game' && more.length === 2 && GERUND[more[0]] && all[stopAt] === 'where' && /^(you|players?)$/.test(all[stopAt + 1] || '') && all[stopAt + 2] === more[0]) return titleCase((/(ss|us|is)$/.test(more[1]) ? more[1] : more[1].replace(/ies$/, 'y').replace(/([^s])s$/, '$1')) + ' ' + GERUND[more[0]] + (dimMod ? ' ' + dimMod : '') + ' game');
     if (more.length) return titleCase(more.join(' ') + (dimMod ? ' ' + dimMod : '') + ' ' + words[0]);
   }
@@ -1046,7 +1066,7 @@ function generate(idea) {
     const tw = [{ tech: 'Twitch Helix API (Get Streams with up to 100 user_login values) via an app access token', why: 'One call says who is live, with title, game, viewers and start time; the client-credentials token stays on the server.' }, { tech: 'Twitch EventSub (stream.online / stream.offline webhooks)', why: 'Twitch tells you the moment someone goes live, instead of polling every minute.' }];
     if (si >= 0) stack.splice(si, 1, ...tw, { tech: 'localStorage for the followed list (Supabase later for accounts and alerts)', why: 'Nobody needs an account to follow a few streamers.' }); else stack.push(...tw);
     must.length = 0;
-    must.push('Add streamers by Twitch username, checked with Get Users (avatar and display name), saved in the browser', 'Live now first: thumbnail, title, game, viewer count and uptime, each linking to the stream', 'One cached server route that asks Helix for every followed streamer in a single batched call, refreshed about once a minute', 'Offline streamers below with when they were last live');
+    must.push('Add streamers by Twitch username, checked with Get Users (avatar and display name), saved ' + (keys[0] === 'mobile' ? 'on the device' : 'in the browser'), 'Live now first: thumbnail, title, game, viewer count and uptime, each linking to the stream', 'One cached server route that asks Helix for every followed streamer in a single batched call, refreshed about once a minute', 'Offline streamers below with when they were last live');
     boss = 'Fresh live status without hammering Twitch: one cached, batched Helix call shared by all visitors (rate limits), app tokens that expire, and EventSub webhook signatures, challenges and revoked subscriptions';
   }
   // "a web app that splits restaurant bills": items, people, tax and tip, exact cents, and a share link, not accounts + a generic schema
@@ -1090,6 +1110,67 @@ function generate(idea) {
     if (si >= 0) must[si] = 'Progress (coins, upgrades, unlocks) saved with DataStoreService so it survives rejoining';
     must.push('Money and upgrades changed only on the server (RemoteEvents ask, the server checks), never trusted from the client');
     boss = COZY_BOSS + '; plus DataStore saves that never lose or duplicate progress, and a server that never trusts the client';
+  }
+  // "a godot puzzle game about light and mirrors": a puzzle loop (one mechanic, hand-made levels, undo), not a player and an enemy
+  const plainGame = keys[0] === 'game' && must[0] === TYPES.game.must[0] && !quizGame && !typingGame;
+  const horrorGame = plainGame && /\b(horror|scary|creepy|terrifying)\b/.test(lower) && !/\b(visual novel|card game|board game|shooter|fps|roguelike|roguelite|platformer|tower defen[cs]e|typing|trivia|quiz\w*|text adventure|chess|multiplayer)\b/.test(lower) && !/\b(?:where|in which) (?:you|players?) (?:run|runs|manage|manages|own|owns|build|builds) (?:an?|the|your|my) /.test(lower);
+  const puzzleGame = plainGame && !horrorGame && /\b(puzzle|puzzles|puzzler|sokoban)\b/.test(lower) && !/\b(match[- ]?3|jigsaw|sudoku|crossword|wordle|word|tetris|platformer|shooter|roguelike|roguelite|rpg|metroidvania|escape rooms?|multiplayer|chess)\b/.test(lower);
+  if (puzzleGame) {
+    must.length = 0;
+    must.push('One core mechanic (push, rotate, connect, swap or reflect) that the first level teaches without any text', '10 hand-made levels stored as data (a JSON or tile-map file), each adding one new idea or twist to the mechanic', 'Undo (one step back) and reset (restart the level) on single keys, and a clear solved moment before the next level', 'A level select that unlocks levels in order and remembers which ones are solved (saved locally)');
+    boss = 'Level design, not code: a difficulty curve where each level teaches one idea, no level that is unsolvable or solved by accident (playtest each one or write a tiny solver), and undo that restores the exact previous state';
+  }
+  // "a horror game in a haunted lighthouse": tension (darkness, sound, one stalker, hiding), not a score and an obstacle
+  if (horrorGame) {
+    if (/^(Scary|Creepy|Terrifying) Game$/.test(name)) name = 'Horror Game';
+    must.length = 0;
+    must.push('One small, dark map (a few rooms) explored with a flashlight that has limited battery', 'One stalker enemy that patrols, investigates noises and chases on sight; being caught ends the run', 'Hide spots (lockers, under beds, closets) and footstep noise the stalker can hear, quieter when you crouch', 'A goal that forces you to move: find 3-5 keys or items, then reach the exit');
+    boss = 'Tension that stays fair: a stalker AI (patrol, investigate, chase, lose you) that is scary but beatable, lighting and 3D sound that tell you where danger is, and pacing between quiet stretches and chases';
+  }
+  // "a discord bot that posts when my favorite streamer goes live": Twitch Helix + EventSub tell the bot, it posts once per stream
+  const liveBot = keys[0] === 'bot' && streamLiveBot(lower);
+  if (liveBot) {
+    name = 'Streamer Live Alerts';
+    const pf = /\bdiscord\b/.test(lower) ? ['Node.js + discord.js', 'Best docs and examples for Discord bots; easy for AI tools to write.'] : /\btelegram\b/.test(lower) ? ['Node.js + grammY (Telegram)', 'Modern, well-documented Telegram bot framework; easy for AI tools to write.'] : /\bslack\b/.test(lower) ? ['Node.js + Slack Bolt', "Slack's official bot framework, with slash commands and events built in."] : null;
+    if (pf) stack[0] = { tech: pf[0], why: pf[1] };
+    stack.splice(1, 0, { tech: 'Twitch Helix API (Get Users, Get Streams) via an app access token', why: 'Checks usernames and fetches the title, game and thumbnail for the post; the client-credentials token stays on the server.' }, { tech: 'Twitch EventSub (stream.online / stream.offline webhooks)', why: 'Twitch tells the bot the moment a streamer goes live; poll Get Streams once a minute until the webhook works.' });
+    must.length = 0;
+    const sl = /\bdiscord\b/.test(lower) || /\bslack\b/.test(lower);
+    must.push((sl ? '/follow <twitch username> in a channel' : '/follow <twitch username>') + ' (checked with Get Users), stored per ' + (/\bdiscord\b/.test(lower) ? 'server' : /\bslack\b/.test(lower) ? 'workspace' : 'chat') + ' in SQLite, plus /unfollow and /list', 'An EventSub stream.online subscription for each followed streamer (or a once-a-minute Get Streams poll to start)', 'A go-live post with the stream title, game, thumbnail and link' + (/\bdiscord\b/.test(lower) ? ', with an optional role ping' : ''), 'One post per stream: no duplicates when the bot restarts or Twitch resends the event');
+    boss = 'EventSub done right: verifying webhook signatures and the challenge, resubscribing after revocations and restarts, de-duplicating stream.online events, and app tokens that expire';
+  }
+  // "a discord bot that splits bills": /split, balances in SQLite, settle up, exact cents
+  const splitBot = keys[0] === 'bot' && !secondary && ((/\bsplit\w*\b/.test(lower) && /\b(bills?|checks?|tabs?|expenses?|costs?|dinner|lunch|restaurant|receipts?|rent|groceries)\b/.test(lower)) || /\bowes?\b/.test(lower)) && !/\b(pdfs?|files?|videos?|audio|screens?|tests?|text|teams?)\b/.test(lower);
+  if (splitBot) {
+    if (/^Owe/.test(name)) name = 'Expense Splitter'; else if (name === 'Expense Splitter' && /\btrips?\b/.test(lower)) name = 'Trip Expense Splitter';
+    const si = stack.findIndex(x => /^SQLite/.test(x.tech));
+    if (si >= 0) stack[si] = { tech: 'SQLite (better-sqlite3), amounts as integer cents', why: 'Expenses and balances per ' + (/\bdiscord\b/.test(lower) ? 'server' : 'group') + ' in one file; integer cents so totals never drift.' };
+    must.length = 0;
+    must.push('/split <amount> <what> @people: who paid, split evenly or by shares, saved per ' + (/\bdiscord\b/.test(lower) ? 'server' : /\bslack\b/.test(lower) ? 'workspace' : 'group') + ' in SQLite', '/balance: who owes whom, simplified to the fewest payments', '/settle @person to record a payment, with /history and /undo for the last entry', 'Exact cents: rounding remainders go to someone, so every split adds up to the total');
+    boss = 'Money math you can trust in chat: integer cents, remainders that still add up, two people running /split at the same moment, and keeping each ' + (/\bdiscord\b/.test(lower) ? 'server' : 'group') + '\'s balances separate';
+  }
+  // "a steam bot that tracks game prices": the Steam store price endpoint (and IsThereAnyDeal), alerts once per sale
+  const steamDeal = /^(bot|web|data|mobile)$/.test(keys[0]) && !secondary && steamPrice(lower) && !steamPlay;
+  if (steamDeal) {
+    if (!/Steam/.test(name)) name = /\b(sales?|wishlist|deals?|discounts?|on sale)\b/.test(lower) && !/\bprices?\b/.test(lower) ? 'Steam Sale Alerts' : 'Steam Price Tracker';
+    const api = { tech: 'Steam store API (appdetails with filters=price_overview and your cc region) + IsThereAnyDeal API (optional)', why: 'Current price, discount and currency per game straight from Steam; IsThereAnyDeal adds other stores and the lowest-ever price.' };
+    const bi = keys[0] === 'bot' ? 1 : stack.findIndex(x => /Supabase|SQLite|Postgres/.test(x.tech));
+    stack.splice(bi >= 0 ? bi : stack.length, 0, api);
+    must.length = 0;
+    if (keys[0] === 'bot') must.push('/watch <game name or Steam link>: find the app id (Steam store search) and save it with an optional target price in SQLite', 'A scheduled check every few hours of every watched game\'s price, batched and cached', 'Alert when a game goes on sale or drops below your target: old vs new price, % off and a store link', 'One alert per sale (no repeats every check), plus /list and /unwatch');
+    else must.push('Search a game (Steam store search) and add it to a watchlist with a target price', 'Current price, % off and the lowest-ever price for each watched game', 'A daily price snapshot (cron) that draws a price-history chart per game', 'An email or push alert when a game drops below your target or hits a new low, once per sale');
+    boss = 'Price data without getting blocked: the Steam store endpoints are unofficial and rate-limited (about 200 requests per 5 minutes), so batch and cache; regional prices and currencies; and alerting once per sale, not every check';
+  }
+  // "a typing tutor for kids": lessons that add keys a few at a time, not a generic web app with accounts
+  const typeTutor = /^(web|mobile)$/.test(keys[0]) && !secondary && /\btyping (tutor|lessons?|trainer|teacher|course|practice|school|class)\b|\b(learn|learns|learning|teach|teaches|teaching)\b[a-z ]{0,24}\bto type\b|\btouch typing\b/.test(lower);
+  if (typeTutor) {
+    const kids = /\b(kids?|children|child|my son|my daughter|students|classroom)\b/.test(lower);
+    name = kids ? 'Kids Typing Tutor' : 'Typing Tutor';
+    const si = stack.findIndex(x => /Supabase/.test(x.tech));
+    if (si >= 0) stack[si] = { tech: 'localStorage for progress (' + (kids ? 'one profile per child on the device; ' : '') + 'accounts later)', why: kids ? 'No sign-up and no personal data, which keeps it simple and kid-safe.' : 'Start practicing in one click; add accounts only when people ask to sync.' };
+    must.length = 0;
+    must.push('Lessons that add a few keys at a time (home row first), with an on-screen keyboard showing which finger to use', 'Live letter feedback (green / red) and WPM + accuracy at the end of each lesson, with stars or a pass mark to unlock the next one', kids ? 'Kid-friendly: big text, short lessons, no ads, chat or accounts; progress saved per child profile on the device' : 'Progress saved on the device: lessons passed, best WPM and the keys you miss most', 'A short typing game (falling words) as a reward after each lesson');
+    boss = 'Fair, responsive input (no missed or doubled keys, mobile and IME keyboards that skip normal key events) and a lesson order that really builds skill' + (kids ? '; plus kid privacy: collect nothing personal, so COPPA rules for under-13s never come into play' : '');
   }
   // "an ai that writes my dungeon master session recaps": paste raw notes, get a recap
   const recap = keys[0] === 'aiapp' && /\brecaps?\b/.test(lower);
@@ -1162,6 +1243,12 @@ function generate(idea) {
   if (steamPlay) { ['Share / invite flow', 'Leaderboards', 'Achievement badges', 'Steam / game API integration'].forEach(l => loot.delete(l)); lootFront(['A weekly recap card (hours, top game, Deck vs desktop) to share', 'Compare with friends from your Steam friends list (public profiles)', 'Backlog view: owned games with zero hours']); }
   if (liveTrack) { ['Share / invite flow', 'Steam / game API integration', 'Leaderboards', 'Achievement badges'].forEach(l => loot.delete(l)); lootFront(['Browser push notifications when a followed streamer goes live', 'Log in with Twitch to import your follows (Get Followed Streams, user:read:follows)', 'YouTube and Kick streamers in the same list']); }
   if (billSplit) { ['Leaderboards', 'Achievement badges', 'Steam / game API integration'].forEach(l => loot.delete(l)); ['Friend lists', 'Moderation tools'].forEach(l => loot.delete(l)); lootFront(['Venmo / PayPal / Cash App pay links per person', /\b(scans?|scanning|photos?|camera|receipts?)\b/.test(lower) ? 'Save past bills per group so regulars are one tap away' : 'Scan a receipt photo to fill in the items (a vision model)', 'A currency per ' + (/\btrips?\b/.test(lower) ? 'trip' : 'group') + ' with conversion']); }
+  if (puzzleGame) { ['Steam / game API integration', 'Model picker', 'Conversation memory'].forEach(l => loot.delete(l)); lootFront(['A move counter with a par for each level', 'A level editor that saves levels as shareable codes']); }
+  if (horrorGame) { ['Leaderboards', 'Model picker', 'Conversation memory'].forEach(l => loot.delete(l)); lootFront(['A second stalker behaviour (one that only moves when you are not looking)', 'Notes and recordings that tell the story as you explore']); }
+  if (liveBot) { ['Leaderboards', 'Achievement badges', 'Steam / game API integration'].forEach(l => loot.delete(l)); lootFront(['A custom go-live message per streamer', 'YouTube and Kick go-live posts in the same channel']); }
+  if (splitBot) { ['Leaderboards', 'Achievement badges', 'Steam / game API integration'].forEach(l => loot.delete(l)); lootFront(['Scan a receipt photo to fill in the items (a vision model)', 'A weekly balance reminder posted in the channel']); }
+  if (steamDeal) { ['Model picker', 'Conversation memory', 'Achievement badges', 'Steam / game API integration', 'Leaderboards'].forEach(l => loot.delete(l)); lootFront(['Import your whole Steam wishlist (IWishlistService) in one go', 'Prices from other stores (GOG, Epic, Humble) through IsThereAnyDeal']); }
+  if (typeTutor) { ['Model picker', 'Conversation memory', 'Steam / game API integration', 'Share / invite flow'].forEach(l => loot.delete(l)); lootFront([/\b(kids?|children|child|students|classroom)\b/.test(lower) ? 'A parent / teacher view of each child\'s progress' : 'A daily practice streak and reminder', 'Lessons for other keyboard layouts (AZERTY, Dvorak, Colemak)']); }
   if (typingGame) { ['Model picker', 'Conversation memory'].forEach(l => loot.delete(l)); lootFront(['A daily challenge text that is the same for everyone, with a leaderboard', 'Per-key mistake heatmap after each run']); }
   if (keys[0] === 'bot' && /\bbirthdays?\b/.test(lower)) lootFront(['A custom message per person (with their age when the year is known)', 'A gift-idea list per person, shared with the family']);
   if (webLang || groupSched || ratingBoard || groupVote || rustPlugin || socialSched || chatGame) ['Polish pass and onboarding', 'Basic analytics'].forEach(l => { if (loot.delete(l)) loot.add(l); });
